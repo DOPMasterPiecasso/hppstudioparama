@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test Mobile Menu</title>
+<style>
+:root{
+  --bg:#F7F5F0;
+  --surface:#FFF;
+  --border:#E2DDD5;
+  --text:#1A1714;
+  --navy:#1C2E3D;
+  --font-b:'DM Sans',sans-serif;
+}
+
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%}
+body{background:var(--bg);color:var(--text);font-family:var(--font-b),sans-serif;font-size:14px}
+
+.app{display:grid;grid-template-columns:224px 1fr;min-height:100vh}
+.sidebar{background:var(--navy);color:#fff;position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column;padding:20px}
+.main{overflow:hidden;background:#fff}
+.page{padding:20px}
+
+/* Mobile Menu Button */
+.mobile-menu-btn{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  background:none;
+  border:none;
+  color:#fff;
+  font-size:26px;
+  cursor:pointer;
+  padding:8px 12px;
+  border-radius:6px;
+  transition:.2s;
+  position:fixed;
+  top:10px;
+  left:10px;
+  z-index:10000;
+  visibility:hidden;
+  opacity:0;
+}
+
+.mobile-menu-btn:hover{
+  background:rgba(255,255,255,.2);
+}
+
+.sidebar-overlay{
+  display:none;
+  position:fixed;
+  inset:0;
+  background:rgba(0,0,0,.5);
+  z-index:9998;
+}
+
+.sidebar-overlay.active{
+  display:block;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+  .app{grid-template-columns:1fr}
+  .sidebar{
+    position:fixed;
+    left:0;
+    top:0;
+    height:100vh;
+    width:224px;
+    transform:translateX(-100%);
+    transition:transform .3s ease-out;
+    z-index:9999;
+  }
+  .sidebar.active{
+    transform:translateX(0);
+  }
+  .mobile-menu-btn{
+    visibility:visible;
+    opacity:1;
+  }
+  .main{
+    padding-top:50px;
+  }
+}
+</style>
+</head>
+<body>
+<button class="mobile-menu-btn" onclick="toggleMobileMenu()">☰</button>
+<div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileMenu()"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <h2>Menu</h2>
+    <a href="#" onclick="closeMobileMenu()">Dashboard</a>
+    <a href="#" onclick="closeMobileMenu()">Settings</a>
+    <a href="#" onclick="closeMobileMenu()">Profile</a>
+  </aside>
+  
+  <main class="main">
+    <div class="page">
+      <h1>Test Mobile Menu</h1>
+      <p>Buka dengan DevTools (F12) dan aktifkan device emulation (Ctrl+Shift+M) untuk melihat hamburger menu.</p>
+      <p>Atur viewport ke mobile size (375px) dan refresh halaman.</p>
+      <p>Hamburger menu (☰) harus muncul di pojok kiri atas.</p>
+    </div>
+  </main>
+</div>
+
+<script>
+function toggleMobileMenu(){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  if(sb) sb.classList.toggle('active');
+  if(ov) ov.classList.toggle('active');
+}
+
+function closeMobileMenu(){
+  const sb = document.getElementById('sidebar');
+  const ov = document.getElementById('sidebar-overlay');
+  if(sb) sb.classList.remove('active');
+  if(ov) ov.classList.remove('active');
+}
+
+// Close mobile menu when clicking nav items or outside
+document.querySelectorAll('a').forEach(item => {
+  item.addEventListener('click', () => {
+    if(window.innerWidth <= 768) closeMobileMenu();
+  });
+});
+
+// Debug: Log viewport width on load and resize
+console.log('Initial viewport width:', window.innerWidth);
+window.addEventListener('resize', () => {
+  console.log('Viewport width:', window.innerWidth);
+  const btn = document.querySelector('.mobile-menu-btn');
+  const computed = window.getComputedStyle(btn);
+  console.log('Button visibility:', computed.visibility);
+  console.log('Button opacity:', computed.opacity);
+  console.log('Button display:', computed.display);
+});
+</script>
+</body>
+</html>

@@ -1,0 +1,2123 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Parama Studio — Dashboard Harga 2026</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:#F7F5F0;--surface:#FFF;--surface2:#F0EDE6;--border:#E2DDD5;--border2:#CCC8C0;
+  --text:#1A1714;--text2:#5C5750;--text3:#9C9890;
+  --accent:#C85B2A;--accent-light:#F5EAE3;--accent2:#2A6B8A;--accent2-light:#E3EFF5;
+  --success:#2D7A4A;--success-bg:#E8F5ED;--warning:#8A5F1A;--warning-bg:#FDF3E3;
+  --danger:#A02020;--danger-bg:#FAEAEA;--navy:#1C2E3D;
+  --grad:#1A5C3A;--grad-light:#E5F2EC;
+  --font-d:'DM Serif Display',Georgia,serif;--font-b:'DM Sans',sans-serif;
+  --r:10px;--rl:16px;--sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html{font-size:14px}
+body{background:var(--bg);font-family:var(--font-b);color:var(--text);min-height:100vh}
+.app{display:grid;grid-template-columns:224px 1fr;min-height:100vh}
+.sidebar{background:var(--navy);position:sticky;top:0;height:100vh;overflow-y:auto;display:flex;flex-direction:column}
+.sb-logo{padding:22px 20px 14px;border-bottom:1px solid rgba(255,255,255,.08)}
+.sb-logo .brand{font-family:var(--font-d);font-size:19px;color:#fff}
+.sb-logo .sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;letter-spacing:.06em;text-transform:uppercase}
+.nav{padding:10px 10px;flex:1}
+.nav-sec{font-size:10px;color:rgba(255,255,255,.3);letter-spacing:.08em;text-transform:uppercase;padding:12px 10px 5px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:8px;cursor:pointer;font-size:13px;color:rgba(255,255,255,.6);transition:all .15s;margin-bottom:1px;border:none;background:none;width:100%;text-align:left}
+.nav-item:hover{background:rgba(255,255,255,.07);color:rgba(255,255,255,.9)}
+.nav-item.active{background:rgba(200,91,42,.25);color:#fff}
+.nav-item.active-grad{background:rgba(26,92,58,.35);color:#fff}
+.nav-item .ico{width:16px;text-align:center;font-size:13px;opacity:.7}
+.nav-item.active .ico,.nav-item.active-grad .ico{opacity:1}
+.sb-footer{padding:10px 20px 18px;border-top:1px solid rgba(255,255,255,.08)}
+.sb-footer .ver{font-size:10px;color:rgba(255,255,255,.25)}
+.main{overflow:hidden}
+.page{display:none;padding:26px 30px;max-width:1120px}
+.page.active{display:block}
+.ph{margin-bottom:22px}
+.pt{font-family:var(--font-d);font-size:26px;letter-spacing:-.5px}
+.ps{font-size:13px;color:var(--text3);margin-top:3px}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px;box-shadow:var(--sh)}
+.ct{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px}
+.mg{display:grid;grid-template-columns:repeat(4,1fr);gap:11px;margin-bottom:18px}
+.m{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.ml{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.mv{font-family:var(--font-d);font-size:21px}
+.ms{font-size:11px;color:var(--text3);margin-top:2px}
+.mv.acc{color:var(--accent)}.mv.suc{color:var(--success)}.mv.war{color:var(--warning)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{background:var(--surface2);padding:8px 11px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+input,select,textarea{font-family:var(--font-b);font-size:13px;padding:7px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s;width:100%}
+input:focus,select:focus{border-color:var(--accent)}
+input[type=number]{width:auto}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .15s;font-family:var(--font-b)}
+.bp{background:var(--accent);color:#fff}.bp:hover{background:#b04d22}
+.bs{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}.bs:hover{background:var(--border)}
+.bg{background:transparent;color:var(--accent);border:1px solid var(--accent)}.bg:hover{background:var(--accent-light)}
+.bgrad{background:var(--grad);color:#fff}.bgrad:hover{background:#154d30}
+.bsm{padding:5px 11px;font-size:12px}
+.badge{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:500}
+.bsuc{background:var(--success-bg);color:var(--success)}.bwar{background:var(--warning-bg);color:var(--warning)}
+.bdan{background:var(--danger-bg);color:var(--danger)}.binf{background:var(--accent2-light);color:var(--accent2)}
+.bgra{background:var(--surface2);color:var(--text3)}.bgreen{background:var(--grad-light);color:var(--grad)}
+.chip{display:inline-block;padding:2px 8px;border-radius:20px;font-size:11px;margin:2px}
+.cy{background:var(--success-bg);color:var(--success)}.cn{background:var(--surface2);color:var(--text3);text-decoration:line-through}
+.note{font-size:12px;color:var(--text2);padding:9px 13px;background:var(--accent2-light);border-radius:8px;border-left:3px solid var(--accent2);line-height:1.6;margin-top:8px}
+.note.warn{background:var(--warning-bg);border-left-color:var(--warning);color:var(--warning)}
+.note.suc{background:var(--success-bg);border-left-color:var(--success);color:var(--success)}
+.note.dan{background:var(--danger-bg);border-left-color:var(--danger);color:var(--danger)}
+.note.grad{background:var(--grad-light);border-left-color:var(--grad);color:var(--grad)}
+.rr{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px}
+.rr:last-child{border-bottom:none}
+.rr .rl{color:var(--text2)}.rr .rv{font-weight:500;color:var(--text)}
+.rr.tot{padding-top:10px}.rr.tot .rl{font-weight:600;color:var(--text);font-size:14px}
+.rr.tot .rv{font-family:var(--font-d);font-size:20px;color:var(--accent)}
+.rr .rv.gr{color:var(--success)}.rr .rv.rd{color:var(--danger)}
+.tn{display:flex;gap:3px;border-bottom:1px solid var(--border);margin-bottom:18px}
+.tb{padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;font-family:var(--font-b)}
+.tb.active{color:var(--accent);border-bottom-color:var(--accent)}
+.tp{display:none}.tp.active{display:block}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
+.fg{display:flex;flex-direction:column;gap:5px}
+.fl{font-size:12px;font-weight:500;color:var(--text2)}
+.fh{font-size:11px;color:var(--text3)}
+.br{display:flex;align-items:center;gap:9px;margin-bottom:7px;font-size:12px}
+.bl{width:140px;color:var(--text2);flex-shrink:0}
+.bt{flex:1;height:7px;background:var(--border);border-radius:3px;overflow:hidden}
+.bf{height:100%;border-radius:3px;transition:width .4s}
+.bv{width:42px;text-align:right;color:var(--text2);font-weight:500}
+.pkgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(255px,1fr));gap:13px}
+.pkc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:16px;transition:box-shadow .15s}
+.pkc:hover{box-shadow:0 4px 20px rgba(0,0,0,.08)}
+.pkc.feat{border-color:var(--accent);border-width:2px}
+.pkc.feat-grad{border-color:var(--grad);border-width:2px}
+.pnum{font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:3px}
+.pname{font-family:var(--font-d);font-size:16px;color:var(--text);margin-bottom:5px}
+.pdesc{font-size:12px;color:var(--text2);line-height:1.55;margin-bottom:11px}
+.pp{font-family:var(--font-d);font-size:19px;color:var(--accent)}
+.pp.grad{color:var(--grad)}
+.pps{font-size:11px;color:var(--text3);margin-top:2px}
+.si{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:13px;margin-bottom:8px}
+.sih{display:flex;justify-content:space-between;align-items:center;margin-bottom:7px}
+.sin{font-weight:500;font-size:14px}.sis{font-size:12px;color:var(--text3);margin-top:1px}
+.sim{display:grid;grid-template-columns:repeat(4,1fr);gap:7px;margin-top:9px}
+.sitem{background:var(--surface);border-radius:7px;padding:9px;border:1px solid var(--border)}
+.siml{font-size:10px;color:var(--text3);font-weight:500;text-transform:uppercase;margin-bottom:2px}
+.simv{font-size:13px;font-weight:600}
+.fb{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mb12{margin-bottom:12px}.mb16{margin-bottom:16px}.mb20{margin-bottom:20px}
+.mt10{margin-top:10px}.mt16{margin-top:16px}
+.sec{font-size:12px;font-weight:600;color:var(--text2);margin-bottom:10px;display:flex;align-items:center;gap:8px}
+.sec::after{content:'';flex:1;height:1px;background:var(--border)}
+.dim td{opacity:.5}
+/* Editable table cells */
+.edi{padding:3px 6px;border:1px solid transparent;border-radius:5px;width:100%;font-size:13px;background:transparent;cursor:text;min-width:60px}
+.edi:hover{border-color:var(--border2);background:var(--surface)}
+.edi:focus{border-color:var(--accent);background:var(--surface);outline:none}
+.edit-hint{font-size:10px;color:var(--text3);font-style:italic;padding:4px 0}
+/* graduation accent */
+.grad-accent{color:var(--grad)}
+.grad-card-header{background:var(--grad);color:#fff;border-radius:var(--r) var(--r) 0 0;padding:10px 14px;margin:-18px -18px 14px;font-weight:600;font-size:13px}
+/* ---- LOGIN OVERLAY ---- */
+#login-overlay{position:fixed;inset:0;background:var(--navy);z-index:9999;display:flex;align-items:center;justify-content:center}
+.login-box{background:var(--surface);border-radius:var(--rl);padding:40px 36px;width:340px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.login-logo{font-family:var(--font-d);font-size:22px;color:var(--text);margin-bottom:4px}
+.login-sub{font-size:12px;color:var(--text3);margin-bottom:28px}
+.login-field{margin-bottom:14px}
+.login-field label{display:block;font-size:12px;font-weight:500;color:var(--text2);margin-bottom:5px}
+.login-field input{width:100%;padding:9px 12px;border:1px solid var(--border2);border-radius:8px;font-size:13px;font-family:var(--font-b);background:var(--surface);color:var(--text);outline:none;transition:border-color .15s}
+.login-field input:focus{border-color:var(--accent)}
+.login-btn{width:100%;padding:10px;background:var(--accent);color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:500;cursor:pointer;font-family:var(--font-b);transition:background .15s;margin-top:4px}
+.login-btn:hover{background:#b04d22}
+.login-err{font-size:12px;color:var(--danger);margin-top:8px;display:none;text-align:center}
+.sb-user{padding:10px 20px 14px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;justify-content:space-between;gap:8px}
+.sb-user-info{display:flex;flex-direction:column;gap:2px}
+.sb-user-name{font-size:12px;color:rgba(255,255,255,.8);font-weight:500}
+.sb-user-role{font-size:10px;color:rgba(255,255,255,.35);text-transform:uppercase;letter-spacing:.06em}
+.sb-logout{font-size:11px;color:rgba(255,255,255,.4);cursor:pointer;padding:3px 7px;border-radius:5px;border:1px solid rgba(255,255,255,.15);background:none;transition:all .15s;flex-shrink:0}
+.sb-logout:hover{color:#fff;border-color:rgba(255,255,255,.4)}
+.nav-item.locked{display:none}
+.bns-tag{display:inline-flex;align-items:center;gap:5px;padding:3px 10px 3px 12px;background:var(--accent-light);color:var(--accent);border-radius:20px;font-size:12px;font-weight:500}
+.bns-tag button{background:none;border:none;cursor:pointer;color:var(--accent);font-size:14px;line-height:1;padding:0;opacity:.7}
+.bns-tag button:hover{opacity:1}
+/* diskon section */
+.diskon-box{background:var(--surface2);border:1px dashed var(--accent);border-radius:var(--r);padding:13px;margin-top:12px}
+.diskon-box .dbt{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.dkbtn{padding:4px 12px;border-radius:20px;font-size:12px;cursor:pointer;border:1px solid var(--border2);background:transparent;color:var(--text2);transition:all .15s;font-family:var(--font-b)}
+.dkbtn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.dk-warn{font-size:11px;padding:6px 10px;border-radius:6px;margin-top:8px}
+.dw-ok{background:var(--success-bg);color:var(--success)}.dw-warn{background:var(--warning-bg);color:var(--warning)}.dw-bad{background:var(--danger-bg);color:var(--danger)}
+</style>
+</head>
+<body>
+
+<!-- LOGIN OVERLAY -->
+<div id="login-overlay">
+  <div class="login-box">
+    <div class="login-logo">Parama Studio</div>
+    <div class="login-sub">Dashboard Harga 2026 — Masuk untuk melanjutkan</div>
+    <div class="login-field"><label>Username</label><input type="text" id="li-user" placeholder="contoh: manager" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <div class="login-field"><label>Password</label><input type="password" id="li-pass" placeholder="••••••••" onkeydown="if(event.key==='Enter')doLogin()"></div>
+    <button class="login-btn" onclick="doLogin()">Masuk</button>
+    <div class="login-err" id="li-err">Username atau password salah.</div>
+    <div style="margin-top:18px;padding-top:14px;border-top:1px solid var(--border);font-size:11px;color:var(--text3);line-height:1.7">
+      <b>Demo akun:</b><br>
+      Manager: <code>manager</code> / <code>parama2026</code><br>
+      Staff: <code>staff</code> / <code>staff123</code>
+    </div>
+  </div>
+</div>
+
+<div class="app" id="main-app" style="display:none">
+<aside class="sidebar">
+  <div class="sb-logo">
+    <div class="brand">Parama Studio</div>
+    <div class="sub">Dashboard Harga 2026</div>
+  </div>
+  <div class="sb-user" id="sb-user-area">
+    <div class="sb-user-info">
+      <div class="sb-user-name" id="sb-uname">—</div>
+      <div class="sb-user-role" id="sb-urole">—</div>
+    </div>
+    <button class="sb-logout" onclick="doLogout()">Keluar</button>
+  </div>
+  <nav class="nav">
+    <div class="nav-sec">Overview</div>
+    <button class="nav-item active" onclick="goPage('ringkasan',this)"><span class="ico">◈</span>Ringkasan</button>
+    <div class="nav-sec">Buku Tahunan</div>
+    <button class="nav-item" onclick="goPage('fullservice',this)"><span class="ico">◉</span>Full Service</button>
+    <button class="nav-item" onclick="goPage('alacarte',this)"><span class="ico">◎</span>À La Carte</button>
+    <button class="nav-item" onclick="goPage('addon',this)"><span class="ico">◫</span>Add-on</button>
+    <div class="nav-sec">Graduation</div>
+    <button class="nav-item" onclick="goPage('graduation',this)"><span class="ico">◈</span>Graduation</button>
+    <div class="nav-sec">Tools</div>
+    <button class="nav-item" onclick="goPage('kalkulator',this)"><span class="ico">⊟</span>Kalkulator</button>
+    <button class="nav-item" onclick="goPage('proyek',this)"><span class="ico">◉</span>Penawaran & Proyek</button>
+    <button class="nav-item" onclick="goPage('analisis',this)"><span class="ico">⊕</span>Analisis Margin</button>
+    <div class="nav-sec">Pengaturan</div>
+    <button class="nav-item" onclick="goPage('pengaturan',this)"><span class="ico">⊙</span>Edit Semua Harga</button>
+  </nav>
+  <div class="sb-footer"><div class="ver">v2.0 — Mar 2026</div></div>
+</aside>
+
+<main class="main">
+
+<!-- ============================= RINGKASAN ============================= -->
+<div class="page active" id="page-ringkasan">
+  <div class="ph"><div class="pt">Ringkasan</div><div class="ps">Overview bisnis Parama Studio</div></div>
+  <div class="mg" id="metrics-ov"></div>
+  <div class="g2 mb20">
+    <div class="card"><div class="ct">Breakdown Overhead Bulanan</div><div id="oh-bars"></div></div>
+    <div class="card"><div class="ct">Distribusi Komponen Full Service</div><div id="komp-bars"></div><div class="note mt10">Estimasi distribusi biaya → dasar harga à la carte.</div></div>
+  </div>
+  <div class="card"><div class="ct">Skenario BEP Bulanan</div><div id="bep-sc"></div></div>
+</div>
+
+<!-- ============================= FULL SERVICE ============================= -->
+<div class="page" id="page-fullservice">
+  <div class="ph"><div class="pt">Pricelist Full Service</div><div class="ps">Termasuk photography, fashion stylist, editing, desain, e-book, cetak & shipping</div></div>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px">
+    <div class="note" style="margin:0">💡 <b>Edit langsung:</b> klik angka Harga/Buku atau Maks Halaman untuk mengubahnya. Kolom "Saran Harga" otomatis muncul jika margin kurang dari 55%.</div>
+    <div class="note warn" style="margin:0">⚠️ <b>Logika yang benar:</b> margin % per buku MEMANG turun untuk qty besar — itu <b>normal</b>. Yang penting adalah <b>Total Gross per proyek</b> harus cukup nutup OH yang terpakai. Lihat kolom "Total Gross" & "Saran Harga".</div>
+  </div>
+
+  <div class="fb mb16" style="justify-content:space-between;align-items:center">
+    <div class="fb">
+      <span style="font-size:13px;color:var(--text2)">Paket:</span>
+      <button class="btn bp bsm" onclick="setPkg('handy')" id="btn-handy">Handy Book A4+</button>
+      <button class="btn bs bsm" onclick="setPkg('minimal')" id="btn-minimal">Minimal Book SQ</button>
+      <button class="btn bs bsm" onclick="setPkg('large')" id="btn-large">Large Book B4</button>
+    </div>
+    <div class="fb" style="gap:6px;align-items:center;font-size:12px;color:var(--text3)">
+      <span>OH per proyek (asumsi</span>
+      <input type="number" id="fs-nproyek" value="4" min="1" max="20" style="width:42px;padding:3px 6px;font-size:12px" oninput="renderFS()">
+      <span>proyek aktif/bln)</span>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="edit-hint mb12">✏️ Klik angka Harga/Buku atau Maks Halaman untuk edit. Kolom Saran Harga = harga minimum agar proyek tetap profitable.</div>
+    <div class="tw"><table id="fs-table">
+      <thead><tr>
+        <th>Range Siswa</th>
+        <th>Harga/Buku</th>
+        <th>Maks Halaman</th>
+        <th>Est. Cetak/Buku</th>
+        <th>Gross/Buku</th>
+        <th>Gross %</th>
+        <th>Total Gross</th>
+        <th>Net/Proyek*</th>
+        <th>Rating</th>
+        <th>Saran Harga</th>
+      </tr></thead>
+      <tbody id="fs-body"></tbody>
+    </table></div>
+    <div style="font-size:11px;color:var(--text3);margin-top:8px">*Net/Proyek = Total Gross dikurangi alokasi overhead (OH bulanan ÷ jumlah proyek aktif). Ubah asumsi proyek aktif di kanan atas.</div>
+  </div>
+
+  <div class="card mt16" id="fs-insight-box" style="border-left:3px solid var(--accent)">
+    <div class="ct">Insight & Anomali</div>
+    <div id="fs-insights"></div>
+  </div>
+</div>
+
+<!-- ============================= À LA CARTE ============================= -->
+<div class="page" id="page-alacarte">
+  <div class="ph"><div class="pt">Paket À La Carte</div><div class="ps">Paket parsial untuk klien yang tidak ambil full service</div></div>
+  <div class="note mb16">💡 Harga à la carte dihitung otomatis dari faktor % full service. Ubah faktornya di menu <b>Edit Semua Harga</b>.</div>
+  <div class="pkgrid" id="alc-grid"></div>
+  <div class="mt16">
+    <div class="sec">Tabel Perbandingan Paket</div>
+    <div class="card"><div class="tw"><table><thead><tr><th>Paket</th><th>Foto</th><th>Editing</th><th>Desain</th><th>E-Book</th><th>Cetak</th><th>Harga (100 siswa)</th><th>Target Margin</th></tr></thead><tbody id="alc-cmp"></tbody></table></div>
+    <div class="note warn mt10">⚠️ Paket Edit+Cetak & Desain Only: wajib kasih SOP standar file foto ke klien (300dpi, JPG/RAW, tersortir per kelas).</div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= ADD-ON ============================= -->
+<div class="page" id="page-addon">
+  <div class="ph"><div class="pt">Pricelist Add-on</div><div class="ps">Layanan tambahan — bisa diedit langsung di tabel</div></div>
+  <div class="note mb16">💡 Klik angka mana saja di tabel untuk edit harga. Perubahan langsung aktif di Kalkulator.</div>
+  <div class="g2">
+    <div>
+      <div class="sec">Finishing & Binding</div>
+      <div class="card mb16"><div class="tw"><table><thead><tr><th>Jenis</th><th>25–75 buku</th><th>76–150 buku</th><th>&gt;151 buku</th></tr></thead><tbody id="adn-finishing"></tbody></table></div></div>
+      <div class="sec">Upgrade Kertas</div>
+      <div class="card mb16"><div class="tw"><table><thead><tr><th>Jenis</th><th>25–50</th><th>51–100</th><th>101–150</th><th>&gt;151</th></tr></thead><tbody id="adn-kertas"></tbody></table></div></div>
+      <div class="sec">Halaman Tambahan (per halaman)</div>
+      <div class="card mb16"><div class="tw"><table><thead><tr><th>Jumlah Order</th><th>Harga/Hal</th></tr></thead><tbody id="adn-halaman"></tbody></table></div></div>
+      <div class="sec">Video</div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Jenis</th><th>Durasi</th><th>Harga</th></tr></thead><tbody id="adn-video"></tbody></table></div></div>
+    </div>
+    <div>
+      <div class="sec">Packaging — Slide & Standard</div>
+      <div class="card mb16"><div class="tw"><table><thead><tr><th>Tipe</th><th>25–50</th><th>51–100</th><th>101–150</th><th>151–200</th><th>&gt;200</th></tr></thead><tbody id="adn-pkg1"></tbody></table></div></div>
+      <div class="sec">Packaging — Custom Box</div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Tipe</th><th>25–50</th><th>51–100</th><th>101–150</th><th>151–200</th><th>&gt;200</th></tr></thead><tbody id="adn-pkg2"></tbody></table></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= GRADUATION ============================= -->
+<div class="page" id="page-graduation">
+  <div class="ph"><div class="pt" style="color:var(--grad)">Graduation Package</div><div class="ps">Dokumentasi wisuda — foto, video, photobooth & glamation 360°</div></div>
+  <div class="note grad mb16">✏️ Klik angka harga mana saja untuk edit langsung. Semua harga juga bisa diubah di menu <b>Edit Semua Harga</b>.</div>
+
+  <div class="sec">Paket Utama</div>
+  <div class="pkgrid mb20" id="grad-grid"></div>
+
+  <div class="g2 mb20">
+    <div>
+      <div class="sec">Add-on Graduation</div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Item</th><th>Harga</th></tr></thead><tbody id="grad-addon"></tbody></table></div></div>
+    </div>
+    <div>
+      <div class="sec">Cetak Foto Tambahan</div>
+      <div class="card"><div class="tw"><table><thead><tr><th>Ukuran</th><th>Harga/lembar</th></tr></thead><tbody id="grad-cetak"></tbody></table></div></div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="grad-card-header">Kalkulator Graduation</div>
+    <div class="g2">
+      <div>
+        <div class="fg mb12">
+          <label class="fl">Pilih Paket</label>
+          <select id="gc-pkg" onchange="gcUpdate()"><option value="">— Pilih paket —</option></select>
+        </div>
+        <div id="gc-addons"></div>
+      </div>
+      <div>
+        <div class="ct">Ringkasan</div>
+        <div id="gc-result"></div>
+        <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+          <div class="rr tot"><span class="rl">Total</span><span class="rv" id="gc-total" style="color:var(--grad)">—</span></div>
+        </div>
+        <div id="gc-note" class="note grad mt10"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= KALKULATOR ============================= -->
+<div class="page" id="page-kalkulator">
+  <div class="ph"><div class="pt">Kalkulator Harga</div><div class="ps">Hitung penawaran — full service, à la carte, graduation, + add-on</div></div>
+  <div class="g2">
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="card">
+        <div class="ct">Parameter Utama</div>
+        <div style="display:flex;flex-direction:column;gap:9px">
+          <div class="fg">
+            <label class="fl">Kategori</label>
+            <select id="k-cat" onchange="kCatChange()">
+              <option value="bukutahunan">Buku Tahunan</option>
+              <option value="graduation">Graduation</option>
+            </select>
+          </div>
+          <div class="fg" id="k-type-row">
+            <label class="fl">Tipe Paket</label>
+            <select id="k-type" onchange="kalcUpdate()">
+              <optgroup label="Full Service">
+                <option value="fs-handy">Full Service — Handy Book A4+</option>
+                <option value="fs-minimal">Full Service — Minimal Book SQ</option>
+                <option value="fs-large">Full Service — Large Book B4</option>
+              </optgroup>
+              <optgroup label="À La Carte">
+                <option value="ac-ebook">À La Carte — E-Book Package</option>
+                <option value="ac-editcetak">À La Carte — Edit+Desain+Cetak</option>
+                <option value="ac-fotohalf">À La Carte — Foto Only (½ hari)</option>
+                <option value="ac-fotofull">À La Carte — Foto Only (Full day)</option>
+                <option value="ac-videod">À La Carte — Drone Video</option>
+                <option value="ac-videodoc">À La Carte — Docudrama Video</option>
+                <option value="ac-desain">À La Carte — Desain Only</option>
+                <option value="ac-cetakonly">À La Carte — Cetak Only</option>
+              </optgroup>
+            </select>
+          </div>
+          <div class="fg" id="k-grad-row" style="display:none">
+            <label class="fl">Paket Graduation</label>
+            <select id="k-grad-pkg" onchange="kalcUpdate()"></select>
+          </div>
+          <div class="fg" id="k-siswa-row">
+            <label class="fl">Jumlah Siswa / Order</label>
+            <input type="number" id="k-siswa" value="100" min="25" max="500" oninput="kalcUpdate()">
+          </div>
+          <div class="fg" id="k-hal-row">
+            <label class="fl">Jumlah Halaman</label>
+            <input type="number" id="k-hal" value="60" min="30" max="160" readonly style="background:var(--surface2);cursor:default">
+            <span class="fh" id="k-hal-info">Otomatis dari pricelist</span>
+            <span class="fh" id="k-hal-warn" style="display:none;color:var(--warning)">⚠ Tambah halaman? Centang add-on "Halaman Tambahan" di bawah</span>
+          </div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="ct">Add-on (Opsional)</div>
+        <div style="max-height:300px;overflow-y:auto" id="k-addon-list"></div>
+      </div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:13px">
+      <div class="card">
+        <div class="ct">Hasil Kalkulasi</div>
+        <div id="k-result"></div>
+        <hr style="border:none;border-top:1px solid var(--border);margin:12px 0">
+        <div class="rr tot"><span class="rl">Total Penawaran</span><span class="rv" id="k-total">—</span></div>
+        <div id="k-total-sub" style="font-size:11px;color:var(--text3);margin-top:3px;text-align:right"></div>
+
+        <!-- NEGOSIASI: DISKON + BONUS BISA GABUNG -->
+        <div class="diskon-box">
+          <div style="font-size:11px;font-weight:600;color:var(--accent);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">Negosiasi Harga</div>
+
+          <!-- DISKON / CASHBACK -->
+          <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px">Potongan Harga</div>
+          <div class="dbt" style="margin-bottom:8px">
+            <button class="dkbtn active" data-type="none" onclick="setDkType('none',this)">Tidak Ada</button>
+            <button class="dkbtn" data-type="persen" onclick="setDkType('persen',this)">Diskon %</button>
+            <button class="dkbtn" data-type="nominal" onclick="setDkType('nominal',this)">Diskon Nominal</button>
+            <button class="dkbtn" data-type="cashback" onclick="setDkType('cashback',this)">Cashback %</button>
+          </div>
+          <div id="dk-val-section" style="display:none;margin-bottom:10px">
+            <div style="display:flex;align-items:center;gap:6px">
+              <input type="number" id="dk-value" value="5" min="0" max="100" step="0.5" style="width:85px" oninput="applyDiskon();updateNominalFmt()">
+              <span style="font-size:13px;color:var(--text3)" id="dk-unit">%</span>
+              <span id="dk-nominal-fmt" style="font-size:12px;color:var(--text3)"></span>
+            </div>
+          </div>
+
+          <!-- BONUS PRODUK — bisa aktif bersamaan dgn diskon -->
+          <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;margin-top:4px">Bonus Produk <span style="font-size:11px;font-weight:400;color:var(--text3)">(opsional, bisa gabung dgn diskon)</span></div>
+          <div style="display:flex;gap:6px;margin-bottom:6px">
+            <input type="text" id="bns-input" placeholder="contoh: +10 halaman gratis, slide box..." style="flex:1;font-size:12px;padding:5px 10px" onkeydown="if(event.key==='Enter'){addBonusTag();event.preventDefault()}">
+            <input type="number" id="bns-nominal" placeholder="Rp nilai" style="width:100px;font-size:12px;padding:5px 8px" title="Estimasi nilai bonus dalam Rp (opsional)" oninput="applyDiskon()">
+            <button class="btn bs bsm" onclick="addBonusTag()" style="flex-shrink:0;padding:5px 10px">+</button>
+          </div>
+          <div style="display:flex;gap:5px;flex-wrap:wrap;min-height:24px" id="bns-tags"></div>
+          <div style="font-size:10px;color:var(--text3);margin-top:4px">Ketik lalu Enter. Kolom Rp opsional untuk estimasi nilai bonus.</div>
+
+          <div id="dk-result" style="margin-top:10px"></div>
+          <div id="dk-warn" class="dk-warn" style="display:none"></div>
+        </div>
+      </div>
+
+      <div class="card" id="k-profit-card">
+        <div class="ct">Estimasi Profitabilitas</div>
+        <div id="k-profit"></div>
+        <div id="k-verdict" style="margin-top:9px"></div>
+      </div>
+      <div class="note" id="k-note"></div>
+
+      <!-- Save to penawaran — inline form (no prompt) -->
+      <div style="margin-top:10px;padding:12px;background:var(--surface2);border-radius:var(--r);border:1px dashed var(--border2)">
+        <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">💾 Simpan ke Daftar Penawaran</div>
+        <div style="display:flex;gap:6px">
+          <input type="text" id="k-save-nama" placeholder="Nama sekolah / klien..." style="flex:1;font-size:13px;padding:7px 10px">
+          <button class="btn bp" style="flex-shrink:0;padding:7px 14px" onclick="saveKalcToPenawaran()">Simpan</button>
+        </div>
+        <div id="k-save-msg" style="font-size:11px;margin-top:5px;display:none"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= PROYEK ============================= -->
+<div class="page" id="page-proyek">
+  <div class="ph">
+    <div class="pt">Penawaran & Proyek</div>
+    <div class="ps">Semua penawaran — input dari Kalkulator, update status kapanpun</div>
+  </div>
+
+  <!-- Perbandingan Bulan (manager only) -->
+  <div id="pw-comparison" style="display:none;margin-bottom:16px"></div>
+
+  <!-- Metrics row (manager only) -->
+  <div class="mg" id="sim-metrics" style="grid-template-columns:repeat(5,1fr);margin-bottom:16px"></div>
+
+  <!-- Toolbar -->
+  <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:14px">
+    <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <!-- Calendar filter -->
+      <select id="pw-bulan" onchange="renderProyek()" style="font-size:12px;padding:5px 9px;border-radius:8px;border:1px solid var(--border2);background:var(--surface)"></select>
+      <select id="pw-filter" onchange="renderProyek()" style="font-size:12px;padding:5px 9px;border-radius:8px;border:1px solid var(--border2);background:var(--surface)">
+        <option value="all">Semua Status</option>
+        <option value="pending">🕐 Pending</option>
+        <option value="nego">🔄 Nego</option>
+        <option value="deal">✅ Deal</option>
+        <option value="gagal">❌ Tidak Jadi</option>
+      </select>
+      <select id="pw-sort" onchange="renderProyek()" style="font-size:12px;padding:5px 9px;border-radius:8px;border:1px solid var(--border2);background:var(--surface)">
+        <option value="newest">Terbaru dulu</option>
+        <option value="oldest">Terlama dulu</option>
+        <option value="highest">Harga tertinggi</option>
+        <option value="lowest">Harga terendah</option>
+      </select>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      <button class="btn bs bsm" onclick="exportPenawaran()">⬇ Export</button>
+      <label class="btn bs bsm" style="cursor:pointer;margin:0">⬆ Import<input type="file" accept=".json" onchange="importPenawaran(event)" style="display:none"></label>
+      <button class="btn bs bsm" onclick="clearPenawaran()" style="color:var(--danger)">Bersihkan</button>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div id="pw-summary" style="margin-bottom:16px"></div>
+
+  <!-- Penawaran list -->
+  <div id="pw-list"></div>
+
+  <!-- Breakdown (manager only) -->
+  <div class="g2 mt16" id="proyek-breakdown" style="display:none">
+    <div class="card">
+      <div class="ct">Breakdown per Status</div>
+      <div id="sim-by-status"></div>
+    </div>
+    <div class="card">
+      <div class="ct">Breakdown per Paket</div>
+      <div id="sim-by-paket"></div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ============================= ANALISIS ============================= -->
+<div class="page" id="page-analisis">
+  <div class="ph"><div class="pt">Analisis Margin</div><div class="ps">Evaluasi profitabilitas & rekomendasi penyesuaian harga</div></div>
+  <div class="card mb20">
+    <div class="tn">
+      <button class="tb active" onclick="setAnTab('margin',this)">Margin per Segmen</button>
+      <button class="tb" onclick="setAnTab('kompetitor',this)">vs Kompetitor</button>
+      <button class="tb" onclick="setAnTab('rekomendasi',this)">Rekomendasi</button>
+    </div>
+    <div class="tp active" id="an-margin">
+      <div class="fb mb16">
+        <span style="font-size:13px;color:var(--text2)">Paket:</span>
+        <button class="btn bp bsm" onclick="setAnPkg('handy')" id="abtn-handy">Handy</button>
+        <button class="btn bs bsm" onclick="setAnPkg('minimal')" id="abtn-minimal">Minimal</button>
+        <button class="btn bs bsm" onclick="setAnPkg('large')" id="abtn-large">Large</button>
+      </div>
+      <div class="tw"><table><thead><tr><th>Range Siswa</th><th>Harga Jual</th><th>Est. Cetak</th><th>Overhead/Buku*</th><th>Gross Margin</th><th>Net Margin</th><th>Status</th></tr></thead><tbody id="an-body"></tbody></table></div>
+      <div class="note mt10">*Overhead per buku dihitung asumsi 3 proyek aktif/bulan. Ubah overhead di <b>Edit Semua Harga</b>.</div>
+    </div>
+    <div class="tp" id="an-kompetitor">
+      <div class="tw"><table><thead><tr><th>Range Siswa</th><th>Parama (Handy)</th><th>Parama (Large)</th><th>Est. Kompetitor</th><th>Posisi</th><th>Catatan</th></tr></thead>
+      <tbody>
+        <tr><td>30–50</td><td>Rp465.000</td><td>Rp480.000</td><td>Rp400rb–520rb</td><td><span class="badge bsuc">Kompetitif</span></td><td>Margin tinggi, harga wajar</td></tr>
+        <tr><td>51–100</td><td>Rp370–415rb</td><td>Rp405–430rb</td><td>Rp350rb–450rb</td><td><span class="badge bsuc">Kompetitif</span></td><td>Sweet spot pasar</td></tr>
+        <tr><td>101–150</td><td>Rp320–350rb</td><td>Rp350–365rb</td><td>Rp300rb–380rb</td><td><span class="badge bsuc">Kompetitif</span></td><td>Range paling sering order</td></tr>
+        <tr><td>151–250</td><td>Rp235–315rb</td><td>Rp265–330rb</td><td>Rp220rb–320rb</td><td><span class="badge binf">Sedikit premium</span></td><td>Wajar karena include e-book</td></tr>
+        <tr><td>251–375</td><td>Rp185–240rb</td><td>Rp215–255rb</td><td>Rp170rb–240rb</td><td><span class="badge bwar">Perlu dicek</span></td><td>Margin mulai menipis</td></tr>
+        <tr><td>376–500</td><td>Rp140–190rb</td><td>Rp155–205rb</td><td>Rp130rb–190rb</td><td><span class="badge bwar">Margin tipis</span></td><td>Risiko jika banyak revisi</td></tr>
+      </tbody></table></div>
+    </div>
+    <div class="tp" id="an-rekomendasi">
+      <div class="tw"><table><thead><tr><th>Range / Isu</th><th>Kondisi Saat Ini</th><th>Rekomendasi</th><th>Prioritas</th></tr></thead>
+      <tbody>
+        <tr><td><b>426–475 siswa (Handy)</b></td><td>Rp165–175rb — margin ~41–45%</td><td>Naikkan ke <b>Rp185–195rb</b></td><td><span class="badge bdan">Tinggi</span></td></tr>
+        <tr><td><b>476–500 siswa (Handy)</b></td><td>Rp150rb — margin ~36%</td><td>Naikkan ke <b>Rp165–170rb</b></td><td><span class="badge bdan">Tinggi</span></td></tr>
+        <tr><td><b>Halaman tambahan</b></td><td>Tidak ada harga eksplisit</td><td>Gunakan pricelist add-on halaman</td><td><span class="badge bwar">Sedang</span></td></tr>
+        <tr><td><b>Paket À La Carte</b></td><td>Belum ada pricing resmi</td><td>Formalkan paket E-Book & Edit+Cetak</td><td><span class="badge bwar">Sedang</span></td></tr>
+        <tr><td><b>SOP file klien</b></td><td>Belum ada standar</td><td>Buat checklist kualitas foto untuk Paket 2 & 5</td><td><span class="badge binf">Anjuran</span></td></tr>
+        <tr><td><b>BEP rendah</b></td><td>BEP hanya 1.6 proyek/bulan</td><td>Sudah bagus — fokus ke upsell add-on</td><td><span class="badge bsuc">Positif</span></td></tr>
+      </tbody></table></div>
+    </div>
+  </div>
+</div>
+
+<!-- ============================= PENGATURAN ============================= -->
+<div class="page" id="page-pengaturan">
+  <div class="ph"><div class="pt">Edit Semua Harga</div><div class="ps">Ubah semua harga & asumsi biaya — berpengaruh ke seluruh dashboard</div></div>
+
+  <!-- Overhead -->
+  <div class="card mb16">
+    <div class="ct">Overhead & Gaji Tim (Rp/bulan)</div>
+    <div class="note mb12">Ubah nilai di bawah lalu klik <b>Simpan Overhead</b>.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:9px;margin-bottom:12px" id="ov-oh"></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn bp bsm" onclick="saveOH()">Simpan Overhead</button>
+      <button class="btn bs bsm" onclick="resetOH()">Reset ke Default</button>
+      <span id="ov-status" style="font-size:12px;color:var(--success);display:none">✓ Tersimpan</span>
+    </div>
+  </div>
+
+  <!-- Biaya Cetak Renjana Offset -->
+  <div class="card mb16">
+    <div class="ct">Biaya Cetak — Renjana Offset</div>
+    <div class="note mb12">Harga dasar per buku dari Renjana Offset. Edit langsung kalau harga vendor naik. Klik angka untuk ubah. Faktor paket (Minimal ×0.95, Large ×1.15) tetap berlaku di atas harga ini.</div>
+
+    <div style="margin-bottom:10px">
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">Pilih Range Siswa</div>
+      <div style="display:flex;gap:5px;flex-wrap:wrap" id="cetak-range-btns"></div>
+    </div>
+
+    <div class="tw" id="cetak-table-wrap"></div>
+
+    <div style="display:flex;gap:8px;align-items:center;margin-top:12px;flex-wrap:wrap">
+      <button class="btn bp bsm" onclick="saveCetakBase()">Simpan Harga Cetak</button>
+      <button class="btn bs bsm" onclick="resetCetakBase()">Reset ke Default Renjana</button>
+      <span id="ov-cetak-status" style="font-size:12px;color:var(--success);display:none">✓ Tersimpan</span>
+    </div>
+
+    <div style="margin-top:16px;padding-top:12px;border-top:1px solid var(--border)">
+      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:6px">Faktor per Paket (×multiplier dari tabel di atas)</div>
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:10px">
+        <div class="fg"><label class="fl">Handy Book A4+</label><div style="display:flex;align-items:center;gap:5px"><input type="number" id="ov-cetak-handy" value="1.00" step="0.01" min="0.5" max="3"><span style="font-size:12px;color:var(--text3)">×</span></div></div>
+        <div class="fg"><label class="fl">Minimal Book SQ</label><div style="display:flex;align-items:center;gap:5px"><input type="number" id="ov-cetak-minimal" value="0.95" step="0.01" min="0.5" max="3"><span style="font-size:12px;color:var(--text3)">×</span></div></div>
+        <div class="fg"><label class="fl">Large Book B4</label><div style="display:flex;align-items:center;gap:5px"><input type="number" id="ov-cetak-large" value="1.15" step="0.01" min="0.5" max="3"><span style="font-size:12px;color:var(--text3)">×</span></div></div>
+      </div>
+      <button class="btn bp bsm" onclick="saveCetak()">Simpan Faktor Paket</button>
+    </div>
+  </div>
+
+  <!-- Faktor À La Carte -->
+  <div class="card mb16">
+    <div class="ct">Faktor Harga À La Carte (% dari Full Service)</div>
+    <div class="note mb12">Harga à la carte = harga full service × faktor ini. Default: E-Book 72%, Edit+Desain+Cetak 62%, Desain Only 22%.</div>
+    <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px">
+      <div class="fg"><label class="fl">E-Book Package (%)</label><input type="number" id="ov-ac-ebook" value="72" min="10" max="100"></div>
+      <div class="fg"><label class="fl">Edit+Desain+Cetak (%)</label><input type="number" id="ov-ac-editcetak" value="62" min="10" max="100"></div>
+      <div class="fg"><label class="fl">Desain Only (%)</label><input type="number" id="ov-ac-desain" value="22" min="10" max="100"></div>
+      <div class="fg"><label class="fl">Cetak Only (%)</label><input type="number" id="ov-ac-cetakonly" value="30" min="10" max="100"></div>
+    </div>
+    <button class="btn bp bsm" onclick="saveALC()">Simpan Faktor À La Carte</button>
+  </div>
+
+  <!-- Graduation Prices Override -->
+  <div class="card mb16">
+    <div class="ct" style="color:var(--grad)">Harga Graduation</div>
+    <div class="note grad mb12">Edit harga paket graduation di sini atau langsung klik angka di tabel pada halaman Graduation.</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:9px;margin-bottom:12px" id="ov-grad"></div>
+    <div style="display:flex;gap:8px;align-items:center">
+      <button class="btn bgrad bsm" onclick="saveGrad()">Simpan Harga Graduation</button>
+      <button class="btn bs bsm" onclick="resetGrad()">Reset ke Default</button>
+    </div>
+  </div>
+
+  <!-- Foto Graduation Prices -->
+  <div class="card">
+    <div class="ct">Add-on & Cetak Foto Graduation</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:9px;margin-bottom:12px" id="ov-grad-addon"></div>
+    <button class="btn bgrad bsm" onclick="saveGradAddon()">Simpan Add-on Graduation</button>
+  </div>
+</div>
+
+</main>
+</div><!-- end main-app -->
+
+<script>
+// ============================================================
+// STATE — all prices live here, editable
+// ============================================================
+const DEF_OH = {total:65540000,marketing:12750000,creative:7670000,designer:16700000,pm:7200000,sosmed:6430000,freelance:3204000,ops:11586000};
+let OH = {...DEF_OH};
+let CETAK_F = {handy:1.0, minimal:0.95, large:1.15};
+let ALC_F = {ebook:0.72, editcetak:0.62, desain:0.22, cetakonly:0.30};
+
+// Full service pricelist [lo, hi, harga, maxPages]
+let FS = {
+  handy:   [[30,50,465000,30],[51,75,415000,30],[76,100,370000,45],[101,125,350000,55],[126,150,335000,60],[151,175,315000,65],[176,200,295000,75],[201,225,260000,80],[226,250,250000,80],[251,275,240000,90],[276,300,230000,100],[300,325,220000,100],[326,350,210000,120],[351,375,200000,120],[376,400,190000,135],[401,425,185000,135],[426,450,165000,145],[451,475,175000,150],[476,500,150000,160]],
+  minimal: [[30,50,450000,30],[51,75,400000,30],[76,100,355000,45],[101,125,335000,55],[126,150,320000,60],[151,175,300000,65],[176,200,280000,75],[201,225,245000,80],[226,250,235000,80],[251,275,240000,90],[276,300,215000,100],[300,325,205000,100],[326,350,195000,120],[351,375,185000,120],[376,400,180000,135],[401,425,170000,135],[426,450,160000,145],[451,475,150000,150],[476,500,140000,160]],
+  large:   [[30,50,480000,30],[51,75,430000,30],[76,100,405000,45],[101,125,365000,55],[126,150,350000,60],[151,175,330000,65],[176,200,310000,75],[201,225,275000,80],[226,250,265000,80],[251,275,255000,90],[276,300,245000,100],[300,325,235000,100],[326,350,225000,120],[351,375,215000,120],[376,400,205000,135],[401,425,195000,135],[426,450,175000,145],[451,475,165000,150],[476,500,155000,160]]
+};
+
+// Add-ons [name, type, ...tiers]
+// type: flat (per buku by qty), per_hal, extra_hal, flat_video, flat_total
+let ADDON_DATA = {
+  finishing: [
+    {id:'binding',name:'Binding Paku/Jepang/Spiral',type:'flat',tiers:[[25,75,50000],[76,150,35000],[151,9999,30000]]},
+    {id:'popup',name:'Pop Up 2D',type:'flat',tiers:[[25,75,55000],[76,150,40000],[151,9999,35000]]},
+    {id:'tunnel',name:'Cover Tunnel',type:'flat',tiers:[[25,75,75000],[76,150,60000],[151,9999,50000]]},
+    {id:'klip',name:'Cover Klip/Cetekan',type:'flat',tiers:[[25,75,15000],[76,150,10000],[151,9999,8000]]},
+    {id:'covbahan',name:'Cover Bahan',type:'flat',tiers:[[25,75,55000],[76,150,40000],[151,9999,35000]]},
+  ],
+  kertas: [
+    {id:'ivory',name:'Ivory Paper',type:'per_hal',tiers:[[25,50,450],[51,100,250],[101,150,200],[151,9999,150]]},
+    {id:'laminasi',name:'Laminasi Paper',type:'per_hal',tiers:[[25,50,600],[51,100,450],[101,150,400],[151,9999,350]]},
+  ],
+  halaman: [
+    {id:'extrahal',name:'Halaman Tambahan',type:'extra_hal',tiers:[[25,50,3000],[51,100,2000],[101,150,1300],[151,9999,1000]]},
+  ],
+  video: [
+    {id:'drone',name:'Drone Video (1–2 mnt)',type:'flat_video',price:1500000},
+    {id:'docudrama',name:'Docudrama Video (5–10 mnt)',type:'flat_video',price:3000000},
+  ],
+  pkg1: [
+    {id:'slidebox',name:'Slide Box',type:'flat',tiers:[[25,50,45000],[51,100,40000],[101,150,35000],[151,200,30000],[201,9999,25000]]},
+    {id:'stdbox1',name:'Standart Box 1',type:'flat',tiers:[[25,50,150000],[51,100,95000],[101,150,80000],[151,200,70000],[201,9999,65000]]},
+    {id:'stdbox2',name:'Standart Box 2',type:'flat',tiers:[[25,50,150000],[51,100,100000],[101,150,80000],[151,200,75000],[201,9999,70000]]},
+    {id:'hardbox',name:'Hard Box 3 (Akrilik)',type:'flat',tiers:[[25,50,125000],[51,100,100000],[101,150,90000],[151,200,80000],[201,9999,75000]]},
+  ],
+  pkg2: [
+    {id:'cbox1',name:'Custom Box 1',type:'flat',tiers:[[25,50,200000],[51,100,170000],[101,150,130000],[151,200,120000],[201,9999,110000]]},
+    {id:'cbox2',name:'Custom Box 2',type:'flat',tiers:[[25,50,165000],[51,100,150000],[101,150,130000],[151,200,120000],[201,9999,110000]]},
+    {id:'cbox3',name:'Custom Box 3',type:'flat',tiers:[[25,50,200000],[51,100,170000],[101,150,130000],[151,200,120000],[201,9999,110000]]},
+    {id:'cbox4',name:'Custom Box 4',type:'flat',tiers:[[25,50,200000],[51,100,170000],[101,150,140000],[151,200,130000],[201,9999,120000]]},
+    {id:'cbox5',name:'Custom Box 5',type:'flat',tiers:[[25,50,200000],[51,100,170000],[101,150,145000],[151,200,135000],[201,9999,130000]]},
+  ],
+};
+
+// Graduation pricing (editable)
+let GRAD = {
+  packages: [
+    {id:'gphv',name:'Photo & Video',price:4500000,desc:'2 Fotografer + 1 Videografer, 50 foto edited, video cinematic 2–4 mnt, G-Drive, 4 jam coverage, transport jabodetabek',color:'acc'},
+    {id:'gvideo',name:'Video Only',price:2000000,desc:'1 Videografer, video cinematic 2–5 mnt, G-Drive, 4 jam coverage, transport jabodetabek',color:''},
+    {id:'gphoto',name:'Photo Only',price:2750000,desc:'2 Fotografer, 100 foto edited, G-Drive, 4 jam coverage, transport jabodetabek',color:''},
+    {id:'gbooth',name:'Photo Booth',price:3850000,desc:'1–2 Crew profesional, backdrop wisuda, lighting studio, Selfiebox Machine, unlimited print 4R, max 3 jam, softcopy + QR Code realtime, transport jabodetabek',color:''},
+    {id:'g360',name:'Glamation 360°',price:4100000,desc:'1–2 Crew profesional, MP4, LCD 50in preview, GoPro/iPhone 12 Pro, overlay design free, max 3 jam, QR Code realtime, transport jabodetabek',color:''},
+    {id:'gcomplete',name:'Complete Package',price:7750000,desc:'Photo (2 foto, 100 edited) + Video (1 videografer, cinematic 2–4 mnt) + Photo Booth (unlimited print 4R, max 3 jam, QR Code), transport jabodetabek',color:'feat'},
+  ],
+  addons: [
+    {id:'gvideo_add',name:'Tambah 1 Videografer',price:1500000},
+    {id:'gphoto_add',name:'Tambah 1 Fotografer',price:1250000},
+    {id:'gbooth_add',name:'Tambah 1 Jam Photobooth/360',price:500000},
+    {id:'gwork_add',name:'Tambah 1 Jam Kerja/Orang',price:350000},
+  ],
+  cetak: [
+    {id:'g4r',name:'Cetak Foto 4R',price:4000},
+    {id:'g8r',name:'Cetak Foto 8R',price:8000},
+    {id:'g10r',name:'Cetak Foto 10R',price:15000},
+    {id:'g12r',name:'Cetak Foto 12R',price:20000},
+  ]
+};
+
+// ALC config
+const ALC_CFG = {
+  'fs-handy':   {label:'Full Service — Handy Book A4+',fs:true,pkg:'handy',bySiswa:true},
+  'fs-minimal': {label:'Full Service — Minimal Book SQ',fs:true,pkg:'minimal',bySiswa:true},
+  'fs-large':   {label:'Full Service — Large Book B4',fs:true,pkg:'large',bySiswa:true},
+  'ac-ebook':   {label:'E-Book Package',bySiswa:true,factor:'ebook'},
+  'ac-editcetak':{label:'Edit+Desain+Cetak',bySiswa:true,factor:'editcetak'},
+  'ac-fotohalf':{label:'Foto Only (½ hari)',bySiswa:false,flat:[3500000,5000000]},
+  'ac-fotofull':{label:'Foto Only (full day)',bySiswa:false,flat:[6000000,9000000]},
+  'ac-videod':  {label:'Drone Video',bySiswa:false,flat:[1500000,1500000]},
+  'ac-videodoc':{label:'Docudrama Video',bySiswa:false,flat:[3000000,3000000]},
+  'ac-desain':    {label:'Desain Only',bySiswa:true,factor:'desain',minPerBuku:50000},
+  'ac-cetakonly': {label:'Cetak Only',bySiswa:true,factor:'cetakonly',minPerBuku:30000},
+};
+
+let curFSPkg='handy', curAnPkg='handy', scenarios=[];
+
+// ============================================================
+// HELPERS
+// ============================================================
+const fmt = n => 'Rp'+Math.round(n).toLocaleString('id-ID');
+const fmtM = n => n>=1000000?'Rp'+(n/1000000).toFixed(1)+'jt':fmt(n);
+function getTier(tiers,qty){for(const[lo,hi,v]of tiers)if(qty>=lo&&qty<=hi)return v;return tiers[tiers.length-1][2]}
+function getFSPrice(pkg,siswa){for(const[lo,hi,h,p]of FS[pkg])if(siswa>=lo&&siswa<=hi)return{harga:h,pages:p};return siswa<30?{harga:FS[pkg][0][2],pages:FS[pkg][0][3]}:{harga:FS[pkg][FS[pkg].length-1][2],pages:FS[pkg][FS[pkg].length-1][3]}}
+function getFSPageForSiswa(pkg,siswa){return getFSPrice(pkg,siswa).pages}
+
+// ============================================================
+// BIAYA CETAK — editable base price table (Renjana Offset)
+// ============================================================
+// BIAYA CETAK — Renjana Offset, per range 25 siswa
+// Struktur: array of {label, lo, hi, pages: {hal: harga/buku}}
+// Range sesuai pricelist Full Service Parama
+// ============================================================
+const DEF_CETAK_BASE = [
+  {lo:30,  hi:50,  label:'30–50 siswa',   pages:{30:92000,45:102000,60:115000,65:127000,75:140000,80:140000,90:152000,100:165000,110:176000,120:176000,135:176000,150:176000,160:176000}},
+  {lo:51,  hi:75,  label:'51–75 siswa',   pages:{30:80000,45:90000, 60:100000,65:110000,75:122000,80:122000,90:134000,100:145000,110:158000,120:162000,135:165000,150:168000,160:170000}},
+  {lo:76,  hi:100, label:'76–100 siswa',  pages:{30:70000,45:80000, 60:90000, 65:98000, 75:108000,80:108000,90:118000,100:130000,110:140000,120:145000,135:150000,150:155000,160:160000}},
+  {lo:101, hi:125, label:'101–125 siswa', pages:{30:62000,45:72000, 60:82000, 65:88000, 75:97000, 80:97000, 90:106000,100:116000,110:126000,120:130000,135:135000,150:140000,160:145000}},
+  {lo:126, hi:150, label:'126–150 siswa', pages:{30:58000,45:68000, 60:76000, 65:82000, 75:90000, 80:90000, 90:98000, 100:108000,110:118000,120:122000,135:127000,150:132000,160:137000}},
+  {lo:151, hi:175, label:'151–175 siswa', pages:{30:54000,45:63000, 60:71000, 65:76000, 75:84000, 80:84000, 90:91000, 100:100000,110:109000,120:113000,135:118000,150:123000,160:128000}},
+  {lo:176, hi:200, label:'176–200 siswa', pages:{30:50000,45:59000, 60:66000, 65:71000, 75:78000, 80:78000, 90:85000, 100:93000, 110:101000,120:105000,135:110000,150:115000,160:119000}},
+  {lo:201, hi:225, label:'201–225 siswa', pages:{30:47000,45:55000, 60:62000, 65:66000, 75:73000, 80:73000, 90:79000, 100:87000, 110:95000, 120:98000, 135:103000,150:107000,160:111000}},
+  {lo:226, hi:250, label:'226–250 siswa', pages:{30:44000,45:52000, 60:58000, 65:62000, 75:68000, 80:68000, 90:74000, 100:81000, 110:88000, 120:92000, 135:96000, 150:100000,160:104000}},
+  {lo:251, hi:275, label:'251–275 siswa', pages:{30:41000,45:49000, 60:55000, 65:58000, 75:64000, 80:64000, 90:70000, 100:76000, 110:83000, 120:86000, 135:90000, 150:94000, 160:98000}},
+  {lo:276, hi:300, label:'276–300 siswa', pages:{30:39000,45:46000, 60:52000, 65:55000, 75:60000, 80:60000, 90:66000, 100:72000, 110:78000, 120:81000, 135:85000, 150:89000, 160:92000}},
+  {lo:301, hi:325, label:'301–325 siswa', pages:{30:37000,45:44000, 60:49000, 65:52000, 75:57000, 80:57000, 90:62000, 100:68000, 110:74000, 120:77000, 135:80000, 150:84000, 160:87000}},
+  {lo:326, hi:350, label:'326–350 siswa', pages:{30:35000,45:42000, 60:47000, 65:50000, 75:54000, 80:54000, 90:59000, 100:65000, 110:70000, 120:73000, 135:76000, 150:80000, 160:83000}},
+  {lo:351, hi:375, label:'351–375 siswa', pages:{30:33000,45:40000, 60:45000, 65:47000, 75:52000, 80:52000, 90:56000, 100:62000, 110:67000, 120:70000, 135:73000, 150:76000, 160:79000}},
+  {lo:376, hi:400, label:'376–400 siswa', pages:{30:31000,45:38000, 60:42000, 65:45000, 75:49000, 80:49000, 90:53000, 100:58000, 110:63000, 120:66000, 135:69000, 150:72000, 160:75000}},
+  {lo:401, hi:425, label:'401–425 siswa', pages:{30:30000,45:36000, 60:40000, 65:42000, 75:46000, 80:46000, 90:50000, 100:55000, 110:60000, 120:62000, 135:65000, 150:68000, 160:71000}},
+  {lo:426, hi:450, label:'426–450 siswa', pages:{30:28000,45:34000, 60:38000, 65:40000, 75:44000, 80:44000, 90:48000, 100:52000, 110:57000, 120:59000, 135:62000, 150:65000, 160:67000}},
+  {lo:451, hi:475, label:'451–475 siswa', pages:{30:27000,45:32000, 60:36000, 65:38000, 75:42000, 80:42000, 90:45000, 100:50000, 110:54000, 120:56000, 135:59000, 150:62000, 160:64000}},
+  {lo:476, hi:500, label:'476–500 siswa', pages:{30:26000,45:31000, 60:34000, 65:36000, 75:40000, 80:40000, 90:43000, 100:47000, 110:51000, 120:53000, 135:56000, 150:59000, 160:61000}},
+];
+
+let CETAK_BASE = DEF_CETAK_BASE.map(r=>({...r, pages:{...r.pages}}));
+let curCetakRange = 0;
+
+function getCetakRangeIdx(siswa){
+  for(let i=0;i<CETAK_BASE.length;i++){
+    if(siswa>=CETAK_BASE[i].lo && siswa<=CETAK_BASE[i].hi) return i;
+  }
+  return CETAK_BASE.length-1;
+}
+
+function setCetakRange(idx, btn){
+  curCetakRange = idx;
+  document.querySelectorAll('#cetak-range-btns button').forEach((b,i)=>{
+    b.className = i===idx ? 'btn bp bsm' : 'btn bs bsm';
+  });
+  renderCetakTable();
+}
+
+function renderCetakTable(){
+  const r = CETAK_BASE[curCetakRange];
+  const pages = Object.keys(r.pages).map(Number).sort((a,b)=>a-b);
+  const rows = pages.map(p=>`
+    <tr>
+      <td style="font-weight:500;white-space:nowrap">${p} hal</td>
+      <td><div style="display:flex;align-items:center;gap:5px">
+        <input type="number" value="${r.pages[p]}" style="width:95px;text-align:right"
+          onchange="CETAK_BASE[${curCetakRange}].pages[${p}]=parseInt(this.value)||${r.pages[p]};kalcUpdate()">
+        <span style="font-size:11px;color:var(--text3)">/buku</span>
+      </div></td>
+      <td style="font-size:11px;color:var(--text3)">
+        Handy <b>${fmt(Math.round(r.pages[p]*CETAK_F.handy))}</b> ·
+        Minimal <b>${fmt(Math.round(r.pages[p]*CETAK_F.minimal))}</b> ·
+        Large <b>${fmt(Math.round(r.pages[p]*CETAK_F.large))}</b>
+      </td>
+    </tr>`).join('');
+  const wrap = document.getElementById('cetak-table-wrap');
+  if(!wrap) return;
+  wrap.innerHTML=`
+    <div style="font-size:12px;color:var(--accent);font-weight:600;margin-bottom:8px">${r.label}</div>
+    <table style="width:100%">
+      <thead><tr><th>Halaman</th><th>Harga Base/Buku</th><th>Efektif per paket (setelah faktor)</th></tr></thead>
+      <tbody>${rows}</tbody>
+    </table>`;
+}
+
+function saveCetakBase(){
+  try { localStorage.setItem('parama_cetak_base_v1', JSON.stringify(CETAK_BASE)); } catch(e){}
+  const s=document.getElementById('ov-cetak-status');
+  if(s){s.style.display='block';s.textContent='✓ Harga cetak tersimpan';setTimeout(()=>s.style.display='none',2500);}
+  kalcUpdate();
+}
+
+function resetCetakBase(){
+  CETAK_BASE = DEF_CETAK_BASE.map(r=>({...r, pages:{...r.pages}}));
+  try { localStorage.removeItem('parama_cetak_base_v1'); } catch(e){}
+  renderCetakTable();
+  const s=document.getElementById('ov-cetak-status');
+  if(s){s.style.display='block';s.textContent='✓ Reset ke harga default Renjana';setTimeout(()=>s.style.display='none',2500);}
+  kalcUpdate();
+}
+
+function loadCetakBaseLS(){
+  try {
+    const raw = localStorage.getItem('parama_cetak_base_v1');
+    if(raw){
+      const parsed = JSON.parse(raw);
+      // Validate new format: array of objects with .pages property
+      if(Array.isArray(parsed) && parsed[0] && parsed[0].pages){
+        CETAK_BASE = parsed;
+      } else {
+        // Old format — discard and use default
+        localStorage.removeItem('parama_cetak_base_v1');
+      }
+    }
+  } catch(e){ localStorage.removeItem('parama_cetak_base_v1'); }
+}
+
+function estCetak(siswa, pages, pkg='handy'){
+  try {
+    const idx = getCetakRangeIdx(siswa);
+    const r = CETAK_BASE[idx]?.pages;
+    if(!r) return 0;
+    const keys = Object.keys(r).map(Number).sort((a,b)=>a-b);
+    if(!keys.length) return 0;
+    const closest = keys.reduce((a,b)=>Math.abs(b-pages)<Math.abs(a-pages)?b:a);
+    return Math.round((r[closest]||0) * (CETAK_F[pkg]||1));
+  } catch(e){ return 0; }
+}
+
+
+function marginBadge(p){if(p>=70)return'<span class="badge bsuc">Excellent</span>';if(p>=55)return'<span class="badge binf">Baik</span>';if(p>=40)return'<span class="badge bwar">Cukup</span>';return'<span class="badge bdan">Tipis</span>'}
+function bc(p){return p>=70?'#2D7A4A':p>=55?'#2A6B8A':p>=40?'#8A5F1A':'#A02020'}
+function miniBar(p){const c=bc(p);return`<div style="display:flex;align-items:center;gap:5px"><div style="width:75px;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:${Math.min(p,100)}%;height:100%;background:${c};border-radius:3px"></div></div><span style="font-size:12px;color:${c};font-weight:500">${p.toFixed(0)}%</span></div>`}
+
+// Editable cell helper
+function editCell(val, onChange, isRp=true){
+  const display = isRp ? fmt(val) : val;
+  return `<input class="edi" value="${val}" type="number" onchange="${onChange}" style="text-align:right">`;
+}
+
+// ============================================================
+// NAVIGATION
+// ============================================================
+function goPageCore(id, el){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n=>{n.classList.remove('active');n.classList.remove('active-grad')});
+  document.getElementById('page-'+id).classList.add('active');
+  el.classList.add(id==='graduation'?'active-grad':'active');
+  const renders={ringkasan:renderRingkasan,fullservice:()=>renderFS(),alacarte:renderAlacarte,addon:renderAddon,graduation:renderGraduation,kalkulator:()=>{buildAddonList();kalcUpdateCore()},proyek:renderProyek,analisis:renderAnalisis,pengaturan:renderPengaturan};
+  if(renders[id]) renders[id]();
+}
+function goPage(id, el){ goPageCore(id, el); }
+
+// ============================================================
+// RINGKASAN
+// ============================================================
+function renderRingkasan(){
+  const oh=OH.total;
+  const {harga:h150}=getFSPrice('handy',150);
+  const c150=estCetak(150,60,'handy');
+  const mb=h150-c150;
+  const bepP=oh/(mb*150);
+  document.getElementById('metrics-ov').innerHTML=`
+    <div class="m"><div class="ml">Overhead Bulanan</div><div class="mv acc">${fmtM(oh)}</div><div class="ms">total pengeluaran tim & ops</div></div>
+    <div class="m"><div class="ml">BEP (150 siswa)</div><div class="mv war">${bepP.toFixed(1)} proyek</div><div class="ms">min. proyek/bulan</div></div>
+    <div class="m"><div class="ml">Gross Margin Avg</div><div class="mv suc">68–80%</div><div class="ms">full service, 30–150 siswa</div></div>
+    <div class="m"><div class="ml">Net (3 proyek)</div><div class="mv suc">${fmtM(3*150*h150-3*150*c150-oh)}</div><div class="ms">estimasi @150 siswa</div></div>`;
+  const ohItems=[['Designer',OH.designer],['Marketing',OH.marketing],['Creative Prod.',OH.creative],['Project Mgr',OH.pm],['Social Media',OH.sosmed],['Freelance',OH.freelance],['Operasional',OH.ops]];
+  const mx=Math.max(...ohItems.map(x=>x[1]));
+  const cols=['#2A6B8A','#C85B2A','#2D7A4A','#8A5F1A','#6B3A8A','#4A7A6B','#888'];
+  document.getElementById('oh-bars').innerHTML=ohItems.map(([l,v],i)=>`<div class="br"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:${v/mx*100}%;background:${cols[i]}"></div></div><div class="bv">${fmtM(v)}</div></div>`).join('');
+  const komps=[['Foto+Stylist+Prop',30,'#C85B2A'],['Cetak+Shipping',25,'#2A6B8A'],['Desain Layout',20,'#2D7A4A'],['Editing Foto',15,'#8A5F1A'],['PM+Overhead',7,'#6B3A8A'],['E-Book',3,'#888']];
+  document.getElementById('komp-bars').innerHTML=komps.map(([l,p,c])=>`<div class="br"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:${p}%;background:${c}"></div></div><div class="bv">${p}%</div></div>`).join('');
+  let bepHTML='<div style="display:grid;grid-template-columns:repeat(3,1fr);gap:11px">';
+  for(const[lbl,np,ns,hp]of[['Konservatif',3,150,335000],['Moderat',5,150,335000],['Optimis',8,150,335000]]){
+    const rev=np*ns*hp,cogs=np*ns*estCetak(ns,60,'handy'),gp=rev-cogs,net=gp-oh,ok=net>=0;
+    bepHTML+=`<div style="border:1px solid var(--border);border-radius:var(--r);padding:13px"><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px">${lbl}</div><div style="font-size:11px;color:var(--text3)">${np} proyek × ${ns} siswa</div><div style="margin-top:7px;display:flex;flex-direction:column;gap:3px;font-size:12px"><div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Revenue</span><span>${fmtM(rev)}</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">COGS</span><span style="color:var(--danger)">-${fmtM(cogs)}</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Gross</span><span>${fmtM(gp)}</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Overhead</span><span style="color:var(--danger)">-${fmtM(oh)}</span></div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"><span>Net</span><span style="color:${ok?'var(--success)':'var(--danger)'}">${ok?'':'-'}${fmtM(Math.abs(net))}</span></div></div></div>`;
+  }
+  bepHTML+='</div>';
+  document.getElementById('bep-sc').innerHTML=bepHTML;
+}
+
+// ============================================================
+// FULL SERVICE
+// ============================================================
+function setPkg(p){
+  curFSPkg=p;
+  ['handy','minimal','large'].forEach(x=>document.getElementById('btn-'+x).className='btn bsm '+(x===p?'bp':'bs'));
+  renderFS();
+}
+function suggestedPrice(siswa, cetak, grossTotal, ohPerProyek) {
+  // Saran harga dari 2 sisi:
+  // 1. Agar net per proyek positif: harga = cetak + (OH_per_proyek / siswa) * 1.3 (target net 30% dari OH)
+  const minFromNet = cetak + (ohPerProyek / siswa) * 1.3;
+  // 2. Agar margin minimal 55%: harga = cetak / 0.45
+  const minFromMargin = cetak / 0.45;
+  const raw = Math.max(minFromNet, minFromMargin);
+  return Math.ceil(raw / 5000) * 5000;
+}
+
+function renderFS(){
+  const rows = FS[curFSPkg];
+  const nProyek = parseInt(document.getElementById('fs-nproyek')?.value) || 4;
+  const ohPerProyek = OH.total / nProyek;
+
+  let insightList = [];
+  let anomaly = false;
+  let prevHarga = 9999999;
+
+  document.getElementById('fs-body').innerHTML = rows.map(([lo,hi,harga,pages],i) => {
+    const mid = Math.round((lo+hi)/2);
+    const cetak = estCetak(mid, pages, curFSPkg);
+    const grossBuku = harga - cetak;
+    const pct = grossBuku / harga * 100;
+    const grossTotal = grossBuku * mid;
+    const netProyek = grossTotal - ohPerProyek;
+    const netOk = netProyek > 0;
+
+    // Detect anomaly: harga naik dari range sebelumnya (harusnya turun)
+    const isAnomaly = harga > prevHarga;
+    prevHarga = harga;
+
+    // Status berdasarkan GABUNGAN: gross% + net per proyek
+    let statusBadge, rowClass = '', saranCell = '';
+    if (pct >= 60 && netOk) {
+      statusBadge = '<span class="badge bsuc">✅ Bagus</span>';
+    } else if (pct >= 50 && netOk) {
+      statusBadge = '<span class="badge binf">🟡 Cukup</span>';
+    } else if (netOk && pct >= 40) {
+      statusBadge = '<span class="badge bwar">🟠 Perlu Cek</span>';
+      const saran = suggestedPrice(mid, cetak, grossTotal, ohPerProyek);
+      if (saran > harga) saranCell = `<span style="color:var(--accent);font-weight:600">${fmt(saran)}</span><div style="font-size:10px;color:var(--text3)">+${fmt(saran-harga)}/buku</div>`;
+    } else if (!netOk || pct < 40) {
+      statusBadge = '<span class="badge bdan">🔴 Kritis</span>';
+      rowClass = 'highlight-row';
+      const saran = suggestedPrice(mid, cetak, grossTotal, ohPerProyek);
+      saranCell = `<span style="color:var(--danger);font-weight:600">${fmt(saran)}</span><div style="font-size:10px;color:var(--text3)">+${fmt(saran-harga)}/buku</div>`;
+      insightList.push({lo,hi,harga,saran,pct,grossTotal,netProyek,reason: pct<30?'margin sangat rendah':'net proyek negatif'});
+    }
+
+    if (isAnomaly && i > 0) {
+      insightList.push({lo,hi,harga,anomaly:true,prevLo:rows[i-1][0],prevHi:rows[i-1][1],prevHarga:rows[i-1][2]});
+      rowClass = 'highlight-row';
+    }
+
+    const netColor = netOk ? 'var(--success)' : 'var(--danger)';
+
+    return `<tr class="${rowClass}">
+      <td><b>${lo}–${hi}</b>${isAnomaly&&i>0?'<span style="font-size:10px;color:var(--danger);margin-left:4px">⚠ anomali</span>':''}</td>
+      <td><input class="edi" type="number" value="${harga}" onchange="FS['${curFSPkg}'][${i}][2]=parseInt(this.value);renderFS()" style="width:90px;text-align:right;font-weight:600"></td>
+      <td><input class="edi" type="number" value="${pages}" onchange="FS['${curFSPkg}'][${i}][3]=parseInt(this.value);renderFS()" style="width:55px;text-align:center"> hal</td>
+      <td style="color:var(--danger)">${fmt(cetak)}</td>
+      <td style="color:${grossBuku>0?'var(--success)':'var(--danger)'}">${fmt(grossBuku)}</td>
+      <td>${miniBar(pct)}</td>
+      <td style="font-weight:500">${fmtM(grossTotal)}</td>
+      <td style="color:${netColor};font-weight:500">${netOk?'+':''}${fmtM(netProyek)}</td>
+      <td>${statusBadge}</td>
+      <td>${saranCell || '<span style="color:var(--text3);font-size:12px">—</span>'}</td>
+    </tr>`;
+  }).join('');
+
+  // Render insights
+  const insightBox = document.getElementById('fs-insights');
+  if (insightList.length === 0) {
+    insightBox.innerHTML = '<div style="font-size:13px;color:var(--success)">✓ Semua range sudah dalam kondisi baik berdasarkan asumsi ' + nProyek + ' proyek aktif/bulan.</div>';
+    return;
+  }
+  insightBox.innerHTML = insightList.map(ins => {
+    if (ins.anomaly) {
+      return `<div style="margin-bottom:10px;padding:10px 12px;background:var(--danger-bg);border-radius:8px;font-size:13px">
+        <b style="color:var(--danger)">⚠ Anomali Harga: ${ins.lo}–${ins.hi} siswa</b><br>
+        <span style="color:var(--text2)">Harga <b>${fmt(ins.harga)}</b> lebih <b>mahal</b> dari range sebelumnya (${ins.prevLo}–${ins.prevHi}: ${fmt(ins.prevHarga)}) — padahal quantity lebih besar, harusnya lebih murah. Cek kembali atau ini disengaja?</span>
+      </div>`;
+    }
+    return `<div style="margin-bottom:10px;padding:10px 12px;background:var(--warning-bg);border-radius:8px;font-size:13px">
+      <b style="color:var(--warning)">${ins.lo}–${ins.hi} siswa — ${ins.reason}</b><br>
+      <span style="color:var(--text2)">Gross margin ${ins.pct.toFixed(0)}%, net per proyek ${ins.netProyek>=0?'+':''}${fmtM(ins.netProyek)}. Saran harga minimal: <b>${fmt(ins.saran)}</b>.<br>
+      <span style="font-size:12px;color:var(--text3)">Logika: meski qty besar, margin/buku terlalu tipis sampai tidak nutup alokasi overhead tim. Kenaikan ${fmt(ins.saran-ins.harga)}/buku masih kompetitif untuk school-size order.</span></span>
+    </div>`;
+  }).join('');
+}
+
+// ============================================================
+// À LA CARTE
+// ============================================================
+function renderAlacarte(){
+  const pakets=[
+    {num:'1',name:'E-Book Package',desc:'Foto+Editing+Desain, output file digital. Tanpa cetak fisik.',chips:['Foto','Fashion Stylist','Editing','Desain','E-Book'],no:['Cetak','Shipping'],key:'ebook',feat:true,margin:'62–68%'},
+    {num:'2',name:'Edit+Desain+Cetak',desc:'Klien bawa foto sendiri. Parama handle editing, layout, cetak & kirim.',chips:['Editing','Desain','Cetak','Shipping'],no:['Foto','Fashion Stylist'],key:'editcetak',margin:'55–62%'},
+    {num:'3a',name:'Foto Only (½ Hari)',desc:'Sesi foto max ~75 siswa. Fotografer + fashion stylist.',chips:['Foto','Fashion Stylist','Basic Edit'],no:['Desain','Cetak'],flatStr:'Rp3,5jt – 5jt',margin:'55–65%'},
+    {num:'3b',name:'Foto Only (Full Day)',desc:'Sesi foto 76–150+ siswa. Full team seharian.',chips:['Foto','Fashion Stylist','Basic Edit'],no:['Desain','Cetak'],flatStr:'Rp6jt – 9jt',margin:'55–65%'},
+    {num:'4a',name:'Drone Video',desc:'Video drone 1–2 menit.',chips:['Shooting','Edit Video'],no:['Foto','Desain','Cetak'],flatStr:'Rp1,5jt',margin:'—'},
+    {num:'4b',name:'Docudrama Video',desc:'Video cerita angkatan 5–10 menit.',chips:['Shooting','Edit Video'],no:['Foto','Desain','Cetak'],flatStr:'Rp3jt',margin:'—'},
+    {num:'5',name:'Desain Only',desc:'Klien bawa semua konten. Parama hanya layout buku.',chips:['Desain','E-Book'],no:['Foto','Editing','Cetak'],key:'desain',margin:'55–65%'},
+    {num:'6',name:'Cetak Only',desc:'Klien sudah punya file siap cetak. Parama cetak & kirim saja.',chips:['Cetak','Shipping'],no:['Foto','Editing','Desain'],key:'cetakonly',margin:'30–45%'},
+  ];
+  document.getElementById('alc-grid').innerHTML=pakets.map(p=>{
+    let price='';
+    if(p.flatStr) price=`<div class="pp">${p.flatStr}</div><div class="pps">flat / per project</div>`;
+    else{const f=ALC_F[p.key];const h=getFSPrice('handy',100).harga;const pb=Math.max(p.key==='desain'?50000:0,Math.round(h*f));price=`<div class="pp">${fmt(pb)}/siswa</div><div class="pps">100 siswa, Handy Book acuan</div>`}
+    return `<div class="pkc ${p.feat?'feat':''}"><div class="pnum">Paket ${p.num}${p.feat?' — Populer':''}</div><div class="pname">${p.name}</div><div class="pdesc">${p.desc}</div><div style="margin-bottom:9px">${p.chips.map(c=>`<span class="chip cy">${c}</span>`).join('')}${p.no.map(c=>`<span class="chip cn">${c}</span>`).join('')}</div>${price}<div style="margin-top:7px"><span class="badge binf">Margin ~${p.margin}</span></div></div>`;
+  }).join('');
+  const h100=getFSPrice('handy',100).harga;
+  const cmpData=[
+    ['Full Service','✓','✓','✓','✓','✓',fmt(h100)+'/siswa','68–80%'],
+    ['E-Book','✓','✓','✓','✓','—',fmt(Math.round(h100*ALC_F.ebook))+'/siswa','62–68%'],
+    ['Edit+Desain+Cetak','—','✓','✓','✓','✓',fmt(Math.round(h100*ALC_F.editcetak))+'/siswa','55–62%'],
+    ['Foto Only ½ Hari','✓','—','—','—','—','Rp3,5–5jt/sesi','55–65%'],
+    ['Foto Only Full Day','✓','—','—','—','—','Rp6–9jt/sesi','55–65%'],
+    ['Drone Video','—','—','—','—','—','Rp1,5jt/video','—'],
+    ['Docudrama Video','—','—','—','—','—','Rp3jt/video','—'],
+    ['Desain Only','—','—','✓','✓','—',fmt(Math.max(50000,Math.round(h100*ALC_F.desain)))+'/siswa','55–65%'],
+    ['Cetak Only','—','—','—','—','✓',fmt(Math.max(30000,Math.round(h100*ALC_F.cetakonly)))+'/siswa','30–45%'],
+  ];
+  document.getElementById('alc-cmp').innerHTML=cmpData.map(r=>`<tr>${r.map((c,i)=>{let s=c;if(i>0&&i<6)s=c==='✓'?'<span style="color:var(--success);font-weight:600">✓</span>':'<span style="color:var(--border2)">—</span>';return`<td>${s}</td>`}).join('')}</tr>`).join('');
+}
+
+// ============================================================
+// ADD-ON TABLE (editable)
+// ============================================================
+function renderAddon(){
+  function finRow(a){return`<tr><td>${a.name}</td>${a.tiers.map((t,ti)=>`<td><input class="edi" type="number" value="${t[2]}" onchange="ADDON_DATA.finishing[${ADDON_DATA.finishing.findIndex(x=>x.id===a.id)}].tiers[${ti}][2]=parseInt(this.value)" style="width:70px;text-align:right"></td>`).join('')}</tr>`}
+  document.getElementById('adn-finishing').innerHTML=ADDON_DATA.finishing.map(a=>finRow(a)).join('');
+  document.getElementById('adn-kertas').innerHTML=ADDON_DATA.kertas.map((a,ai)=>`<tr><td>${a.name}</td>${a.tiers.map((t,ti)=>`<td><input class="edi" type="number" value="${t[2]}" onchange="ADDON_DATA.kertas[${ai}].tiers[${ti}][2]=parseInt(this.value)" style="width:60px;text-align:right"><span style="font-size:11px;color:var(--text3)">/hal</span></td>`).join('')}</tr>`).join('');
+  document.getElementById('adn-halaman').innerHTML=ADDON_DATA.halaman.map((a,ai)=>`<tr><td>25–50 order</td><td><input class="edi" type="number" value="${a.tiers[0][2]}" onchange="ADDON_DATA.halaman[0].tiers[0][2]=parseInt(this.value)" style="width:70px;text-align:right"></td></tr><tr><td>51–100 order</td><td><input class="edi" type="number" value="${a.tiers[1][2]}" onchange="ADDON_DATA.halaman[0].tiers[1][2]=parseInt(this.value)" style="width:70px;text-align:right"></td></tr><tr><td>101–150 order</td><td><input class="edi" type="number" value="${a.tiers[2][2]}" onchange="ADDON_DATA.halaman[0].tiers[2][2]=parseInt(this.value)" style="width:70px;text-align:right"></td></tr><tr><td>&gt;151 order</td><td><input class="edi" type="number" value="${a.tiers[3][2]}" onchange="ADDON_DATA.halaman[0].tiers[3][2]=parseInt(this.value)" style="width:70px;text-align:right"></td></tr>`).join('');
+  document.getElementById('adn-video').innerHTML=ADDON_DATA.video.map((a,ai)=>`<tr><td>${a.name}</td><td>${a.id==='drone'?'1–2 menit':'5–10 menit'}</td><td><input class="edi" type="number" value="${a.price}" onchange="ADDON_DATA.video[${ai}].price=parseInt(this.value)" style="width:90px;text-align:right"></td></tr>`).join('');
+  function pkgRow(arr,grp,ai){return arr.map((a,i)=>`<tr><td>${a.name}</td>${a.tiers.map((t,ti)=>`<td><input class="edi" type="number" value="${t[2]}" onchange="ADDON_DATA.${grp}[${i}].tiers[${ti}][2]=parseInt(this.value)" style="width:60px;text-align:right"></td>`).join('')}</tr>`).join('')}
+  document.getElementById('adn-pkg1').innerHTML=pkgRow(ADDON_DATA.pkg1,'pkg1');
+  document.getElementById('adn-pkg2').innerHTML=pkgRow(ADDON_DATA.pkg2,'pkg2');
+}
+
+// ============================================================
+// GRADUATION
+// ============================================================
+function renderGraduation(){
+  // Populate paket select in kalkulator
+  const sel=[document.getElementById('gc-pkg'),document.getElementById('k-grad-pkg'),document.getElementById('s-grad-pkg')];
+  const opts='<option value="">— Pilih paket —</option>'+GRAD.packages.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
+  sel.forEach(s=>{if(s)s.innerHTML=opts});
+
+  document.getElementById('grad-grid').innerHTML=GRAD.packages.map((p,pi)=>`
+    <div class="pkc ${p.color==='feat'?'feat-grad':''} ${p.color==='acc'?'feat':''}">
+      <div class="pnum">${p.color==='feat'?'Complete Package':''}</div>
+      <div class="pname">${p.name}</div>
+      <div class="pdesc" style="font-size:11px">${p.desc}</div>
+      <div class="pp grad" style="margin-top:10px">
+        <input class="edi" type="number" value="${p.price}" onchange="GRAD.packages[${pi}].price=parseInt(this.value);renderGraduation()" style="width:100px;font-size:18px;font-family:var(--font-d);color:var(--grad);text-align:right;border-color:var(--grad-light)">
+      </div>
+      <div class="pps">flat per event • incl. transport jabodetabek</div>
+    </div>`).join('');
+
+  document.getElementById('grad-addon').innerHTML=GRAD.addons.map((a,ai)=>`
+    <tr><td>${a.name}</td><td><input class="edi" type="number" value="${a.price}" onchange="GRAD.addons[${ai}].price=parseInt(this.value)" style="width:90px;text-align:right"></td></tr>`).join('');
+  document.getElementById('grad-cetak').innerHTML=GRAD.cetak.map((c,ci)=>`
+    <tr><td>${c.name}</td><td><input class="edi" type="number" value="${c.price}" onchange="GRAD.cetak[${ci}].price=parseInt(this.value)" style="width:70px;text-align:right"><span style="font-size:11px;color:var(--text3)">/lembar</span></td></tr>`).join('');
+
+  // Add-on checklist for graduation calculator
+  document.getElementById('gc-addons').innerHTML=`
+    <div class="ct">Add-on Graduation</div>
+    ${GRAD.addons.map((a,ai)=>`<div class="addon-check-row" style="display:flex;align-items:center;gap:8px;padding:7px 0;border-bottom:1px solid var(--border);font-size:13px"><input type="checkbox" id="gchk-${a.id}" onchange="gcUpdate()"><span style="flex:1">${a.name}</span><span style="color:var(--text3);font-size:12px">${fmt(a.price)}</span></div>`).join('')}
+    <div class="ct mt10">Cetak Foto Tambahan</div>
+    ${GRAD.cetak.map((c,ci)=>`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><input type="checkbox" id="gchk-${c.id}" onchange="gcUpdate()"><span style="flex:1">${c.name}</span><span style="color:var(--text3);font-size:12px">${fmt(c.price)}/lembar</span><input type="number" id="gqty-${c.id}" value="1" min="1" style="width:50px;display:none" oninput="gcUpdate()"></div>`).join('')}`;
+  // show qty inputs when checked
+  GRAD.cetak.forEach(c=>{
+    const chk=document.getElementById('gchk-'+c.id);
+    if(chk) chk.addEventListener('change',()=>{const qi=document.getElementById('gqty-'+c.id);if(qi)qi.style.display=chk.checked?'':'none'});
+  });
+  gcUpdate();
+}
+
+function gcUpdate(){
+  const pkgId=document.getElementById('gc-pkg')?.value;
+  if(!pkgId){document.getElementById('gc-result').innerHTML='<div style="color:var(--text3);font-size:13px">Pilih paket terlebih dahulu.</div>';document.getElementById('gc-total').textContent='—';document.getElementById('gc-note').textContent='';return}
+  const pkg=GRAD.packages.find(p=>p.id===pkgId);
+  if(!pkg) return;
+  let rows=`<div class="rr"><span class="rl">Paket ${pkg.name}</span><span class="rv">${fmt(pkg.price)}</span></div>`;
+  let total=pkg.price;
+  GRAD.addons.forEach(a=>{const chk=document.getElementById('gchk-'+a.id);if(chk&&chk.checked){rows+=`<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmt(a.price)}</span></div>`;total+=a.price}});
+  GRAD.cetak.forEach(c=>{const chk=document.getElementById('gchk-'+c.id);if(chk&&chk.checked){const qty=parseInt(document.getElementById('gqty-'+c.id)?.value)||1;const sub=c.price*qty;rows+=`<div class="rr"><span class="rl">+ ${c.name} ×${qty}</span><span class="rv gr">+${fmt(sub)}</span></div>`;total+=sub}});
+  document.getElementById('gc-result').innerHTML=rows;
+  document.getElementById('gc-total').textContent=fmt(total);
+  document.getElementById('gc-note').textContent=`Harga sudah termasuk transport Jabodetabek. Luar Jabodetabek + biaya transport.`;
+}
+
+// ============================================================
+// KALKULATOR
+// ============================================================
+function kCatChange(){
+  const cat=document.getElementById('k-cat').value;
+  document.getElementById('k-type-row').style.display=cat==='bukutahunan'?'':'none';
+  document.getElementById('k-grad-row').style.display=cat==='graduation'?'':'none';
+  document.getElementById('k-siswa-row').style.display=cat==='bukutahunan'?'':'none';
+  document.getElementById('k-hal-row').style.display=cat==='bukutahunan'?'':'none';
+  kalcUpdate();
+}
+
+function buildAddonList(){
+  // Populate grad select
+  const gs=document.getElementById('k-grad-pkg');
+  if(gs) gs.innerHTML='<option value="">— Pilih paket —</option>'+GRAD.packages.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
+  const allAddons=[...ADDON_DATA.finishing,...ADDON_DATA.kertas,...ADDON_DATA.halaman,...ADDON_DATA.video,...ADDON_DATA.pkg1,...ADDON_DATA.pkg2];
+  const grps=[['Finishing',ADDON_DATA.finishing],['Kertas',ADDON_DATA.kertas],['Halaman Tambahan',ADDON_DATA.halaman],['Video',ADDON_DATA.video],['Packaging Standard',ADDON_DATA.pkg1],['Custom Box',ADDON_DATA.pkg2]];
+  let html='';
+  grps.forEach(([g,arr])=>{
+    html+=`<div style="font-size:10px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;padding:9px 0 3px">${g}</div>`;
+    arr.forEach(a=>{
+      let sub='';
+      if(a.type==='extra_hal') sub=`<div style="padding-left:22px;margin-top:3px;padding-bottom:4px"><input type="number" id="xhal-${a.id}" value="10" min="1" max="100" style="width:55px" oninput="kalcUpdate()"> halaman</div>`;
+      html+=`<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><input type="checkbox" id="chk-${a.id}" onchange="kalcUpdate()"><span style="flex:1">${a.name}</span><span style="color:var(--text3);font-size:11px" id="acp-${a.id}">—</span></div>${sub}`;
+    });
+  });
+  // Grad addons
+  html+=`<div style="font-size:10px;font-weight:600;color:var(--grad);text-transform:uppercase;letter-spacing:.06em;padding:9px 0 3px">Add-on Graduation</div>`;
+  GRAD.addons.forEach(a=>{html+=`<div style="display:flex;align-items:center;gap:7px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px"><input type="checkbox" id="chk-${a.id}" onchange="kalcUpdate()"><span style="flex:1">${a.name}</span><span style="color:var(--text3);font-size:11px">${fmt(a.price)}</span></div>`});
+  document.getElementById('k-addon-list').innerHTML=html;
+}
+
+function kalcUpdateCore(){
+  const cat=document.getElementById('k-cat')?.value||'bukutahunan';
+  const siswa=parseInt(document.getElementById('k-siswa')?.value)||100;
+
+  if(cat==='graduation'){
+    const pkgId=document.getElementById('k-grad-pkg')?.value;
+    const pkg=GRAD.packages.find(p=>p.id===pkgId);
+    let rows='',total=0,addonRows='';
+    if(pkg){total=pkg.price;rows=`<div class="rr"><span class="rl">Paket ${pkg.name}</span><span class="rv">${fmt(pkg.price)}</span></div>`}
+    GRAD.addons.forEach(a=>{const c=document.getElementById('chk-'+a.id);if(c&&c.checked){total+=a.price;addonRows+=`<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmt(a.price)}</span></div>`}});
+    document.getElementById('k-result').innerHTML=rows+addonRows;
+    document.getElementById('k-total').textContent=total>0?fmt(total):'—';
+    document.getElementById('k-total').style.color='var(--grad)';
+    document.getElementById('k-profit').innerHTML=`<div class="rr"><span class="rl">Tipe harga</span><span class="rv">Flat per event</span></div><div class="rr"><span class="rl">Transport</span><span class="rv">Included (Jabodetabek)</span></div>`;
+    document.getElementById('k-verdict').innerHTML='';
+    document.getElementById('k-note').textContent='Harga graduation flat per event, bukan per siswa.';
+    return;
+  }
+
+  const type=document.getElementById('k-type').value;
+  const cfg=ALC_CFG[type];
+  document.getElementById('k-total').style.color='var(--accent)';
+
+  // Auto-fill halaman from pricelist
+  const halInput=document.getElementById('k-hal');
+  if(cfg&&cfg.fs){
+    const {pages}=getFSPrice(cfg.pkg,siswa);
+    halInput.value=pages;
+    document.getElementById('k-hal-info').textContent=`Otomatis: ${pages} halaman untuk ${siswa} siswa (dari pricelist)`;
+    document.getElementById('k-hal-warn').style.display='none';
+  } else {
+    halInput.value='—';
+    document.getElementById('k-hal-info').textContent='Halaman menyesuaikan paket';
+  }
+  const hal=cfg&&cfg.fs?getFSPrice(cfg.pkg,siswa).pages:60;
+
+  const isSiswa=cfg?.bySiswa;
+  document.getElementById('k-siswa-row').style.display=isSiswa?'':'none';
+  document.getElementById('k-hal-row').style.display=(cfg?.fs)?'':'none';
+
+  // Update addon prices
+  const allAddons=[...ADDON_DATA.finishing,...ADDON_DATA.kertas,...ADDON_DATA.halaman,...ADDON_DATA.video,...ADDON_DATA.pkg1,...ADDON_DATA.pkg2];
+  allAddons.forEach(a=>{
+    const el=document.getElementById('acp-'+a.id);if(!el)return;
+    if(a.type==='flat'||a.type==='flat_video') el.textContent=a.type==='flat_video'?fmtM(a.price):fmt(getTier(a.tiers,siswa))+'/buku';
+    else if(a.type==='per_hal') el.textContent=getTier(a.tiers,siswa).toLocaleString('id-ID')+'/hal';
+    else if(a.type==='extra_hal') el.textContent=getTier(a.tiers,siswa).toLocaleString('id-ID')+'/hal ekstra';
+  });
+
+  // Base price
+  let basePB=0,baseFlat=0,baseLabel='';
+  if(cfg?.fs){const{harga}=getFSPrice(cfg.pkg,siswa);basePB=harga;baseLabel=`${fmt(harga)}/buku (${siswa} siswa)`}
+  else if(cfg?.bySiswa){const hB=getFSPrice('handy',siswa).harga;basePB=Math.max(cfg.minPerBuku||0,Math.round(hB*ALC_F[cfg.factor]));baseLabel=`${fmt(basePB)}/buku (${siswa} siswa)`}
+  else if(cfg?.flat){baseFlat=(cfg.flat[0]+cfg.flat[1])/2;baseLabel=`${fmtM(cfg.flat[0])}${cfg.flat[0]!==cfg.flat[1]?' – '+fmtM(cfg.flat[1]):''} (flat/proyek)`}
+
+  let addonPB=0,addonVid=0,addonRows='';
+  allAddons.forEach(a=>{
+    const chk=document.getElementById('chk-'+a.id);if(!chk||!chk.checked)return;
+    if(a.type==='flat'){const v=getTier(a.tiers,siswa);addonPB+=v;addonRows+=`<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmt(v)}/buku</span></div>`}
+    else if(a.type==='per_hal'){const v=getTier(a.tiers,siswa)*hal;addonPB+=v;addonRows+=`<div class="rr"><span class="rl">+ ${a.name} (${hal}hal)</span><span class="rv gr">+${fmt(v)}/buku</span></div>`}
+    else if(a.type==='extra_hal'){const eh=parseInt(document.getElementById('xhal-'+a.id)?.value)||0;const v=getTier(a.tiers,siswa)*eh;addonPB+=v;addonRows+=`<div class="rr"><span class="rl">+ ${eh} hal tambahan</span><span class="rv gr">+${fmt(v)}/buku</span></div>`}
+    else if(a.type==='flat_video'){addonVid+=a.price;addonRows+=`<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmtM(a.price)} (flat)</span></div>`}
+  });
+
+  const totPB=basePB+addonPB;
+  const totAll=isSiswa?totPB*siswa+addonVid:baseFlat+addonVid;
+  document.getElementById('k-result').innerHTML=`<div class="rr"><span class="rl">Harga dasar</span><span class="rv">${baseLabel}</span></div>`+addonRows;
+  document.getElementById('k-total').textContent=isSiswa?fmt(totAll):cfg?.flat?fmtM(cfg.flat[0])+(cfg.flat[0]!==cfg.flat[1]?' – '+fmtM(cfg.flat[1]):''):'—';
+  document.getElementById('k-total-sub').textContent=addonVid>0?`*termasuk video ${fmtM(addonVid)} flat`:'';
+
+  let profHTML='';
+  if(cfg?.fs&&isSiswa){
+    const cetak=estCetak(siswa,hal,cfg.pkg);
+    const gB=basePB-cetak+addonPB;
+    const gT=gB*siswa+addonVid;
+    const net=gT-OH.total;
+    const pct=gB/totPB*100;
+    // Store for diskon warning
+    let cetakEl=document.getElementById('k-cetak-est');
+    if(!cetakEl){cetakEl=document.createElement('span');cetakEl.id='k-cetak-est';cetakEl.style.display='none';document.body.appendChild(cetakEl)}
+    cetakEl.dataset.cetak=cetak*siswa;
+    profHTML=`<div class="rr"><span class="rl">Est. biaya cetak/buku</span><span class="rv rd">−${fmt(cetak)}</span></div><div class="rr"><span class="rl">Gross margin/buku</span><span class="rv gr">${fmt(gB)} (${pct.toFixed(0)}%)</span></div><div class="rr"><span class="rl">Gross total proyek</span><span class="rv gr">${fmt(gT)}</span></div><div class="rr"><span class="rl">Overhead bulanan</span><span class="rv rd">−${fmtM(OH.total)}</span></div><div class="rr tot"><span class="rl">Net (1 proyek/bln)</span><span class="rv ${net>=0?'gr':'rd'}">${net>=0?'':'-'}${fmtM(Math.abs(net))}</span></div>`;
+    document.getElementById('k-verdict').innerHTML=pct>=60?`<div class="note suc">✓ Margin ${pct.toFixed(0)}% sehat.</div>`:pct>=40?`<div class="note warn">⚠ Margin ${pct.toFixed(0)}% tipis, perhatikan efisiensi.</div>`:`<div class="note dan">✗ Margin ${pct.toFixed(0)}% terlalu rendah.</div>`;
+  } else {document.getElementById('k-verdict').innerHTML='';profHTML=`<div class="rr"><span class="rl">Tipe harga</span><span class="rv">${isSiswa?'Per siswa':'Flat per proyek'}</span></div>`}
+  document.getElementById('k-profit').innerHTML=profHTML;
+  const notes={'fs-handy':'Full service: foto, editing, desain, e-book, cetak & kirim.','fs-minimal':'Paket buku square 24×24cm, semua layanan.','fs-large':'Buku besar B4 25×35cm, semua layanan.','ac-ebook':'Tanpa cetak fisik. Klien terima file digital.','ac-editcetak':'⚠ Klien bawa foto sendiri — wajib SOP kualitas file.','ac-desain':'⚠ Klien bawa semua konten siap pakai.','ac-cetakonly':'⚠ Klien bawa file print-ready. Parama hanya cetak & kirim — pastikan spesifikasi file sesuai Renjana Offset.','ac-fotohalf':'Sesi ½ hari, max ~75 siswa.','ac-fotofull':'Full day, 76–150+ siswa.','ac-videod':'Flat per video, bukan per siswa.','ac-videodoc':'Flat per video.'};
+  document.getElementById('k-note').textContent=notes[type]||'';
+}
+// kalcUpdate wrapper — will be replaced by auth-aware version after login system loads
+function kalcUpdate(){ kalcUpdateCore(); }
+
+// ============================================================
+// SIMULASI
+// ============================================================
+function sCatChange(){
+  const cat=document.getElementById('s-cat').value;
+  document.getElementById('s-type-row').style.display=cat==='bukutahunan'?'':'none';
+  document.getElementById('s-grad-row').style.display=cat==='graduation'?'':'none';
+  document.getElementById('s-siswa-row').style.display=cat==='bukutahunan'?'':'none';
+}
+
+function calcRev(type,siswa){
+  const cfg=ALC_CFG[type];if(!cfg)return{rev:0,cogs:0,gp:0,label:'—'};
+  if(cfg.bySiswa){
+    let pb;
+    if(cfg.fs){pb=getFSPrice(cfg.pkg,siswa).harga}
+    else{const hB=getFSPrice('handy',siswa).harga;pb=Math.max(cfg.minPerBuku||0,Math.round(hB*ALC_F[cfg.factor]))}
+    const rev=pb*siswa;
+    const cogs=cfg.fs?estCetak(siswa,getFSPrice(cfg.pkg,siswa).pages,cfg.pkg)*siswa:cfg.factor==='editcetak'?estCetak(siswa,60,'handy')*siswa:0;
+    return{rev,cogs,gp:rev-cogs,label:`${fmt(pb)}/buku × ${siswa}`};
+  } else {
+    const mid=(cfg.flat[0]+cfg.flat[1])/2;
+    return{rev:mid,cogs:0,gp:mid,label:`flat ${fmtM(mid)}`};
+  }
+}
+
+function addScenario(){
+  const name=document.getElementById('s-name').value||'Proyek';
+  const cat=document.getElementById('s-cat').value;
+  let rev=0,cogs=0,gp=0,label='',typeLabel='';
+  if(cat==='graduation'){
+    const pid=document.getElementById('s-grad-pkg').value;
+    const pkg=GRAD.packages.find(p=>p.id===pid);
+    if(!pkg){console.warn('Pilih paket graduation');return}
+    rev=pkg.price;gp=pkg.price;label=fmt(pkg.price)+' flat';typeLabel='Graduation — '+pkg.name;
+  } else {
+    const type=document.getElementById('s-type').value;
+    const siswa=parseInt(document.getElementById('s-siswa').value)||100;
+    const r=calcRev(type,siswa);rev=r.rev;cogs=r.cogs;gp=r.gp;label=r.label;typeLabel=ALC_CFG[type]?.label||type;
+  }
+  scenarios.push({name,typeLabel,rev,cogs,gp,label,id:Date.now()});
+  renderSimulasi();
+}
+
+// ============================================================
+// PENAWARAN SYSTEM (shared between staff & manager)
+// ============================================================
+let penawaranList = []; // global shared list
+
+function addPenawaran(){
+  const nama = document.getElementById('pw-nama')?.value?.trim();
+  if(!nama){ return; }
+  const harga = parseInt(document.getElementById('pw-harga')?.value)||0;
+  const siswa = parseInt(document.getElementById('pw-siswa')?.value)||0;
+  const paket = document.getElementById('pw-paket')?.value||'';
+  const catatan = document.getElementById('pw-catatan')?.value?.trim()||'';
+  const status = document.getElementById('pw-status')?.value||'pending';
+  const addedBy = currentUser?.name||'Staff';
+  penawaranList.push({id:Date.now(), nama, paket, harga, siswa, catatan, status, addedBy, ts: new Date().toLocaleDateString('id-ID')});
+  // reset form
+  document.getElementById('pw-nama').value='';
+  document.getElementById('pw-harga').value='';
+  document.getElementById('pw-siswa').value='';
+  document.getElementById('pw-catatan').value='';
+  document.getElementById('pw-status').value='pending';
+  renderProyek();
+}
+
+function updatePenawaranStatus(id, status){
+  const p = penawaranList.find(x=>x.id===id);
+  if(p){ p.status=status; savePenawaranLS(); renderProyek(); }
+}
+
+function removePenawaran(id){
+  penawaranList = penawaranList.filter(x=>x.id!==id);
+  savePenawaranLS(); renderProyek();
+}
+
+function clearPenawaran(){
+  penawaranList=[];
+  savePenawaranLS(); renderProyek();
+}
+
+// ============================================================
+// STORAGE — auto-save to localStorage
+// ============================================================
+const LS_KEY = 'parama_penawaran_v1';
+
+function savePenawaranLS(){
+  try { localStorage.setItem(LS_KEY, JSON.stringify(penawaranList)); } catch(e){}
+}
+function loadPenawaranLS(){
+  try {
+    const raw = localStorage.getItem(LS_KEY);
+    if(raw){ penawaranList = JSON.parse(raw); }
+  } catch(e){}
+}
+
+function exportPenawaran(){
+  const data = JSON.stringify(penawaranList, null, 2);
+  showDataModal(data, 'export');
+}
+
+function importPenawaran(event){
+  const file = event.target.files[0];
+  if(!file){ showDataModal('', 'import'); return; }
+  const reader = new FileReader();
+  reader.onload = e => {
+    try {
+      const imported = JSON.parse(e.target.result);
+      if(!Array.isArray(imported)) throw new Error('format salah');
+      const existingIds = new Set(penawaranList.map(p=>p.id));
+      const newItems = imported.filter(p=>!existingIds.has(p.id));
+      penawaranList = [...penawaranList, ...newItems];
+      savePenawaranLS();
+      renderProyek();
+      showDataModal(null, 'import-ok', newItems.length);
+    } catch(err){ showDataModal('', 'import'); }
+  };
+  reader.readAsText(file);
+  event.target.value = '';
+}
+
+function showDataModal(data, mode, count){
+  // Remove existing modal
+  const old = document.getElementById('data-modal');
+  if(old) old.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'data-modal';
+  modal.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9998;display:flex;align-items:center;justify-content:center;padding:20px';
+
+  let inner = '';
+  if(mode === 'export'){
+    inner = `
+      <div style="background:var(--surface);border-radius:var(--rl);padding:24px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+        <div style="font-family:var(--font-d);font-size:18px;margin-bottom:6px">Export Data Penawaran</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Download otomatis mungkin diblokir browser. Salin teks di bawah dan simpan sebagai file <code>.json</code></div>
+        <textarea id="modal-ta" style="width:100%;height:200px;font-size:11px;font-family:monospace;padding:10px;border:1px solid var(--border2);border-radius:8px;resize:vertical" readonly>${data}</textarea>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn bp" style="flex:1" onclick="document.getElementById('modal-ta').select();document.execCommand('copy');this.textContent='✓ Tersalin!'">Salin Semua</button>
+          <button class="btn bs" onclick="document.getElementById('data-modal').remove()">Tutup</button>
+        </div>
+      </div>`;
+  } else if(mode === 'import'){
+    inner = `
+      <div style="background:var(--surface);border-radius:var(--rl);padding:24px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3)">
+        <div style="font-family:var(--font-d);font-size:18px;margin-bottom:6px">Import Data Penawaran</div>
+        <div style="font-size:12px;color:var(--text3);margin-bottom:14px">Tempel (paste) teks JSON di bawah, lalu klik Import</div>
+        <textarea id="modal-ta" style="width:100%;height:200px;font-size:11px;font-family:monospace;padding:10px;border:1px solid var(--border2);border-radius:8px;resize:vertical" placeholder="Tempel JSON di sini..."></textarea>
+        <div style="display:flex;gap:8px;margin-top:12px">
+          <button class="btn bp" style="flex:1" onclick="importFromText()">Import</button>
+          <button class="btn bs" onclick="document.getElementById('data-modal').remove()">Batal</button>
+        </div>
+      </div>`;
+  } else if(mode === 'import-ok'){
+    inner = `
+      <div style="background:var(--surface);border-radius:var(--rl);padding:24px;max-width:400px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.3);text-align:center">
+        <div style="font-size:32px;margin-bottom:10px">✅</div>
+        <div style="font-family:var(--font-d);font-size:18px;margin-bottom:6px">Import Berhasil</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px">${count} penawaran berhasil diimport.</div>
+        <button class="btn bp" style="width:100%" onclick="document.getElementById('data-modal').remove()">OK</button>
+      </div>`;
+  }
+
+  modal.innerHTML = inner;
+  modal.addEventListener('click', e=>{ if(e.target===modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+function importFromText(){
+  const ta = document.getElementById('modal-ta');
+  if(!ta) return;
+  try {
+    const imported = JSON.parse(ta.value);
+    if(!Array.isArray(imported)) throw new Error('bukan array');
+    const existingIds = new Set(penawaranList.map(p=>p.id));
+    const newItems = imported.filter(p=>!existingIds.has(p.id));
+    penawaranList = [...penawaranList, ...newItems];
+    savePenawaranLS();
+    renderProyek();
+    document.getElementById('data-modal').remove();
+    showDataModal(null, 'import-ok', newItems.length);
+  } catch(e){
+    ta.style.borderColor = 'var(--danger)';
+    ta.placeholder = '⚠ Format JSON tidak valid. Coba lagi.';
+    ta.value = '';
+  }
+}
+
+// ============================================================
+// PROYEK — unified penawaran + simulasi
+// ============================================================
+
+function initBulanSelector(){
+  const sel=document.getElementById('pw-bulan');
+  if(!sel) return;
+  const now=new Date();
+  const months=[];
+  for(let i=0;i<12;i++){
+    const d=new Date(now.getFullYear(),now.getMonth()-i,1);
+    const val=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    const label=d.toLocaleDateString('id-ID',{month:'long',year:'numeric'});
+    months.push({val,label});
+  }
+  const cur=`${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+  // Only rebuild if empty
+  if(sel.options.length<=1) sel.innerHTML='<option value="all">Semua Waktu</option>'+months.map(m=>`<option value="${m.val}"${m.val===cur?' selected':''}>${m.label}</option>`).join('');
+}
+
+function getPenawaranByMonth(mk){
+  if(mk==='all') return penawaranList;
+  return penawaranList.filter(p=>{
+    const d=p.tsRaw?new Date(p.tsRaw):new Date((p.ts||'').split('/').reverse().join('-')||Date.now());
+    const k=`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}`;
+    return k===mk;
+  });
+}
+
+function renderProyek(){
+  savePenawaranLS();
+  initBulanSelector();
+  const isManager=currentUser?.role==='manager';
+  const filter=document.getElementById('pw-filter')?.value||'all';
+  const sort=document.getElementById('pw-sort')?.value||'newest';
+  const bulan=document.getElementById('pw-bulan')?.value||'all';
+
+  const allFiltered=getPenawaranByMonth(bulan);
+  const stats=(list)=>({
+    deal:list.filter(p=>p.status==='deal'),nego:list.filter(p=>p.status==='nego'),
+    pending:list.filter(p=>p.status==='pending'),gagal:list.filter(p=>p.status==='gagal'),
+    total:list.length,
+    revDeal:list.filter(p=>p.status==='deal').reduce((s,p)=>s+p.harga,0),
+    revNego:list.filter(p=>p.status==='nego').reduce((s,p)=>s+p.harga,0),
+  });
+  const cur=stats(allFiltered);
+
+  // Comparison panel (bulan sebelumnya, manager only)
+  const compEl=document.getElementById('pw-comparison');
+  if(compEl&&isManager&&bulan!=='all'){
+    const [y,m]=bulan.split('-').map(Number);
+    const pd=new Date(y,m-2,1);
+    const pk=`${pd.getFullYear()}-${String(pd.getMonth()+1).padStart(2,'0')}`;
+    const prev=stats(getPenawaranByMonth(pk));
+    compEl.style.display='';
+    const arrow=n=>n>0?`<span style="color:var(--success)">▲${Math.abs(n)}</span>`:n<0?`<span style="color:var(--danger)">▼${Math.abs(n)}</span>`:`<span style="color:var(--text3)">—</span>`;
+    const arrowM=n=>n>0?`<span style="color:var(--success)">▲${fmtM(Math.abs(n))}</span>`:n<0?`<span style="color:var(--danger)">▼${fmtM(Math.abs(n))}</span>`:`<span style="color:var(--text3)">—</span>`;
+    const cr=cur.total>0?(cur.deal.length/cur.total*100).toFixed(0)+'%':'0%';
+    const pr=prev.total>0?(prev.deal.length/prev.total*100).toFixed(0)+'%':'—';
+    compEl.innerHTML=`<div class="card" style="padding:14px 16px;border-left:3px solid var(--accent2)">
+      <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:10px">vs Bulan Sebelumnya</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:8px;font-size:13px">
+        <div style="background:var(--surface2);border-radius:var(--r);padding:10px"><div style="color:var(--text3);font-size:11px;margin-bottom:2px">Total Leads</div><b>${cur.total}</b> ${arrow(cur.total-prev.total)}<div style="font-size:11px;color:var(--text3)">bln lalu: ${prev.total}</div></div>
+        <div style="background:var(--surface2);border-radius:var(--r);padding:10px"><div style="color:var(--text3);font-size:11px;margin-bottom:2px">✅ Deal</div><b>${cur.deal.length}</b> ${arrow(cur.deal.length-prev.deal.length)}<div style="font-size:11px;color:var(--text3)">bln lalu: ${prev.deal.length}</div></div>
+        <div style="background:var(--surface2);border-radius:var(--r);padding:10px"><div style="color:var(--text3);font-size:11px;margin-bottom:2px">🔄 Nego</div><b>${cur.nego.length}</b> ${arrow(cur.nego.length-prev.nego.length)}<div style="font-size:11px;color:var(--text3)">bln lalu: ${prev.nego.length}</div></div>
+        <div style="background:var(--surface2);border-radius:var(--r);padding:10px"><div style="color:var(--text3);font-size:11px;margin-bottom:2px">❌ Gagal</div><b>${cur.gagal.length}</b> ${arrow(cur.gagal.length-prev.gagal.length)}<div style="font-size:11px;color:var(--text3)">bln lalu: ${prev.gagal.length}</div></div>
+        <div style="background:var(--surface2);border-radius:var(--r);padding:10px"><div style="color:var(--text3);font-size:11px;margin-bottom:2px">Revenue Deal</div><b>${fmtM(cur.revDeal)}</b> ${arrowM(cur.revDeal-prev.revDeal)}<div style="font-size:11px;color:var(--text3)">bln lalu: ${fmtM(prev.revDeal)}</div></div>
+        <div style="background:var(--surface2);border-radius:var(--r);padding:10px"><div style="color:var(--text3);font-size:11px;margin-bottom:2px">Conversion Rate</div><b>${cr}</b><div style="font-size:11px;color:var(--text3)">bln lalu: ${pr}</div></div>
+      </div>
+    </div>`;
+  } else if(compEl){ compEl.style.display='none'; }
+
+  // Metrics
+  const metricsEl=document.getElementById('sim-metrics');
+  if(metricsEl){
+    if(isManager){
+      const net=(cur.revDeal-Math.round(cur.revDeal*0.25))-OH.total;
+      metricsEl.style.display='';
+      metricsEl.innerHTML=`
+        <div class="m"><div class="ml">Total Leads</div><div class="mv">${cur.total}</div><div class="ms">${bulan==='all'?'semua waktu':'bulan ini'}</div></div>
+        <div class="m"><div class="ml">✅ Deal</div><div class="mv suc">${cur.deal.length}</div><div class="ms">${fmtM(cur.revDeal)}</div></div>
+        <div class="m"><div class="ml">🔄 Nego</div><div class="mv" style="color:var(--accent2)">${cur.nego.length}</div><div class="ms">${fmtM(cur.revNego)}</div></div>
+        <div class="m"><div class="ml">🕐 Pending</div><div class="mv war">${cur.pending.length}</div><div class="ms">&nbsp;</div></div>
+        <div class="m"><div class="ml">Est. Net</div><div class="mv ${net>=0?'suc':'acc'}">${net>=0?'':'-'}${fmtM(Math.abs(net))}</div><div class="ms">setelah COGS+OH</div></div>`;
+    } else { metricsEl.style.display='none'; }
+  }
+
+  // Summary row
+  const sumEl=document.getElementById('pw-summary');
+  if(sumEl){
+    const row=(l,v,c)=>`<div><span style="color:var(--text3)">${l}</span><br><b ${c?`style="color:${c}"`:''}>${v}</b></div>`;
+    sumEl.innerHTML=`<div class="card mb16" style="padding:11px 16px"><div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(105px,1fr));gap:8px;font-size:13px">
+      ${row('Total',cur.total+' penawaran')}
+      ${row('✅ Deal',cur.deal.length,'var(--success)')}
+      ${row('🔄 Nego',cur.nego.length,'var(--accent2)')}
+      ${row('🕐 Pending',cur.pending.length,'var(--warning)')}
+      ${row('❌ Gagal',cur.gagal.length,'var(--text3)')}
+      ${isManager?row('Revenue',fmtM(cur.revDeal),'var(--success)'):''}
+    </div></div>`;
+  }
+
+  // List
+  let list=filter==='all'?[...allFiltered]:allFiltered.filter(p=>p.status===filter);
+  if(sort==='newest') list.sort((a,b)=>b.id-a.id);
+  if(sort==='oldest') list.sort((a,b)=>a.id-b.id);
+  if(sort==='highest') list.sort((a,b)=>b.harga-a.harga);
+  if(sort==='lowest') list.sort((a,b)=>a.harga-b.harga);
+
+  const statMap={deal:{label:'✅ Deal',cls:'bsuc',color:'var(--success)'},nego:{label:'🔄 Nego',cls:'binf',color:'var(--accent2)'},pending:{label:'🕐 Pending',cls:'bwar',color:'var(--warning)'},gagal:{label:'❌ Gagal',cls:'bdan',color:'var(--danger)'}};
+  const listEl=document.getElementById('pw-list');
+  if(!listEl) return;
+  if(!list.length){
+    listEl.innerHTML=`<div style="color:var(--text3);font-size:13px;padding:28px;text-align:center;background:var(--surface2);border-radius:var(--r)">${penawaranList.length===0?'Belum ada penawaran. Hitung di <b>Kalkulator</b> lalu klik Simpan.':'Tidak ada penawaran dengan filter ini.'}</div>`;
+  } else {
+    listEl.innerHTML=list.map(p=>{
+      const st=statMap[p.status]||statMap.pending;
+      let extra='';
+      if(isManager&&p.status==='deal'){const ec=Math.round(p.harga*0.25);const gp=p.harga>0?(p.harga-ec)/p.harga*100:0;extra=`<div style="font-size:11px;color:var(--text3);margin-top:2px">Est. cetak ~${fmtM(ec)} · Gross ~${gp.toFixed(0)}%</div>`;}
+      const hs=p.hargaSebelumDiskon>0?`<span style="font-size:11px;color:var(--text3);text-decoration:line-through;margin-right:4px">${fmtM(p.hargaSebelumDiskon)}</span>`:'';
+      return `<div class="si" style="border-left:3px solid ${st.color};margin-bottom:8px">
+        <div class="sih">
+          <div style="flex:1;min-width:0">
+            <div class="sin">${p.nama} <span class="badge ${st.cls}" style="margin-left:5px;font-size:10px">${st.label}</span></div>
+            <div class="sis">${p.paket}${p.siswa?' · '+p.siswa+' siswa':''} · ${p.ts}${isManager?' · '+p.addedBy:''}</div>
+            ${p.catatan?`<div style="font-size:11px;color:var(--text3);margin-top:2px">📝 ${p.catatan}</div>`:''}${extra}
+          </div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:5px;flex-shrink:0;margin-left:12px">
+            <div style="text-align:right">${hs}<span style="font-weight:600;font-size:14px;color:${p.status==='gagal'?'var(--text3)':'var(--text)'}">${p.status!=='gagal'?fmtM(p.harga):'—'}</span></div>
+            <select onchange="updatePenawaranStatus(${p.id},this.value)" style="font-size:11px;padding:2px 5px;border-radius:6px;border:1px solid var(--border2)">
+              <option value="pending" ${p.status==='pending'?'selected':''}>🕐 Pending</option>
+              <option value="nego" ${p.status==='nego'?'selected':''}>🔄 Nego</option>
+              <option value="deal" ${p.status==='deal'?'selected':''}>✅ Deal</option>
+              <option value="gagal" ${p.status==='gagal'?'selected':''}>❌ Gagal</option>
+            </select>
+            <div style="display:flex;gap:4px">
+              <button class="btn bs bsm" onclick="editPenawaran(${p.id})" style="padding:1px 9px;font-size:12px">✏ Edit</button>
+              <button class="btn bs bsm" onclick="removePenawaran(${p.id})" style="padding:1px 7px;font-size:12px;color:var(--danger)">×</button>
+            </div>
+          </div>
+        </div>
+      </div>`;
+    }).join('');
+  }
+
+  // Breakdown
+  const bdEl=document.getElementById('proyek-breakdown');
+  if(bdEl) bdEl.style.display=isManager&&allFiltered.length>0?'':'none';
+  if(isManager){
+    const bs=document.getElementById('sim-by-status');
+    if(bs) bs.innerHTML=[['deal','✅ Deal'],['nego','🔄 Nego'],['pending','🕐 Pending'],['gagal','❌ Gagal']].map(([s,l])=>{
+      const items=allFiltered.filter(p=>p.status===s);
+      return `<div class="rr"><span class="rl">${l} (${items.length})</span><span class="rv">${items.length?fmtM(items.reduce((a,p)=>a+p.harga,0)):'—'}</span></div>`;
+    }).join('');
+    const bp=document.getElementById('sim-by-paket');
+    if(bp){const pc={};allFiltered.forEach(p=>{const k=p.paket.split('—')[0].trim();pc[k]=(pc[k]||0)+1});bp.innerHTML=Object.entries(pc).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div class="rr"><span class="rl">${k}</span><span class="rv">${v}</span></div>`).join('');}
+  }
+}
+
+// Aliases
+const renderPenawaran=renderProyek;
+const renderSimulasi=renderProyek;
+
+// Edit penawaran = buka kalkulator pre-filled dengan data penawaran itu
+let editingPenawaranId = null;
+
+function editPenawaran(id){
+  const p = penawaranList.find(x=>x.id===id);
+  if(!p) return;
+  editingPenawaranId = id;
+
+  // Navigate to kalkulator
+  const navBtn = [...document.querySelectorAll('.nav-item')].find(b=>b.getAttribute('onclick')?.includes("'kalkulator'"));
+  if(navBtn) goPage('kalkulator', navBtn);
+
+  // Pre-fill kalkulator after short render delay
+  setTimeout(()=>{
+    // Detect category
+    const isGrad = p.paket.toLowerCase().includes('graduation');
+    const catEl = document.getElementById('k-cat');
+    if(catEl){ catEl.value = isGrad ? 'graduation' : 'bukutahunan'; kCatChange(); }
+
+    if(!isGrad){
+      // Match paket to select option
+      const typeEl = document.getElementById('k-type');
+      if(typeEl){
+        const paketLower = p.paket.toLowerCase();
+        for(let i=0;i<typeEl.options.length;i++){
+          if(typeEl.options[i].text.toLowerCase().includes(paketLower.split('—')[0].trim().toLowerCase().slice(0,10))){
+            typeEl.selectedIndex=i; break;
+          }
+        }
+      }
+      const siswaEl = document.getElementById('k-siswa');
+      if(siswaEl&&p.siswa) siswaEl.value = p.siswa;
+    } else {
+      const gradEl = document.getElementById('k-grad-pkg');
+      if(gradEl){
+        const n=p.paket.split('—')[1]?.trim()||'';
+        for(let i=0;i<gradEl.options.length;i++){
+          if(gradEl.options[i].text.toLowerCase().includes(n.toLowerCase().slice(0,8))){gradEl.selectedIndex=i;break;}
+        }
+      }
+    }
+
+    // Pre-fill catatan into bonus field & diskon if any
+    if(p.catatan){
+      const parts = p.catatan.split('|').map(s=>s.trim()).filter(Boolean);
+      parts.forEach(part=>{
+        if(part.startsWith('diskon ') && part.includes('%')){
+          const pct = parseFloat(part.replace(/[^0-9.]/g,''));
+          setDkType('persen', document.querySelector('[data-type="persen"]'));
+          const dvEl=document.getElementById('dk-value'); if(dvEl) dvEl.value=pct;
+        } else if(part.startsWith('cashback ')){
+          const pct=parseFloat(part.replace(/[^0-9.]/g,''));
+          setDkType('cashback',document.querySelector('[data-type="cashback"]'));
+          const dvEl=document.getElementById('dk-value'); if(dvEl) dvEl.value=pct;
+        } else if(part.startsWith('bonus:')){
+          const bonusText = part.replace('bonus:','').trim();
+          const inp=document.getElementById('bns-input'); if(inp) inp.value=bonusText;
+          addBonusTag();
+        }
+      });
+    }
+
+    kalcUpdate();
+
+    // Show update banner at save section
+    const saveSection = document.querySelector('#k-save-nama')?.parentElement?.parentElement;
+    if(saveSection){
+      const banner = document.createElement('div');
+      banner.className='note';
+      banner.style.cssText='margin-bottom:8px;border-left-color:var(--accent)';
+      banner.innerHTML=`✏️ Mode Edit — memperbarui penawaran <b>${p.nama}</b>. Sesuaikan dan klik Simpan.`;
+      saveSection.insertBefore(banner, saveSection.firstChild);
+    }
+    // Pre-fill nama
+    const namaEl=document.getElementById('k-save-nama'); if(namaEl) namaEl.value=p.nama;
+  }, 150);
+}
+
+function saveKalcToPenawaran(){
+  const totalEl = document.getElementById('k-total');
+  const total = parseInt((totalEl?.textContent||'').replace(/[^0-9]/g,''))||0;
+  const msgEl = document.getElementById('k-save-msg');
+  if(!total){
+    if(msgEl){msgEl.style.display='block';msgEl.style.color='var(--danger)';msgEl.textContent='⚠ Hitung dulu harga di kalkulator sebelum simpan.';}
+    return;
+  }
+  const namaEl = document.getElementById('k-save-nama');
+  const nama = namaEl?.value?.trim();
+  if(!nama){
+    if(msgEl){msgEl.style.display='block';msgEl.style.color='var(--danger)';msgEl.textContent='⚠ Isi nama sekolah / klien dulu.';}
+    namaEl?.focus(); return;
+  }
+  const catEl = document.getElementById('k-cat');
+  const cat = catEl?.value||'bukutahunan';
+  let paketLabel='';
+  if(cat==='graduation'){
+    const gp=document.getElementById('k-grad-pkg');
+    paketLabel='Graduation — '+(gp?.options[gp?.selectedIndex]?.text?.split('—')[0]?.trim()||'');
+  } else {
+    const typeEl=document.getElementById('k-type');
+    paketLabel=typeEl?.options[typeEl?.selectedIndex]?.text||'';
+  }
+  const siswa=parseInt(document.getElementById('k-siswa')?.value)||0;
+  const tags=[...(document.querySelectorAll('.bns-tag')||[])].map(t=>t.dataset.label);
+  const dType=document.querySelector('.dkbtn.active')?.dataset?.type||'none';
+  const dVal=parseFloat(document.getElementById('dk-value')?.value)||0;
+  let nego=[];
+  if(dType==='persen'&&dVal>0) nego.push(`diskon ${dVal}%`);
+  else if(dType==='nominal'&&dVal>0) nego.push(`diskon Rp${dVal.toLocaleString('id-ID')}`);
+  else if(dType==='cashback'&&dVal>0) nego.push(`cashback ${dVal}%`);
+  if(tags.length) nego.push(...tags.map(t=>`bonus: ${t}`));
+  const catatan=nego.join(' | ');
+  let hargaFinal=total;
+  if(dType==='persen'&&dVal>0) hargaFinal=Math.round(total*(1-dVal/100));
+  else if(dType==='nominal'&&dVal>0) hargaFinal=Math.max(0,total-dVal);
+
+  if(editingPenawaranId){
+    // UPDATE existing
+    const p=penawaranList.find(x=>x.id===editingPenawaranId);
+    if(p){
+      p.nama=nama; p.paket=paketLabel; p.harga=hargaFinal;
+      p.hargaSebelumDiskon=total!==hargaFinal?total:0;
+      p.siswa=siswa; p.catatan=catatan;
+    }
+    editingPenawaranId=null;
+    if(msgEl){msgEl.style.display='block';msgEl.style.color='var(--success)';msgEl.textContent=`✓ Penawaran "${nama}" diperbarui!`;setTimeout(()=>msgEl.style.display='none',3000);}
+    // Remove edit banner if any
+    document.querySelectorAll('#page-kalkulator .note').forEach(el=>{if(el.textContent.includes('Mode Edit')) el.remove();});
+  } else {
+    // NEW penawaran
+    penawaranList.push({id:Date.now(),nama,paket:paketLabel,harga:hargaFinal,hargaSebelumDiskon:total!==hargaFinal?total:0,siswa,catatan,status:'pending',addedBy:currentUser?.name||'Staff',ts:new Date().toLocaleDateString('id-ID'),tsRaw:Date.now()});
+    if(msgEl){msgEl.style.display='block';msgEl.style.color='var(--success)';msgEl.textContent=`✓ Penawaran "${nama}" disimpan!`;setTimeout(()=>msgEl.style.display='none',3000);}
+  }
+  namaEl.value='';
+  savePenawaranLS(); renderProyek();
+  setTimeout(()=>{
+    const navBtn=[...document.querySelectorAll('.nav-item')].find(b=>b.getAttribute('onclick')?.includes("'proyek'"));
+    if(navBtn) goPage('proyek',navBtn);
+  }, 800);
+}
+
+
+// ============================================================
+// OLD STUBS
+// ============================================================
+function addScenario(){}
+function removeScenario(){}
+function clearScenarios(){}
+function calcRev(){}
+function sCatChange(){
+  const cat=document.getElementById('s-cat')?.value;
+  if(document.getElementById('s-type-row')) document.getElementById('s-type-row').style.display=cat==='bukutahunan'?'':'none';
+  if(document.getElementById('s-grad-row')) document.getElementById('s-grad-row').style.display=cat==='graduation'?'':'none';
+  if(document.getElementById('s-siswa-row')) document.getElementById('s-siswa-row').style.display=cat==='bukutahunan'?'':'none';
+}
+
+
+// ============================================================
+// ANALISIS
+// ============================================================
+function setAnTab(id,el){document.querySelectorAll('.tp').forEach(p=>p.classList.remove('active'));document.querySelectorAll('.tb').forEach(b=>b.classList.remove('active'));document.getElementById('an-'+id).classList.add('active');el.classList.add('active')}
+function setAnPkg(p){curAnPkg=p;['handy','minimal','large'].forEach(x=>document.getElementById('abtn-'+x).className='btn bsm '+(x===p?'bp':'bs'));renderAnalisis()}
+function renderAnalisis(){
+  const oh=OH.total;
+  document.getElementById('an-body').innerHTML=FS[curAnPkg].map(([lo,hi,harga,pages])=>{
+    const mid=Math.round((lo+hi)/2);
+    const cetak=estCetak(mid,pages,curAnPkg);
+    const ohPB=oh/(mid*3);
+    const gp=(harga-cetak)/harga*100;
+    const np=Math.max(0,(harga-cetak-ohPB)/harga*100);
+    return`<tr class="${gp<45?'dim':''}"><td><b>${lo}–${hi}</b></td><td><b>${fmt(harga)}</b></td><td style="color:var(--danger)">${fmt(cetak)}</td><td style="color:var(--text3)">${fmt(Math.round(ohPB))}</td><td>${miniBar(gp)}</td><td>${miniBar(np)}</td><td>${marginBadge(gp)}</td></tr>`;
+  }).join('');
+}
+
+// ============================================================
+// PENGATURAN
+// ============================================================
+function renderPengaturan(){
+  const ohDefs=[['total','Total Overhead Bulanan'],['marketing','Marketing'],['creative','Creative Production'],['designer','Designer'],['pm','Project Manager'],['sosmed','Social Media'],['freelance','Freelance'],['ops','Operasional']];
+  document.getElementById('ov-oh').innerHTML=ohDefs.map(([k,l])=>`<div class="fg"><label class="fl">${l}</label><div style="display:flex;align-items:center;gap:4px"><span style="font-size:12px;color:var(--text3)">Rp</span><input type="number" id="ov-${k}" value="${OH[k]}"></div></div>`).join('');
+  document.getElementById('ov-grad').innerHTML=GRAD.packages.map((p,pi)=>`<div class="fg"><label class="fl" style="color:var(--grad)">${p.name}</label><div style="display:flex;align-items:center;gap:4px"><span style="font-size:12px;color:var(--text3)">Rp</span><input type="number" id="ovg-${p.id}" value="${p.price}"></div></div>`).join('');
+  document.getElementById('ov-grad-addon').innerHTML=[...GRAD.addons,...GRAD.cetak].map((a,ai)=>`<div class="fg"><label class="fl">${a.name}</label><div style="display:flex;align-items:center;gap:4px"><span style="font-size:12px;color:var(--text3)">Rp</span><input type="number" id="ovga-${a.id}" value="${a.price}"></div></div>`).join('');
+  // Build cetak range buttons dynamically
+  const btnWrap = document.getElementById('cetak-range-btns');
+  if(btnWrap){
+    btnWrap.innerHTML = CETAK_BASE.map((r,i)=>
+      `<button class="btn ${i===curCetakRange?'bp':'bs'} bsm" onclick="setCetakRange(${i},this)">${r.label}</button>`
+    ).join('');
+  }
+  renderCetakTable();
+  // Restore faktor inputs
+  document.getElementById('ov-cetak-handy').value = CETAK_F.handy.toFixed(2);
+  document.getElementById('ov-cetak-minimal').value = CETAK_F.minimal.toFixed(2);
+  document.getElementById('ov-cetak-large').value = CETAK_F.large.toFixed(2);
+  const acEl = document.getElementById('ov-ac-cetakonly');
+  if(acEl) acEl.value = Math.round(ALC_F.cetakonly * 100);
+}
+
+function showStatus(){const s=document.getElementById('ov-status');s.style.display='block';setTimeout(()=>s.style.display='none',2000)}
+function saveOH(){['total','marketing','creative','designer','pm','sosmed','freelance','ops'].forEach(k=>{const el=document.getElementById('ov-'+k);if(el)OH[k]=parseInt(el.value)||OH[k]});showStatus()}
+function resetOH(){Object.assign(OH,{...DEF_OH});renderPengaturan();showStatus()}
+function saveCetak(){['handy','minimal','large'].forEach(k=>{const el=document.getElementById('ov-cetak-'+k);if(el)CETAK_F[k]=parseFloat(el.value)||1});showStatus()}
+function saveALC(){['ebook','editcetak','desain','cetakonly'].forEach(k=>{const el=document.getElementById('ov-ac-'+k);if(el)ALC_F[k]=parseInt(el.value)/100});renderAlacarte();showStatus()}
+function saveGrad(){GRAD.packages.forEach(p=>{const el=document.getElementById('ovg-'+p.id);if(el)p.price=parseInt(el.value)||p.price});renderGraduation();showStatus()}
+function resetGrad(){GRAD.packages=[{id:'gphv',name:'Photo & Video',price:4500000,desc:'2 Fotografer + 1 Videografer, 50 foto edited, video cinematic 2–4 mnt, G-Drive, 4 jam coverage, transport jabodetabek',color:'acc'},{id:'gvideo',name:'Video Only',price:2000000,desc:'1 Videografer, video cinematic 2–5 mnt, G-Drive, 4 jam coverage, transport jabodetabek',color:''},{id:'gphoto',name:'Photo Only',price:2750000,desc:'2 Fotografer, 100 foto edited, G-Drive, 4 jam coverage, transport jabodetabek',color:''},{id:'gbooth',name:'Photo Booth',price:3850000,desc:'1–2 Crew profesional, backdrop wisuda, lighting studio, Selfiebox Machine, unlimited print 4R, max 3 jam, softcopy + QR Code realtime, transport jabodetabek',color:''},{id:'g360',name:'Glamation 360°',price:4100000,desc:'1–2 Crew profesional, MP4, LCD 50in preview, GoPro/iPhone 12 Pro, overlay design free, max 3 jam, QR Code realtime, transport jabodetabek',color:''},{id:'gcomplete',name:'Complete Package',price:7750000,desc:'Photo + Video + Photo Booth, transport jabodetabek',color:'feat'}];renderPengaturan();showStatus()}
+function saveGradAddon(){[...GRAD.addons,...GRAD.cetak].forEach(a=>{const el=document.getElementById('ovga-'+a.id);if(el)a.price=parseInt(el.value)||a.price});showStatus()}
+
+// ============================================================
+// AUTH SYSTEM
+// ============================================================
+const ACCOUNTS = {
+  manager: { pass:'parama2026', role:'manager', name:'Manager' },
+  staff:   { pass:'staff123',   role:'staff',   name:'Staff' },
+};
+// Add extra accounts here: ACCOUNTS['dhamar'] = {pass:'xxx', role:'manager', name:'Dhamar'}
+
+let currentUser = null;
+
+const MANAGER_PAGES = ['ringkasan','fullservice','alacarte','addon','graduation','kalkulator','simulasi','analisis','pengaturan'];
+const STAFF_PAGES   = ['kalkulator','proyek'];
+
+function doLogin(){
+  const u = document.getElementById('li-user').value.trim().toLowerCase();
+  const p = document.getElementById('li-pass').value;
+  const acc = ACCOUNTS[u];
+  const errEl = document.getElementById('li-err');
+  if(!acc || acc.pass !== p){
+    errEl.style.display='block';
+    document.getElementById('li-pass').value='';
+    return;
+  }
+  errEl.style.display='none';
+  currentUser = {username:u, ...acc};
+  loadPenawaranLS(); // load saved penawaran from localStorage
+  loadCetakBaseLS(); // load saved cetak prices from localStorage
+  document.getElementById('login-overlay').style.display='none';
+  document.getElementById('main-app').style.display='grid';
+  document.getElementById('sb-uname').textContent = acc.name;
+  document.getElementById('sb-urole').textContent = acc.role === 'manager' ? 'Manager — Akses Penuh' : 'Staff Penjualan';
+  applyRoleUI();
+  // init renders
+  if(acc.role==='manager'){
+    renderRingkasan(); renderFS();
+    const opts='<option value="">— Pilih paket —</option>'+GRAD.packages.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
+    ['gc-pkg','k-grad-pkg','s-grad-pkg'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts});
+  } else {
+    // Staff: go straight to kalkulator
+    document.querySelectorAll('.page').forEach(pg=>pg.classList.remove('active'));
+    document.getElementById('page-kalkulator').classList.add('active');
+    document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+    const opts='<option value="">— Pilih paket —</option>'+GRAD.packages.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
+    ['k-grad-pkg','s-grad-pkg'].forEach(id=>{const el=document.getElementById(id);if(el)el.innerHTML=opts});
+    buildAddonList(); kalcUpdate();
+  }
+  document.getElementById('s-cat')?.addEventListener('change',sCatChange);
+  document.getElementById('s-type')?.addEventListener('change',()=>{
+    const cfg=ALC_CFG[document.getElementById('s-type')?.value];
+    const row=document.getElementById('s-siswa-row');
+    if(row) row.style.display=cfg?.bySiswa?'':'none';
+  });
+}
+
+function doLogout(){
+  currentUser=null;
+  document.getElementById('main-app').style.display='none';
+  document.getElementById('login-overlay').style.display='flex';
+  document.getElementById('li-user').value='';
+  document.getElementById('li-pass').value='';
+}
+
+function applyRoleUI(){
+  const isManager = currentUser?.role==='manager';
+
+  // For staff: hide nav items not in their access, hide orphan section labels
+  document.querySelectorAll('.nav-item').forEach(btn=>{
+    const page = btn.getAttribute('onclick')?.match(/goPage\('(\w+)'/)?.[1];
+    if(!page) return;
+    if(!isManager && !STAFF_PAGES.includes(page)){
+      btn.classList.add('locked'); // display:none via CSS
+    } else {
+      btn.classList.remove('locked');
+    }
+  });
+
+  // Hide nav-sec labels that have no visible items under them
+  document.querySelectorAll('.nav-sec').forEach(sec=>{
+    let next = sec.nextElementSibling;
+    let hasVisible = false;
+    while(next && !next.classList.contains('nav-sec')){
+      if(next.classList.contains('nav-item') && !next.classList.contains('locked')) hasVisible=true;
+      next = next.nextElementSibling;
+    }
+    sec.style.display = hasVisible ? '' : 'none';
+  });
+
+  // Update sidebar subtitle for staff
+  if(!isManager){
+    document.querySelector('.sb-logo .sub').textContent = 'Kalkulator Harga';
+  } else {
+    document.querySelector('.sb-logo .sub').textContent = 'Dashboard Harga 2026';
+  }
+
+  // Hide profit section for staff in kalkulator
+  const profCard = document.getElementById('k-profit-card');
+  if(profCard) profCard.style.display = isManager ? '' : 'none';
+}
+
+// Override goPage to respect auth — reassign the wrapper cleanly
+function goPage(id, el){
+  if(!currentUser) return;
+  const isManager = currentUser.role==='manager';
+  if(!isManager && !STAFF_PAGES.includes(id)) return;
+  goPageCore(id, el);
+  setTimeout(()=>{
+    const pc = document.getElementById('k-profit-card');
+    if(pc) pc.style.display = isManager ? '' : 'none';
+  }, 50);
+}
+
+// ============================================================
+// DISKON / CASHBACK in Kalkulator
+// ============================================================
+// Override kalcUpdate wrapper to also run applyDiskon
+function kalcUpdate(){
+  kalcUpdateCore();
+  applyDiskon();
+}
+
+function applyDiskon(){
+  const dType = document.querySelector('.dkbtn.active')?.dataset?.type || 'none';
+  const dVal  = parseFloat(document.getElementById('dk-value')?.value)||0;
+  const totalEl = document.getElementById('k-total');
+  const totalStr = totalEl?.textContent?.replace(/[^0-9]/g,'')||'0';
+  const total = parseInt(totalStr)||0;
+  const resEl = document.getElementById('dk-result');
+  const warnEl = document.getElementById('dk-warn');
+
+  // Get bonus tags (always, regardless of dType)
+  const tags = [...(document.querySelectorAll('.bns-tag')||[])];
+  const bonusItems = tags.map(t=>t.dataset.label);
+  const bonusNominal = tags.reduce((s,t)=>s+(parseInt(t.dataset.nominal)||0),0);
+
+  let html = '';
+  let potongan = 0;
+  let warnMsg = '';
+  let warnCls = 'dw-ok';
+
+  if(dType!=='none' && dVal>0 && total>0){
+    if(dType==='persen') potongan = Math.round(total * dVal/100);
+    else if(dType==='nominal') potongan = Math.min(dVal, total);
+    const finalPrice = dType==='cashback' ? total : total - potongan;
+    const cashback = dType==='cashback' ? Math.round(total * dVal/100) : 0;
+
+    if(dType==='persen'||dType==='nominal'){
+      html+=`<div class="rr"><span class="rl">Harga sebelum potongan</span><span class="rv">${fmt(total)}</span></div>`;
+      html+=`<div class="rr"><span class="rl">Diskon ${dType==='persen'?dVal+'%':fmt(dVal)}</span><span class="rv rd">−${fmt(potongan)}</span></div>`;
+      html+=`<div class="rr" style="padding:6px 0;font-weight:600"><span style="color:var(--text2)">Harga Final Klien</span><span style="font-size:18px;font-family:var(--font-d);color:var(--accent)">${fmt(finalPrice)}</span></div>`;
+      // margin impact (manager only)
+      const isManager = currentUser?.role==='manager';
+      if(isManager){
+        const cetakEl = document.getElementById('k-cetak-est');
+        const cetakEst = cetakEl ? parseInt(cetakEl.dataset.cetak||0) : 0;
+        if(cetakEst>0){
+          const grossAfter = finalPrice - cetakEst;
+          const mAfter = finalPrice>0 ? grossAfter/finalPrice*100 : 0;
+          html+=`<div class="rr"><span class="rl" style="font-size:11px;color:var(--text3)">Est. gross setelah diskon</span><span class="rv" style="font-size:11px;color:${mAfter>=50?'var(--success)':'var(--danger)'}">${fmt(grossAfter)} (${mAfter.toFixed(0)}%)</span></div>`;
+        }
+      }
+      const pct = potongan/total*100;
+      if(pct<=5){warnCls='dw-ok';warnMsg=`✓ Diskon ${pct.toFixed(1)}% aman — margin tidak terganggu signifikan.`}
+      else if(pct<=10){warnCls='dw-warn';warnMsg=`⚠ Diskon ${pct.toFixed(1)}% — pertimbangkan kurangi nilai atau ganti sebagian dengan bonus produk.`}
+      else if(pct<=15){warnCls='dw-bad';warnMsg=`✗ Diskon ${pct.toFixed(1)}% berisiko. Sarankan ganti dengan bonus produk agar harga jual tidak turun.`}
+      else{warnCls='dw-bad';warnMsg=`✗ Diskon ${pct.toFixed(1)}% terlalu besar — akan langsung memotong gross profit. Negosiasikan ke bonus produk.`}
+    } else if(dType==='cashback'){
+      html+=`<div class="rr"><span class="rl">Harga ke klien (tetap)</span><span class="rv">${fmt(total)}</span></div>`;
+      html+=`<div class="rr"><span class="rl">Cashback ${dVal}% (diterima setelah delivery)</span><span class="rv gr">${fmt(cashback)}</span></div>`;
+      const pct=dVal;
+      if(pct<=5){warnCls='dw-ok';warnMsg=`✓ Cashback ${pct}% wajar — invoice tetap penuh, aman di laporan.`}
+      else if(pct<=10){warnCls='dw-warn';warnMsg=`⚠ Cashback ${pct}% — pastikan margin proyek masih di atas 50%.`}
+      else{warnCls='dw-bad';warnMsg=`✗ Cashback ${pct}% terlalu besar. Pertimbangkan bonus produk saja.`}
+    }
+  }
+
+  // Bonus produk section (always shown if ada tag)
+  if(bonusItems.length>0){
+    html+=`<div style="margin-top:8px;padding-top:8px;border-top:1px solid var(--border)">
+      <div style="font-size:11px;font-weight:600;color:var(--text2);margin-bottom:4px">Bonus Produk:</div>
+      <ul style="margin:0 0 0 14px;font-size:12px;line-height:1.9;color:var(--text)">${bonusItems.map(b=>`<li>${b}</li>`).join('')}</ul>
+      ${bonusNominal>0?`<div style="font-size:11px;color:var(--text3);margin-top:3px">Total nilai bonus ≈ ${fmtM(bonusNominal)}</div>`:''}
+    </div>`;
+    if(!warnMsg) { warnCls='dw-ok'; warnMsg='✓ Bonus produk = strategi terbaik. Harga jual tidak turun, klien dapat nilai lebih.'; }
+  }
+
+  if(resEl) resEl.innerHTML = html;
+  if(warnEl){
+    if(warnMsg){warnEl.className='dk-warn '+warnCls;warnEl.textContent=warnMsg;warnEl.style.display='block';}
+    else warnEl.style.display='none';
+  }
+}
+
+function renderDiskonResult(potongan, total, finalPrice, dType, cashback, dVal){
+  const isManager = currentUser?.role==='manager';
+  const resEl = document.getElementById('dk-result');
+  const warnEl = document.getElementById('dk-warn');
+  if(!resEl) return;
+
+  if(dType==='none'||(!potongan&&!cashback)){
+    resEl.innerHTML='';
+    if(warnEl) warnEl.style.display='none';
+    return;
+  }
+
+  let html='';
+  if(dType==='persen'||dType==='nominal'){
+    html+=`<div class="rr"><span class="rl">Harga sebelum diskon</span><span class="rv">${fmt(total)}</span></div>`;
+    html+=`<div class="rr"><span class="rl">Diskon ${dType==='persen'?dVal+'%':fmt(dVal)}</span><span class="rv rd">−${fmt(potongan)}</span></div>`;
+    html+=`<div class="rr tot"><span class="rl">Harga Final Klien</span><span class="rv" style="font-size:20px;font-family:var(--font-d);color:var(--accent)">${fmt(finalPrice)}</span></div>`;
+    if(isManager){
+      // show margin impact
+      const cetakEstEl = document.getElementById('k-cetak-est');
+      const cetakEst = cetakEstEl ? parseInt(cetakEstEl.dataset.cetak||0) : 0;
+      if(cetakEst>0){
+        const grossAfter = finalPrice - cetakEst;
+        const marginAfter = finalPrice>0 ? grossAfter/finalPrice*100 : 0;
+        html+=`<div class="rr"><span class="rl" style="font-size:11px;color:var(--text3)">Gross setelah diskon</span><span class="rv" style="font-size:11px;color:${marginAfter>=50?'var(--success)':'var(--danger)'}">${fmt(grossAfter)} (${marginAfter.toFixed(0)}%)</span></div>`;
+      }
+    }
+  } else if(dType==='cashback'){
+    html+=`<div class="rr"><span class="rl">Harga ke klien</span><span class="rv">${fmt(total)}</span></div>`;
+    html+=`<div class="rr"><span class="rl">Cashback (${dVal}%) diterima klien</span><span class="rv gr">${fmt(cashback)}</span></div>`;
+    html+=`<div class="rr" style="padding-top:6px;font-size:12px;color:var(--text3)"><span>Klien bayar penuh dulu, lalu dapat cashback setelah buku diterima</span><span></span></div>`;
+  }
+  if(resEl) resEl.innerHTML=html;
+
+  // Warning
+  if(warnEl && isManager){
+    const pct = potongan/total*100 || dVal;
+    let cls='dw-ok', msg='';
+    if(dType==='cashback'){
+      if(dVal<=5){cls='dw-ok';msg=`✓ Cashback ${dVal}% wajar — klien puas, margin aman.`}
+      else if(dVal<=10){cls='dw-warn';msg=`⚠ Cashback ${dVal}% — pastikan gross margin masih di atas 50% setelah ini.`}
+      else{cls='dw-bad';msg=`✗ Cashback ${dVal}% terlalu besar. Pertimbangkan bonus produk saja.`}
+    } else {
+      if(pct<=5){cls='dw-ok';msg=`✓ Diskon ${pct.toFixed(1)}% aman — tidak mengganggu profitabilitas.`}
+      else if(pct<=10){cls='dw-warn';msg=`⚠ Diskon ${pct.toFixed(1)}% — cukup besar, pastikan gross margin masih sehat.`}
+      else if(pct<=15){cls='dw-bad';msg=`✗ Diskon ${pct.toFixed(1)}% berisiko. Sebaiknya tawarkan bonus produk (halaman/packaging) daripada diskon tunai.`}
+      else{cls='dw-bad';msg=`✗ Diskon ${pct.toFixed(1)}% terlalu besar. Ini akan langsung memotong gross profit. Tolak atau negosiasikan ke bonus produk.`}
+    }
+    warnEl.className='dk-warn '+cls;
+    warnEl.textContent=msg;
+    warnEl.style.display='block';
+  }
+}
+
+function addBonusTag(){
+  const inp = document.getElementById('bns-input');
+  const nomEl = document.getElementById('bns-nominal');
+  const val = inp?.value?.trim();
+  if(!val) return;
+  const nom = parseInt(nomEl?.value)||0;
+  const container = document.getElementById('bns-tags');
+  if(!container) return;
+  const id = 'bns-'+Date.now();
+  const tag = document.createElement('span');
+  tag.className = 'bns-tag';
+  const label = nom>0 ? `${val} (≈${fmtM(nom)})` : val;
+  tag.dataset.label = label;
+  tag.dataset.nominal = nom;
+  tag.id = id;
+  tag.innerHTML = `${label}<button onclick="removeBonusTag('${id}')" title="Hapus">×</button>`;
+  container.appendChild(tag);
+  inp.value=''; if(nomEl) nomEl.value='';
+  inp.focus();
+  applyDiskon();
+}
+
+function removeBonusTag(id){
+  const el=document.getElementById(id);
+  if(el) el.remove();
+  applyDiskon();
+}
+
+function setDkType(type, el){
+  document.querySelectorAll('.dkbtn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+  const unit=document.getElementById('dk-unit');
+  if(unit) unit.textContent = type==='nominal'?'Rp':'%';
+  const valSection=document.getElementById('dk-val-section');
+  if(valSection) valSection.style.display = type==='none'?'none':'';
+  // Update placeholder & update nominal display on change
+  const dkVal=document.getElementById('dk-value');
+  if(dkVal){
+    if(type==='nominal'){dkVal.placeholder='contoh: 500000';dkVal.max=99999999;}
+    else{dkVal.placeholder='contoh: 5';dkVal.max=50;}
+  }
+  applyDiskon();
+}
+
+// Also update dk-nominal-fmt when value changes
+function updateNominalFmt(){
+  const type=document.querySelector('.dkbtn.active')?.dataset?.type||'none';
+  const val=parseFloat(document.getElementById('dk-value')?.value)||0;
+  const totalEl=document.getElementById('k-total');
+  const total=parseInt((totalEl?.textContent||'').replace(/[^0-9]/g,''))||0;
+  const el=document.getElementById('dk-nominal-fmt');
+  if(!el) return;
+  if(type==='persen'&&total>0) el.textContent=`= ${fmtM(Math.round(total*val/100))}`;
+  else if(type==='cashback'&&total>0) el.textContent=`klien terima ${fmtM(Math.round(total*val/100))} cashback`;
+  else el.textContent='';
+}
+
+
+// ============================================================
+// INIT
+// ============================================================
+window.addEventListener('DOMContentLoaded',()=>{
+  // show login, don't init app yet
+});
+</script>
+</body>
+</html>

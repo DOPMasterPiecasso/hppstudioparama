@@ -1,0 +1,26 @@
+RewriteEngine On
+RewriteBase /
+
+# Remove optional /parama_hpp prefix if present
+RewriteRule ^parama_hpp/(.*)$ $1 [L]
+
+# If the request does not map to an existing file or directory,
+# rewrite to the corresponding .php file (e.g., /auth/login → /auth/login.php)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^([^/]+(?:/[^/]+)*)$ $1.php [L]
+
+# Protect sensitive folders
+RewriteRule ^config/ - [F,L]
+
+# Redirect root to index
+RewriteRule ^$ index.php [L]
+
+# Pretty URLs for API (already handled by the generic rule above, but keep for clarity)
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api/$1.php [L]
+
+Options -Indexes
+php_flag display_errors Off
+php_flag log_errors On

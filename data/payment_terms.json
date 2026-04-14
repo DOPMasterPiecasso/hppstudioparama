@@ -1,0 +1,39 @@
+{
+    "terms": [
+        {
+            "id": "pt_full",
+            "name": "Pembayaran Penuh",
+            "deposit": 100,
+            "desc": "Bayar 100% sebelum pekerjaan dimulai — diskon 5% untuk cash\/transfer hkg",
+            "color": "#2ecc71"
+        },
+        {
+            "id": "pt_dp50",
+            "name": "DP 50% tes",
+            "deposit": 50,
+            "desc": "Bayar 50% di awal, sisa 50% setelah serah terima. Standar untuk mayoritas klien.",
+            "color": "#3498db"
+        },
+        {
+            "id": "pt_dp30",
+            "name": "DP 30%",
+            "deposit": 30,
+            "desc": "Bayar 30% uang muka, 40% setelah produksi, 30% sebelum pengiriman. Untuk project besar.",
+            "color": "#E74C3C"
+        },
+        {
+            "id": "pt_dp20",
+            "name": "DP 20%",
+            "deposit": 20,
+            "desc": "Untuk klien korporat\/kontrak jangka panjang. Pembayaran bertahap: 20% + 40% + 40%.",
+            "color": "#F39C12"
+        },
+        {
+            "id": "pt_installment",
+            "name": "Cicilan (4x)",
+            "deposit": 25,
+            "desc": "4x cicilan bulanan tanpa bunga. Tersedia untuk nominal >Rp 10 juta.",
+            "color": "#9B59B6"
+        }
+    ]
+}

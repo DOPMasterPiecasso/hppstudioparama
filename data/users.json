@@ -1,0 +1,85 @@
+{
+    "roles": [
+        {
+            "id": 1,
+            "name": "admin",
+            "label": "Administrator",
+            "permissions": [
+                "create_user",
+                "edit_user",
+                "delete_user",
+                "view_reports",
+                "manage_settings"
+            ]
+        },
+        {
+            "id": 2,
+            "name": "manager",
+            "label": "Manager",
+            "permissions": [
+                "create_penawaran",
+                "edit_penawaran",
+                "view_reports"
+            ]
+        },
+        {
+            "id": 3,
+            "name": "staff",
+            "label": "Staff",
+            "permissions": [
+                "create_penawaran",
+                "view_penawaran"
+            ]
+        }
+    ],
+    "users": [
+        {
+            "id": 1,
+            "username": "admin",
+            "password": "$2y$10$JVcYQCJ9bOxiKKzjD5AaIuFm0JsI.wTCpCsh4WjjMlTELw7aRE0J2",
+            "name": "Administrator",
+            "email": "admin@parama.studio",
+            "role_id": 1,
+            "is_active": true,
+            "last_login": null,
+            "created_at": "2026-04-06T00:00:00+00:00",
+            "updated_at": "2026-04-06T00:00:00+00:00"
+        },
+        {
+            "id": 2,
+            "username": "manager",
+            "password": "$2y$10$vkWDCDwnijr09oKHW50ny.tK6u7mGd08CPzTo0SdVsGCbiLWKMIF6",
+            "name": "Manajer",
+            "email": "manager@parama.studio",
+            "role_id": 2,
+            "is_active": true,
+            "last_login": null,
+            "created_at": "2026-04-06T00:00:00+00:00",
+            "updated_at": "2026-04-06T00:00:00+00:00"
+        },
+        {
+            "id": 3,
+            "username": "staff",
+            "password": "$2y$10$xwONKMp6sripzA5QZRFBTuoYPhXqIdTvi\/Tt0VU5LneOeJjMu6cse",
+            "name": "Staff Member",
+            "email": "staff@parama.studio",
+            "role_id": 3,
+            "is_active": true,
+            "last_login": null,
+            "created_at": "2026-04-06T00:00:00+00:00",
+            "updated_at": "2026-04-06T00:00:00+00:00"
+        },
+        {
+            "id": 4,
+            "username": "qwdq",
+            "password": "$2y$10$6Pel76DjzAtKDroKyLeEruGPoz6pCw8QihIswmrlkfLJCQ7AOQveq",
+            "name": "qweqwe",
+            "email": "",
+            "role_id": 1,
+            "is_active": true,
+            "last_login": null,
+            "created_at": "2026-04-06T10:08:38+00:00",
+            "updated_at": "2026-04-06T10:08:38+00:00"
+        }
+    ]
+}

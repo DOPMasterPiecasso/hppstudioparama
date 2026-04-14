@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Overhead Inline Edit - User Guide</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        h1, h2 { color: #333; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .feature { background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 10px 0; }
+        .steps { margin: 15px 0; }
+        .step { margin: 10px 0; padding: 10px; background: #f0f0f0; border-left: 4px solid #2196f3; }
+        .icon { font-size: 18px; margin-right: 8px; }
+        table { width: 100%; border-collapse: collapse; margin: 10px 0; }
+        th, td { padding: 8px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background: #f9f9f9; font-weight: bold; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📋 Overhead & Gaji Tim - Inline Edit Mode</h1>
+        <p style="color: #666; font-size: 14px;">User guide untuk fitur "click to edit" pada Overhead items</p>
+
+        <div class="section">
+            <h2>✨ Fitur Baru</h2>
+            <div class="feature">
+                <strong>Read-Only Display Mode</strong><br>
+                Angka ditampilkan sebagai text (bukan textbox), lebih rapi dan profesional
+            </div>
+            <div class="feature">
+                <strong>Click to Edit</strong><br>
+                Klik pada angka atau tombol ✏️ untuk masuk mode edit
+            </div>
+            <div class="feature">
+                <strong>Inline Editing</strong><br>
+                Edit langsung di tempat, tanpa form terpisah
+            </div>
+            <div class="feature">
+                <strong>Easy Save & Cancel</strong><br>
+                Tombol 💾 untuk save, ✕ untuk cancel edit
+            </div>
+            <div class="feature">
+                <strong>Smart Total Calculation</strong><br>
+                Total otomatis ter-update setiap kali ada perubahan
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎯 Cara Penggunaan</h2>
+            
+            <h3>1. View Mode (Default)</h3>
+            <div style="border: 1px solid #ddd; padding: 15px; border-radius: 5px; background: #fafafa; margin: 10px 0;">
+                <div style="display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; padding: 10px;">
+                    <div style="font-size: 13px; font-weight: 500;">Designer</div>
+                    <div style="font-size: 13px; font-weight: 600; color: #1a5c3a; cursor: pointer; min-width: 120px; text-align: right;">Rp 20.000.000</div>
+                    <button style="padding: 4px 8px; font-size: 11px; border: 1px solid #ccc; background: white; cursor: pointer;">✏️</button>
+                    <button style="padding: 4px 8px; font-size: 11px; border: 1px solid #ccc; background: white; cursor: pointer;">✕</button>
+                </div>
+            </div>
+            <p><em>Angka ditampilkan dengan format Rp 20.000.000</em></p>
+
+            <h3>2. Edit Mode (After Click)</h3>
+            <div style="border: 2px solid #2196f3; padding: 15px; border-radius: 5px; background: #e3f2fd; margin: 10px 0;">
+                <div style="display: grid; grid-template-columns: 1fr auto auto auto; gap: 8px; align-items: center; padding: 10px;">
+                    <div style="font-size: 13px; font-weight: 500;">Designer</div>
+                    <input type="number" value="20000000" style="border: 2px solid #1a5c3a; padding: 6px 8px; border-radius: 3px; width: 120px; text-align: right; font-weight: 600;">
+                    <button style="padding: 4px 8px; font-size: 11px; background: #4caf50; color: white; border: none; cursor: pointer;">💾</button>
+                    <button style="padding: 4px 8px; font-size: 11px; border: 1px solid #ccc; background: white; cursor: pointer;">✕</button>
+                </div>
+            </div>
+            <p><em>Input textbox muncul, siap untuk edit nilai</em></p>
+
+            <div class="steps">
+                <h3 style="margin-top: 0;">📝 Step-by-Step:</h3>
+                <div class="step">
+                    <span class="icon">1️⃣</span>
+                    <strong>Lihat Item</strong> - Semua overhead items ditampilkan dengan nilai (format Rp XXX.XXX)
+                </div>
+                <div class="step">
+                    <span class="icon">2️⃣</span>
+                    <strong>Klik untuk Edit</strong> - Klik pada angka atau tombol ✏️
+                </div>
+                <div class="step">
+                    <span class="icon">3️⃣</span>
+                    <strong>Edit Value</strong> - Ubah nilai di textbox yang muncul
+                </div>
+                <div class="step">
+                    <span class="icon">4️⃣</span>
+                    <strong>Save</strong> - Klik tombol 💾 untuk save perubahan
+                </div>
+                <div class="step">
+                    <span class="icon">5️⃣</span>
+                    <strong>View Updated</strong> - Item kembali ke view mode dengan nilai baru
+                </div>
+                <div class="step">
+                    <span class="icon">6️⃣</span>
+                    <strong>Lihat Total</strong> - Total otomatis ter-update
+                </div>
+            </div>
+        </div>
+
+        <div class="section">
+            <h2>🎮 Controls & Buttons</h2>
+            <table>
+                <tr>
+                    <th>Button</th>
+                    <th>Fungsi</th>
+                    <th>Mode</th>
+                    <th>Aksi</th>
+                </tr>
+                <tr>
+                    <td style="font-size: 16px;">✏️</td>
+                    <td><strong>Edit</strong></td>
+                    <td>View Mode</td>
+                    <td>Masuk ke edit mode, tampilkan textbox</td>
+                </tr>
+                <tr>
+                    <td style="font-size: 16px;">💾</td>
+                    <td><strong>Save</strong></td>
+                    <td>Edit Mode</td>
+                    <td>Simpan perubahan value, kembali ke view mode</td>
+                </tr>
+                <tr>
+                    <td style="font-size: 16px;">✕</td>
+                    <td><strong>Cancel/Delete</strong></td>
+                    <td>Edit/View</td>
+                    <td>Cancel edit atau hapus item (depends on mode)</td>
+                </tr>
+                <tr>
+                    <td  style="font-size: 16px;">Rp XXX.XXX</td>
+                    <td><strong>Value Display</strong></td>
+                    <td>View Mode</td>
+                    <td>Klik untuk edit (alternative ke button ✏️)</td>
+                </tr>
+            </table>
+        </div>
+
+        <div class="section">
+            <h2>💡 Tips & Tricks</h2>
+            <ul>
+                <li>✓ Klik pada <strong>angka</strong> untuk edit (tidak perlu klik button ✏️)</li>
+                <li>✓ Angka dipilih otomatis saat edit mode - langsung bisa ketik nilai baru</li>
+                <li>✓ Total otomatis ter-update - lihat di bawah saat edit</li>
+                <li>✓ Saat save item baru, otomatis masuk ke edit mode - bisa langsung ubah</li>
+                <li>✓ Toast notification muncul untuk setiap aksi - confirm success/error</li>
+                <li>✓ Format Rp dengan thousands separator - lebih mudah dibaca</li>
+            </ul>
+        </div>
+
+        <div class="section">
+            <h2>🔄 Workflow Comparison</h2>
+            
+            <h3>❌ OLD (Sebelumnya)</h3>
+            <div style="background: #ffebee; padding: 10px; border-radius: 4px; font-size: 12px;">
+                Textbox permanent view → User langsung lihat semua nilai → Berantakan dan tidak profesional
+            </div>
+
+            <h3>✅ NEW (Sekarang)</h3>
+            <div style="background: #e8f5e9; padding: 10px; border-radius: 4px; font-size: 12px;">
+                Clean text display → Klik untuk edit → Edit inline → Save → Back to clean display
+            </div>
+        </div>
+
+        <div class="section" style="background: #fff3e0; border-left: 4px solid #ff9800;">
+            <h2>⚠️ Important Notes</h2>
+            <ul>
+                <li>Klik button Simpan Overhead di bawah untuk persist semua perubahan ke database</li>
+                <li>Edit item individual TIDAK otomatis save ke database - harus klik "Simpan Overhead"</li>
+                <li>Delete item langsung auto-save ke database</li>
+                <li>Nilai harus > 0 (tidak boleh 0 atau minus)</li>
+                <li>Nama item tidak boleh duplikat</li>
+            </ul>
+        </div>
+
+        <div class="section" style="background: #e8f5e9;">
+            <h2>✓ Status</h2>
+            <strong>Inline Edit System ACTIVE</strong>
+            <ul>
+                <li>✓ Read-only display dengan format Rp yang rapi</li>
+                <li>✓ Click to edit dengan textbox inline</li>
+                <li>✓ Save/Cancel buttons di edit mode</li>
+                <li>✓ Real-time total calculation</li>
+                <li>✓ Toast notifications untuk semua aksi</li>
+                <li>✓ Smooth animations saat edit/delete</li>
+                <li>✓ Keyboard shortcuts (Enter to save, Esc to cancel)</li>
+            </ul>
+        </div>
+    </div>
+</body>
+</html>

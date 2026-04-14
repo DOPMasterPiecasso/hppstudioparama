@@ -1,0 +1,33 @@
+{
+  "finishing": [
+    {"id":"binding","name":"Binding Paku/Jepang/Spiral","type":"flat","tiers":[[25,75,50000],[76,150,35000],[151,9999,30000]]},
+    {"id":"popup","name":"Pop Up 2D","type":"flat","tiers":[[25,75,55000],[76,150,40000],[151,9999,35000]]},
+    {"id":"tunnel","name":"Cover Tunnel","type":"flat","tiers":[[25,75,75000],[76,150,60000],[151,9999,50000]]},
+    {"id":"klip","name":"Cover Klip/Cetekan","type":"flat","tiers":[[25,75,15000],[76,150,10000],[151,9999,8000]]},
+    {"id":"covbahan","name":"Cover Bahan","type":"flat","tiers":[[25,75,55000],[76,150,40000],[151,9999,35000]]}
+  ],
+  "kertas": [
+    {"id":"ivory","name":"Ivory Paper","type":"per_hal","tiers":[[25,50,450],[51,100,250],[101,150,200],[151,9999,150]]},
+    {"id":"laminasi","name":"Laminasi Paper","type":"per_hal","tiers":[[25,50,600],[51,100,450],[101,150,400],[151,9999,350]]}
+  ],
+  "halaman": [
+    {"id":"extrahal","name":"Halaman Tambahan","type":"extra_hal","tiers":[[25,50,3000],[51,100,2000],[101,150,1300],[151,9999,1000]]}
+  ],
+  "video": [
+    {"id":"drone","name":"Drone Video (1–2 mnt)","type":"flat_video","price":1500000},
+    {"id":"docudrama","name":"Docudrama Video (5–10 mnt)","type":"flat_video","price":3000000}
+  ],
+  "pkg1": [
+    {"id":"slidebox","name":"Slide Box","type":"flat","tiers":[[25,50,45000],[51,100,40000],[101,150,35000],[151,200,30000],[201,9999,25000]]},
+    {"id":"stdbox1","name":"Standart Box 1","type":"flat","tiers":[[25,50,150000],[51,100,95000],[101,150,80000],[151,200,70000],[201,9999,65000]]},
+    {"id":"stdbox2","name":"Standart Box 2","type":"flat","tiers":[[25,50,150000],[51,100,100000],[101,150,80000],[151,200,75000],[201,9999,70000]]},
+    {"id":"hardbox","name":"Hard Box 3 (Akrilik)","type":"flat","tiers":[[25,50,125000],[51,100,100000],[101,150,90000],[151,200,80000],[201,9999,75000]]}
+  ],
+  "pkg2": [
+    {"id":"cbox1","name":"Custom Box 1","type":"flat","tiers":[[25,50,200000],[51,100,170000],[101,150,130000],[151,200,120000],[201,9999,110000]]},
+    {"id":"cbox2","name":"Custom Box 2","type":"flat","tiers":[[25,50,165000],[51,100,150000],[101,150,130000],[151,200,120000],[201,9999,110000]]},
+    {"id":"cbox3","name":"Custom Box 3","type":"flat","tiers":[[25,50,200000],[51,100,170000],[101,150,130000],[151,200,120000],[201,9999,110000]]},
+    {"id":"cbox4","name":"Custom Box 4","type":"flat","tiers":[[25,50,200000],[51,100,170000],[101,150,140000],[151,200,130000],[201,9999,120000]]},
+    {"id":"cbox5","name":"Custom Box 5","type":"flat","tiers":[[25,50,200000],[51,100,170000],[101,150,145000],[151,200,135000],[201,9999,130000]]}
+  ]
+}

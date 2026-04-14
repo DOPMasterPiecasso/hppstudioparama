@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Graduation Rendering</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background: #f5f5f5; }
+        .container { max-width: 1200px; margin: 0 auto; background: white; padding: 20px; border-radius: 8px; }
+        h1 { color: #333; }
+        .section { margin: 20px 0; padding: 15px; border: 1px solid #ddd; border-radius: 5px; }
+        .section h2 { font-size: 16px; margin-bottom: 10px; color: #555; }
+        .status { padding: 10px; border-radius: 4px; margin: 10px 0; }
+        .status.error { background: #ffebee; color: #c62828; }
+        .status.success { background: #e8f5e9; color: #2e7d32; }
+        .status.info { background: #e3f2fd; color: #1565c0; }
+        code { background: #f0f0f0; padding: 2px 6px; border-radius: 3px; font-family: monospace; }
+        pre { background: #f0f0f0; padding: 10px; border-radius: 4px; overflow-x: auto; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🧪 Graduation Data Rendering Test</h1>
+        
+        <div class="section">
+            <h2>1. Script Loading Status</h2>
+            <div id="script-status"></div>
+        </div>
+        
+        <div class="section">
+            <h2>2. Global Variables Check</h2>
+            <div id="globals-status"></div>
+        </div>
+        
+        <div class="section">
+            <h2>3. Function Availability</h2>
+            <div id="functions-status"></div>
+        </div>
+        
+        <div class="section">
+            <h2>4. Data Structure</h2>
+            <pre id="data-structure"></pre>
+        </div>
+        
+        <div class="section">
+            <h2>5. Render Test Result</h2>
+            <div id="render-result"></div>
+        </div>
+    </div>
+
+    <script>
+        // Simulated DB_SETTINGS as would be loaded from header.php
+        const DB_SETTINGS = {
+            'grad_packages': JSON.stringify({
+                "packages": [
+                    {"id":"gphv","name":"Photo & Video","price":4500000,"desc":"2 Fotografer + 1 Videografer, 50 foto edited, video cinematic 2–4 mnt, G-Drive, 4 jam coverage, transport jabodetabek","color":"acc"},
+                    {"id":"gvideo","name":"Video Only","price":2000000,"desc":"1 Videografer, video cinematic 2–5 mnt, G-Drive, 4 jam coverage, transport jabodetabek","color":""},
+                    {"id":"gphoto","name":"Photo Only","price":2750000,"desc":"2 Fotografer, 100 foto edited, G-Drive, 4 jam coverage, transport jabodetabek","color":""},
+                    {"id":"gbooth","name":"Photo Booth","price":3850000,"desc":"1–2 Crew profesional, backdrop wisuda, lighting studio, Selfiebox Machine, unlimited print 4R, max 3 jam, softcopy + QR Code realtime, transport jabodetabek","color":""},
+                    {"id":"g360","name":"Glamation 360°","price":4100000,"desc":"1–2 Crew profesional, MP4, LCD 50in preview, GoPro/iPhone 12 Pro, overlay design free, max 3 jam, QR Code realtime, transport jabodetabek","color":""},
+                    {"id":"gcomplete","name":"Complete Package","price":7750000,"desc":"Photo (2 foto, 100 edited) + Video (1 videografer, cinematic 2–4 mnt) + Photo Booth (unlimited print 4R, max 3 jam, QR Code), transport jabodetabek","color":"feat"}
+                ],
+                "addons": [
+                    {"id":"gvideo_add","name":"Tambah 1 Videografer","price":1500000},
+                    {"id":"gphoto_add","name":"Tambah 1 Fotografer","price":1250000},
+                    {"id":"gbooth_add","name":"Tambah 1 Jam Photobooth/360","price":500000},
+                    {"id":"gwork_add","name":"Tambah 1 Jam Kerja/Orang","price":350000}
+                ],
+                "cetak": [
+                    {"id":"g4r","name":"Cetak Foto 4R","price":4000},
+                    {"id":"g8r","name":"Cetak Foto 8R","price":8000},
+                    {"id":"g10r","name":"Cetak Foto 10R","price":15000},
+                    {"id":"g12r","name":"Cetak Foto 12R","price":20000}
+                ]
+            })
+        };
+        
+        // Simulated app.js initialization
+        const fmt = n => 'Rp'+Math.round(n).toLocaleString('id-ID');
+        let GRAD = DB_SETTINGS['grad_packages'] ? JSON.parse(DB_SETTINGS['grad_packages']) : {
+            packages:[],
+            addons:[],
+            cetak:[]
+        };
+        
+        // Simulated renderGraduation function (from app-pages.js)
+        function renderGraduation(){
+            const sel=[document.getElementById('gc-pkg'),document.getElementById('k-grad-pkg')];
+            const opts='<option value="">— Pilih paket —</option>'+GRAD.packages.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
+            sel.forEach(s=>{if(s)s.innerHTML=opts});
+
+            const gridHtml = GRAD.packages.map((p,pi)=>`
+                <div style="padding: 15px; border: 1px solid #ddd; border-radius: 5px; background: #fafafa;">
+                    <div style="font-weight: bold; font-size: 14px;">${p.name}</div>
+                    <div style="font-size: 12px; color: #666; margin: 8px 0;">${p.desc}</div>
+                    <div style="font-size: 16px; font-weight: bold; color: #1a5c3a; margin-top: 10px;">${fmt(p.price)}</div>
+                </div>`).join('');
+            
+            if (document.getElementById('grad-grid')) {
+                document.getElementById('grad-grid').innerHTML = gridHtml;
+            }
+            
+            const addonHtml = GRAD.addons.map((a,ai)=>`
+                <tr><td>${a.name}</td><td>${fmt(a.price)}</td></tr>`).join('');
+            if (document.getElementById('grad-addon')) {
+                document.getElementById('grad-addon').innerHTML = addonHtml;
+            }
+            
+            const cetakHtml = GRAD.cetak.map((c,ci)=>`
+                <tr><td>${c.name}</td><td>${fmt(c.price)}/lembar</td></tr>`).join('');
+            if (document.getElementById('grad-cetak')) {
+                document.getElementById('grad-cetak').innerHTML = cetakHtml;
+            }
+        }
+        
+        // Test execution
+        document.addEventListener('DOMContentLoaded', function() {
+            // Test 1: Script loading
+            const scriptStatus = document.getElementById('script-status');
+            scriptStatus.innerHTML = '<div class="status success">✓ DB_SETTINGS loaded</div>' +
+                                    '<div class="status success">✓ Global variables initialized</div>' +
+                                    '<div class="status info">Note: app.js and app-pages.js should be loaded in the actual page</div>';
+            
+            // Test 2: Global variables
+            const globalsStatus = document.getElementById('globals-status');
+            let globalsHtml = '<div class="status success">✓ DB_SETTINGS defined: ' + (typeof DB_SETTINGS !== 'undefined' ? 'YES' : 'NO') + '</div>';
+            globalsHtml += '<div class="status success">✓ GRAD object initialized: ' + (typeof GRAD !== 'undefined' ? 'YES' : 'NO') + '</div>';
+            globalsHtml += '<div class="status success">✓ GRAD.packages: ' + (GRAD.packages?.length || 0) + ' packages</div>';
+            globalsStatus.innerHTML = globalsHtml;
+            
+            // Test 3: Function availability
+            const functionsStatus = document.getElementById('functions-status');
+            let functionsHtml = '<div class="status ' + (typeof fmt === 'function' ? 'success' : 'error') + '">✓ fmt() function: ' + (typeof fmt === 'function' ? 'AVAILABLE' : 'MISSING') + '</div>';
+            functionsHtml += '<div class="status ' + (typeof renderGraduation === 'function' ? 'success' : 'error') + '">✓ renderGraduation() function: ' + (typeof renderGraduation === 'function' ? 'AVAILABLE' : 'MISSING') + '</div>';
+            functionsStatus.innerHTML = functionsHtml;
+            
+            // Test 4: Data structure
+            const dataElement = document.getElementById('data-structure');
+            dataElement.textContent = JSON.stringify(GRAD, null, 2);
+            
+            // Test 5: Render test
+            const renderTest = document.getElementById('render-result');
+            try {
+                // Create test containers
+                const testDiv = document.createElement('div');
+                testDiv.innerHTML = `
+                    <div style="margin: 15px 0;">
+                        <h3>Paket Utama (pkgrid):</h3>
+                        <div id="grad-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 10px;"></div>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <h3>Add-on Graduation:</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead><tr><th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Item</th><th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Harga</th></tr></thead>
+                            <tbody id="grad-addon" style=""></tbody>
+                        </table>
+                    </div>
+                    <div style="margin: 15px 0;">
+                        <h3>Cetak Foto Tambahan:</h3>
+                        <table style="width: 100%; border-collapse: collapse;">
+                            <thead><tr><th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Ukuran</th><th style="text-align: left; padding: 8px; border-bottom: 1px solid #ddd;">Harga/lembar</th></tr></thead>
+                            <tbody id="grad-cetak"></tbody>
+                        </table>
+                    </div>
+                `;
+                renderTest.appendChild(testDiv);
+                
+                // Execute render
+                renderGraduation();
+                
+                renderTest.innerHTML = '<div class="status success">✓ renderGraduation() executed successfully</div>' + renderTest.innerHTML;
+            } catch (error) {
+                renderTest.innerHTML = '<div class="status error">✗ Error: ' + error.message + '</div>';
+            }
+        });
+    </script>
+</body>
+</html>

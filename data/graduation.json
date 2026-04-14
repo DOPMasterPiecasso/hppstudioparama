@@ -1,0 +1,90 @@
+{
+    "packages": [
+        {
+            "id": "gphv",
+            "name": "Photo & Video",
+            "price": 4700000,
+            "color": "acc",
+            "desc": "2 Fotografer + 1 Videografer, 50 foto edited, video cinematic 2–4 mnt, G-Drive, 4 jam coverage, transport jabodetabek"
+        },
+        {
+            "id": "gvideo",
+            "name": "Video Only",
+            "price": 2000000,
+            "color": "",
+            "desc": "1 Videografer, video cinematic 2–5 mnt, G-Drive, 4 jam coverage, transport jabodetabek"
+        },
+        {
+            "id": "gphoto",
+            "name": "Photo Only",
+            "price": 2750000,
+            "color": "",
+            "desc": "2 Fotografer, 100 foto edited, G-Drive, 4 jam coverage, transport jabodetabek"
+        },
+        {
+            "id": "gbooth",
+            "name": "Photo Booth",
+            "price": 3850000,
+            "color": "",
+            "desc": "1–2 Crew profesional, backdrop wisuda, lighting studio, Selfiebox Machine, unlimited print 4R, max 3 jam, softcopy + QR Code realtime, transport jabodetabek"
+        },
+        {
+            "id": "g360",
+            "name": "Glamation 360°",
+            "price": 4100000,
+            "color": "",
+            "desc": "1–2 Crew profesional, MP4, LCD 50in preview, GoPro/iPhone 12 Pro, overlay design free, max 3 jam, QR Code realtime, transport jabodetabek"
+        },
+        {
+            "id": "gcomplete",
+            "name": "Complete Package",
+            "price": 7750000,
+            "color": "feat",
+            "desc": "Photo (2 foto, 100 edited) + Video (1 videografer, cinematic 2–4 mnt) + Photo Booth (unlimited print 4R, max 3 jam, QR Code), transport jabodetabek"
+        }
+    ],
+    "addons": [
+        {
+            "id": "gvideo_add",
+            "name": "Tambah 1 Videografer",
+            "price": 1100000
+        },
+        {
+            "id": "gphoto_add",
+            "name": "Tambah 1 Fotografer",
+            "price": 1250000
+        },
+        {
+            "id": "gbooth_add",
+            "name": "Tambah 1 Jam Photobooth/360",
+            "price": 500000
+        },
+        {
+            "id": "gwork_add",
+            "name": "Tambah 1 Jam Kerja/Orang",
+            "price": 350000
+        }
+    ],
+    "cetak": [
+        {
+            "id": "g4r",
+            "name": "Cetak Foto 4R",
+            "price": 4000
+        },
+        {
+            "id": "g8r",
+            "name": "Cetak Foto 8R",
+            "price": 8000
+        },
+        {
+            "id": "g10r",
+            "name": "Cetak Foto 10R",
+            "price": 15000
+        },
+        {
+            "id": "g12r",
+            "name": "Cetak Foto 12R",
+            "price": 20000
+        }
+    ]
+}
