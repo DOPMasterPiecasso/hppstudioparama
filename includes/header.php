@@ -106,7 +106,25 @@ try {
     $alcF = ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30];
 }
 ?>
-<script>const DB_SETTINGS = <?= json_encode($allSettings) ?>;</script>
+<script>
+const DB_SETTINGS = <?= json_encode($allSettings) ?>;
+console.log('=== DB_SETTINGS LOADED ===');
+console.log('DB_SETTINGS.oh (raw):', DB_SETTINGS['oh']);
+try {
+    const ohObj = JSON.parse(DB_SETTINGS['oh']);
+    console.log('DB_SETTINGS.oh (parsed):', ohObj);
+    console.log('  - designer:', ohObj.designer);
+    console.log('  - marketing:', ohObj.marketing);
+    console.log('  - creative:', ohObj.creative);
+    console.log('  - pm:', ohObj.pm);
+    console.log('  - sosmed:', ohObj.sosmed);
+    console.log('  - freelance:', ohObj.freelance);
+    console.log('  - operasional:', ohObj.operasional, '(type:', typeof ohObj.operasional, ')');
+    console.log('  - total:', ohObj.total);
+} catch (e) {
+    console.error('Failed to parse DB_SETTINGS.oh:', e);
+}
+</script>
 <script>
 // Master Data API Helper — fetch dari master data terpusat
 // Semua halaman lain bisa menggunakan API ini untuk data master

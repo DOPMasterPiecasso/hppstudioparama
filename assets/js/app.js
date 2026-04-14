@@ -13,6 +13,9 @@ const currentUser = typeof PHP_USER !== 'undefined' ? PHP_USER : null;
 const DEF_OH = {total:73586000,marketing:15000000,creative:8000000,designer:20000000,pm:8000000,sosmed:7000000,freelance:4000000,operasional:11586000};
 let OH = DB_SETTINGS['oh'] ? JSON.parse(DB_SETTINGS['oh']) : {...DEF_OH};
 
+console.log('=== app.js OH INITIALIZATION ===');
+console.log('Initial OH before cleanup:', JSON.parse(JSON.stringify(OH)));
+
 // Ensure OH has proper structure and calculate total if missing
 if (!OH.total || OH.total === 0) {
     OH.total = (OH.designer||0) + (OH.marketing||0) + (OH.creative||0) + (OH.pm||0) + 
@@ -23,10 +26,15 @@ Object.keys(OH).forEach(key => {
     OH[key] = typeof OH[key] === 'number' ? OH[key] : parseInt(OH[key]) || 0;
 });
 
+console.log('OH after numeric conversion:', JSON.parse(JSON.stringify(OH)));
+
 // Ensure operasional has a value
 if (!OH.operasional || OH.operasional === 0) {
     OH.operasional = OH.ops || DEF_OH.operasional || 0;
 }
+
+console.log('OH final:', JSON.parse(JSON.stringify(OH)));
+console.log('OH.operasional final value:', OH.operasional, '(type:', typeof OH.operasional, ')');
 
 let CETAK_F = DB_SETTINGS['cetak_f'] ? JSON.parse(DB_SETTINGS['cetak_f']) : {handy:1.0, minimal:0.95, large:1.15};
 let ALC_F = DB_SETTINGS['alc_f'] ? JSON.parse(DB_SETTINGS['alc_f']) : {ebook:0.72, editcetak:0.62, desain:0.22, cetakonly:0.30};
@@ -408,6 +416,8 @@ function goPage(id, el){
 // RINGKASAN
 // ============================================================
 function renderRingkasan(){
+  console.log('=== renderRingkasan called ===');
+  console.log('OH.operasional:', OH.operasional, '(type:', typeof OH.operasional, ')');
   const oh=OH.total;
   const {harga:h150}=getFSPrice('handy',150);
   const c150=estCetak(150,60,'handy');
@@ -419,10 +429,12 @@ function renderRingkasan(){
     <div class="m"><div class="ml">Gross Margin Avg</div><div class="mv suc">68–80%</div><div class="ms">full service, 30–150 siswa</div></div>
     <div class="m"><div class="ml">Net (3 proyek)</div><div class="mv suc">${fmtM(3*150*h150-3*150*c150-oh)}</div><div class="ms">estimasi @150 siswa</div></div>`;
   const ohItems=[['Designer',OH.designer||0],['Marketing',OH.marketing||0],['Creative Prod.',OH.creative||0],['Project Mgr',OH.pm||0],['Social Media',OH.sosmed||0],['Freelance',OH.freelance||0],['Operasional',OH.operasional||0]];
+  console.log('ohItems:', ohItems);
   const mx=Math.max(...ohItems.map(x=>x[1]));
   const cols=['#2A6B8A','#C85B2A','#2D7A4A','#8A5F1A','#6B3A8A','#4A7A6B','#888'];
   document.getElementById('oh-bars').innerHTML=ohItems.map(([l,v],i)=>{
     const val=parseInt(v)||0;
+    console.log(`Rendering ${l}: value=${v}, parsed=${val}, formatted=${fmtM(val)}`);
     return `<div class="br"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:${mx>0?val/mx*100:0}%;background:${cols[i]}"></div></div><div class="bv">${fmtM(val)}</div></div>`;
   }).join('');
   const komps=[['Foto+Stylist+Prop',30,'#C85B2A'],['Cetak+Shipping',25,'#2A6B8A'],['Desain Layout',20,'#2D7A4A'],['Editing Foto',15,'#8A5F1A'],['PM+Overhead',7,'#6B3A8A'],['E-Book',3,'#888']];
