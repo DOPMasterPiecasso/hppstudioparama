@@ -1,8 +1,102 @@
 <?php
 /**
- * JSON File Based Database Handler
- * Storage: data/ folder with JSON files
+ * Database Configuration & Handler
+ * Support untuk JSON (legacy) dan MySQL (new)
+ * 
+ * Configuration dimuat dari .env file (production-safe)
  */
+
+// ============================================================
+// .ENV FILE LOADER
+// ============================================================
+
+function loadEnvFile($filePath = null) {
+    if ($filePath === null) {
+        $filePath = dirname(__DIR__) . '/.env';
+    }
+    
+    if (!file_exists($filePath)) {
+        // .env tidak wajib ada, gunakan default
+        return [];
+    }
+    
+    $env = [];
+    $lines = file($filePath, FILE_IGNORE_NEW_LINES | FILE_SKIP_EMPTY_LINES);
+    
+    foreach ($lines as $line) {
+        // Skip comments
+        if (strpos(trim($line), '#') === 0) {
+            continue;
+        }
+        
+        // Parse KEY=VALUE atau KEY="VALUE" atau KEY='VALUE'
+        if (strpos($line, '=') !== false) {
+            list($key, $value) = explode('=', $line, 2);
+            $key = trim($key);
+            $value = trim($value);
+            
+            // Remove quotes if present
+            if (preg_match('/^["\'](.*)["\']$/', $value, $matches)) {
+                $value = $matches[1];
+            }
+            
+            $env[$key] = $value;
+        }
+    }
+    
+    return $env;
+}
+
+// Load .env file
+$envVars = loadEnvFile();
+
+// ============================================================
+// MYSQL PDO CONNECTION
+// ============================================================
+
+$MySQL_Config = [
+    'host' => $envVars['DB_HOST'] ?? getenv('DB_HOST') ?: 'localhost',
+    'port' => $envVars['DB_PORT'] ?? getenv('DB_PORT') ?: 3306,
+    'name' => $envVars['DB_NAME'] ?? getenv('DB_NAME') ?: 'parama_hpp',
+    'user' => $envVars['DB_USER'] ?? getenv('DB_USER') ?: 'root',
+    'pass' => $envVars['DB_PASS'] ?? getenv('DB_PASS') ?: '',
+    'charset' => 'utf8mb4'
+];
+
+function getMySQLConnection() {
+    global $MySQL_Config;
+    
+    try {
+        $dsn = sprintf(
+            'mysql:host=%s;port=%d;dbname=%s;charset=%s',
+            $MySQL_Config['host'],
+            $MySQL_Config['port'],
+            $MySQL_Config['name'],
+            $MySQL_Config['charset']
+        );
+        
+        $pdo = new PDO(
+            $dsn,
+            $MySQL_Config['user'],
+            $MySQL_Config['pass'],
+            [
+                PDO::ATTR_ERRMODE => PDO::ERRMODE_EXCEPTION,
+                PDO::ATTR_DEFAULT_FETCH_MODE => PDO::FETCH_ASSOC,
+                PDO::MYSQL_ATTR_INIT_COMMAND => "SET NAMES utf8mb4"
+            ]
+        );
+        
+        return $pdo;
+    } catch (PDOException $e) {
+        error_log("MySQL Connection Error: " . $e->getMessage());
+        return null;
+    }
+}
+
+// ============================================================
+// JSON File Based Database Handler (Legacy)
+// Storage: data/ folder with JSON files
+// ============================================================
 
 class JSONDb {
     private $dataPath;
@@ -271,9 +365,362 @@ class JSONDb {
 $GLOBALS['jsonDb'] = new JSONDb();
 
 /**
+ * MySQL Master Data Handler
+ * Untuk reads/writes master data dari MySQL tables
+ */
+class MySQLMasterData {
+    private $pdo;
+    
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+    }
+    
+    // ========== OVERHEAD ==========
+    public function getOverhead() {
+        $stmt = $this->pdo->query("SELECT name, amount FROM overhead WHERE active = 1 ORDER BY id");
+        $result = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result[$row['name']] = (int)$row['amount'];
+        }
+        
+        // Add total
+        $totalStmt = $this->pdo->query("SELECT total_amount FROM overhead_total LIMIT 1");
+        $totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
+        $result['total'] = $totalRow ? (int)$totalRow['total_amount'] : array_sum($result);
+        
+        return $result;
+    }
+    
+    public function updateOverhead($data) {
+        $this->pdo->beginTransaction();
+        try {
+            // Update individual items
+            $stmt = $this->pdo->prepare("INSERT INTO overhead (name, amount) VALUES (?, ?) 
+                                        ON DUPLICATE KEY UPDATE amount = VALUES(amount)");
+            $total = 0;
+            
+            foreach ($data as $name => $amount) {
+                if (strtolower($name) !== 'total') {
+                    $val = (int)$amount;
+                    $stmt->execute([$name, $val]);
+                    $total += $val;
+                }
+            }
+            
+            // Update total
+            $this->pdo->exec("DELETE FROM overhead_total");
+            $this->pdo->prepare("INSERT INTO overhead_total (total_amount) VALUES (?)")->execute([$total]);
+            
+            $this->pdo->commit();
+            return $this->getOverhead();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+    
+    // ========== PRICING FACTORS ==========
+    public function getPricingFactors() {
+        $stmt = $this->pdo->query("SELECT category, factor_name, factor_value FROM pricing_factors WHERE 1=1 ORDER BY category, factor_name");
+        $result = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            if (!isset($result[$row['category']])) {
+                $result[$row['category']] = [];
+            }
+            $result[$row['category']][$row['factor_name']] = (float)$row['factor_value'];
+        }
+        return $result;
+    }
+    
+    public function updateCetakFactors($data) {
+        return $this->updatePricingFactors('cetak', $data);
+    }
+    
+    public function updateAlaCarteFactors($data) {
+        return $this->updatePricingFactors('alacarte', $data);
+    }
+    
+    private function updatePricingFactors($category, $data) {
+        $stmt = $this->pdo->prepare("INSERT INTO pricing_factors (category, factor_name, factor_value) 
+                                    VALUES (?, ?, ?) 
+                                    ON DUPLICATE KEY UPDATE factor_value = VALUES(factor_value)");
+        
+        foreach ($data as $name => $value) {
+            $val = (float)$value;
+            // Convert percentage to decimal if needed (>1 means percentage)
+            if ($val > 1) {
+                $val = $val / 100;
+            }
+            $stmt->execute([$category, $name, $val]);
+        }
+        
+        return $this->getPricingFactors();
+    }
+    
+    // ========== FULL SERVICE ==========
+    public function getFullService() {
+        $stmt = $this->pdo->query("SELECT package_type, min_students, max_students, price_per_student, pages 
+                                  FROM fullservice_pricing WHERE active = 1 
+                                  ORDER BY package_type, min_students");
+        $result = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $pkg = $row['package_type'];
+            if (!isset($result[$pkg])) {
+                $result[$pkg] = [];
+            }
+            $result[$pkg][] = [
+                (int)$row['min_students'],
+                (int)$row['max_students'],
+                (int)$row['price_per_student'],
+                (int)$row['pages']
+            ];
+        }
+        return $result;
+    }
+    
+    public function updateFullService($data) {
+        $this->pdo->beginTransaction();
+        try {
+            // Delete existing and insert new
+            $this->pdo->exec("DELETE FROM fullservice_pricing");
+            
+            $stmt = $this->pdo->prepare("INSERT INTO fullservice_pricing 
+                                        (package_type, min_students, max_students, price_per_student, pages) 
+                                        VALUES (?, ?, ?, ?, ?)");
+            
+            foreach ($data as $pkg => $tiers) {
+                foreach ($tiers as $tier) {
+                    list($lo, $hi, $price, $pages) = $tier;
+                    $stmt->execute([$pkg, $lo, $hi, $price, $pages ?? 60]);
+                }
+            }
+            
+            $this->pdo->commit();
+            return $this->getFullService();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+    
+    // ========== CETAK BASE ==========
+    public function getCetakBase() {
+        $stmt = $this->pdo->query("SELECT min_students, max_students, price FROM cetak_base 
+                                  WHERE active = 1 ORDER BY min_students");
+        $result = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = [
+                (int)$row['min_students'],
+                (int)$row['max_students'],
+                (int)$row['price']
+            ];
+        }
+        return $result;
+    }
+    
+    public function updateCetakBase($data) {
+        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->exec("DELETE FROM cetak_base");
+            
+            $stmt = $this->pdo->prepare("INSERT INTO cetak_base (min_students, max_students, price) 
+                                        VALUES (?, ?, ?)");
+            
+            foreach ($data as $tier) {
+                list($lo, $hi, $price) = $tier;
+                $stmt->execute([(int)$lo, (int)$hi, (int)$price]);
+            }
+            
+            $this->pdo->commit();
+            return $this->getCetakBase();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+    
+    // ========== ADD-ONS ==========
+    public function getAddons() {
+        $stmt = $this->pdo->query("SELECT name, price, unit, category FROM addons WHERE active = 1");
+        $result = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = [
+                'name' => $row['name'],
+                'price' => (int)$row['price'],
+                'unit' => $row['unit'],
+                'category' => $row['category']
+            ];
+        }
+        return $result;
+    }
+    
+    public function updateAddons($data) {
+        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->exec("DELETE FROM addons");
+            
+            $stmt = $this->pdo->prepare("INSERT INTO addons (name, price, unit, category) 
+                                        VALUES (?, ?, ?, ?)");
+            
+            foreach ($data as $addon) {
+                $stmt->execute([
+                    $addon['name'],
+                    (int)$addon['price'],
+                    $addon['unit'] ?? 'item',
+                    $addon['category'] ?? 'misc'
+                ]);
+            }
+            
+            $this->pdo->commit();
+            return $this->getAddons();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+    
+    // ========== GRADUATION ==========
+    public function getGraduation() {
+        $packages = [];
+        $stmt = $this->pdo->query("SELECT name, price, includes_book, includes_tshirt FROM graduation_packages WHERE active = 1");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $packages[] = [
+                'name' => $row['name'],
+                'price' => (int)$row['price'],
+                'includes_book' => $row['includes_book'],
+                'includes_tshirt' => $row['includes_tshirt']
+            ];
+        }
+        
+        $addons = [];
+        $stmt = $this->pdo->query("SELECT name, price, item_type FROM graduation_addons WHERE active = 1");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $addons[] = [
+                'name' => $row['name'],
+                'price' => (int)$row['price'],
+                'type' => $row['item_type']
+            ];
+        }
+        
+        $cetak = [];
+        $stmt = $this->pdo->query("SELECT min_qty, max_qty, price_per_unit FROM graduation_cetak WHERE active = 1");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $cetak[] = [
+                (int)$row['min_qty'],
+                (int)$row['max_qty'],
+                (int)$row['price_per_unit']
+            ];
+        }
+        
+        return [
+            'packages' => $packages,
+            'addons' => $addons,
+            'cetak' => $cetak
+        ];
+    }
+    
+    // ========== PAYMENT TERMS ==========
+    public function getPaymentTerms() {
+        $stmt = $this->pdo->query("SELECT term_name FROM payment_terms WHERE active = 1 ORDER BY id");
+        $result = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result[] = $row['term_name'];
+        }
+        return ['terms' => $result];
+    }
+    
+    // ========== UPDATE GRADUATION AND PAYMENT TERMS ==========
+    
+    public function updateGraduation($data) {
+        $this->pdo->beginTransaction();
+        try {
+            // Update packages
+            if (isset($data['packages'])) {
+                $this->pdo->exec("DELETE FROM graduation_packages");
+                $stmt = $this->pdo->prepare("INSERT INTO graduation_packages (name, price, includes_book, includes_tshirt) 
+                                            VALUES (?, ?, ?, ?)");
+                foreach ($data['packages'] as $pkg) {
+                    $stmt->execute([
+                        $pkg['name'],
+                        (int)$pkg['price'],
+                        $pkg['includes_book'] ?? 'No',
+                        $pkg['includes_tshirt'] ?? 'No'
+                    ]);
+                }
+            }
+            
+            // Update addons
+            if (isset($data['addons'])) {
+                $this->pdo->exec("DELETE FROM graduation_addons");
+                $stmt = $this->pdo->prepare("INSERT INTO graduation_addons (name, price, item_type) 
+                                            VALUES (?, ?, ?)");
+                foreach ($data['addons'] as $addon) {
+                    $stmt->execute([
+                        $addon['name'],
+                        (int)$addon['price'],
+                        $addon['type'] ?? 'misc'
+                    ]);
+                }
+            }
+            
+            // Update cetak
+            if (isset($data['cetak'])) {
+                $this->pdo->exec("DELETE FROM graduation_cetak");
+                $stmt = $this->pdo->prepare("INSERT INTO graduation_cetak (min_qty, max_qty, price_per_unit) 
+                                            VALUES (?, ?, ?)");
+                foreach ($data['cetak'] as $tier) {
+                    list($lo, $hi, $price) = $tier;
+                    $stmt->execute([(int)$lo, (int)$hi, (int)$price]);
+                }
+            }
+            
+            $this->pdo->commit();
+            return $this->getGraduation();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+    
+    public function updatePaymentTerms($data) {
+        // $data should be array of term names or wrapped in 'terms' key
+        $terms = is_array($data) && isset($data['terms']) ? $data['terms'] : $data;
+        
+        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->exec("DELETE FROM payment_terms");
+            
+            $stmt = $this->pdo->prepare("INSERT INTO payment_terms (term_name) VALUES (?)");
+            foreach ($terms as $term) {
+                if (is_array($term)) {
+                    $term = $term['term_name'] ?? $term['name'] ?? '';
+                }
+                if (!empty($term)) {
+                    $stmt->execute([(string)$term]);
+                }
+            }
+            
+            $this->pdo->commit();
+            return $this->getPaymentTerms();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
+    }
+}
+
+/**
  * Get DB instance for compatibility with existing code
  */
 function getDB() {
     return $GLOBALS['jsonDb'];
 }
+
+/**
+ * Get MySQL Master Data instance
+ */
+function getMySQLMasterData($pdo) {
+    return new MySQLMasterData($pdo);
+}
+
 
