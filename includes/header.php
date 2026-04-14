@@ -54,6 +54,15 @@ try {
         }
     }
     
+    // Ensure all critical overhead keys exist
+    $criticalKeys = ['designer', 'marketing', 'creative', 'pm', 'sosmed', 'freelance', 'operasional'];
+    foreach ($criticalKeys as $ck) {
+        if (!isset($oh[$ck]) || $oh[$ck] === null) {
+            $val = $getOh($ck);
+            $oh[$ck] = ($val !== null) ? $val : 0;
+        }
+    }
+    
     $oh['total'] = $sum ?: ($getOh('total') ?? $getOh('totaloverheadbulanan') ?? 73586000);
     $allSettings['oh'] = json_encode($oh);
     

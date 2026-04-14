@@ -22,6 +22,12 @@ if (!OH.total || OH.total === 0) {
 Object.keys(OH).forEach(key => {
     OH[key] = typeof OH[key] === 'number' ? OH[key] : parseInt(OH[key]) || 0;
 });
+
+// Ensure operasional has a value
+if (!OH.operasional || OH.operasional === 0) {
+    OH.operasional = OH.ops || DEF_OH.operasional || 0;
+}
+
 let CETAK_F = DB_SETTINGS['cetak_f'] ? JSON.parse(DB_SETTINGS['cetak_f']) : {handy:1.0, minimal:0.95, large:1.15};
 let ALC_F = DB_SETTINGS['alc_f'] ? JSON.parse(DB_SETTINGS['alc_f']) : {ebook:0.72, editcetak:0.62, desain:0.22, cetakonly:0.30};
 
@@ -107,8 +113,14 @@ let curFSPkg='handy', curAnPkg='handy';
 // ============================================================
 // HELPERS
 // ============================================================
-const fmt = n => 'Rp'+Math.round(n).toLocaleString('id-ID');
-const fmtM = n => n>=1000000?'Rp'+(n/1000000).toFixed(1)+'jt':fmt(n);
+const fmt = n => {
+  const val = parseInt(n) || 0;
+  return 'Rp'+Math.round(val).toLocaleString('id-ID');
+};
+const fmtM = n => {
+  const val = parseInt(n) || 0;
+  return val>=1000000?'Rp'+(val/1000000).toFixed(1)+'jt':fmt(val);
+};
 function getTier(tiers,qty){for(const[lo,hi,v]of tiers)if(qty>=lo&&qty<=hi)return v;return tiers[tiers.length-1][2]}
 function getFSPrice(pkg,siswa){for(const[lo,hi,h,p]of FS[pkg])if(siswa>=lo&&siswa<=hi)return{harga:h,pages:p};return siswa<30?{harga:FS[pkg][0][2],pages:FS[pkg][0][3]}:{harga:FS[pkg][FS[pkg].length-1][2],pages:FS[pkg][FS[pkg].length-1][3]}}
 function getFSPageForSiswa(pkg,siswa){return getFSPrice(pkg,siswa).pages}
@@ -406,10 +418,13 @@ function renderRingkasan(){
     <div class="m"><div class="ml">BEP (150 siswa)</div><div class="mv war">${bepP.toFixed(1)} proyek</div><div class="ms">min. proyek/bulan</div></div>
     <div class="m"><div class="ml">Gross Margin Avg</div><div class="mv suc">68–80%</div><div class="ms">full service, 30–150 siswa</div></div>
     <div class="m"><div class="ml">Net (3 proyek)</div><div class="mv suc">${fmtM(3*150*h150-3*150*c150-oh)}</div><div class="ms">estimasi @150 siswa</div></div>`;
-  const ohItems=[['Designer',OH.designer],['Marketing',OH.marketing],['Creative Prod.',OH.creative],['Project Mgr',OH.pm],['Social Media',OH.sosmed],['Freelance',OH.freelance],['Operasional',OH.operasional||OH.ops]];
+  const ohItems=[['Designer',OH.designer||0],['Marketing',OH.marketing||0],['Creative Prod.',OH.creative||0],['Project Mgr',OH.pm||0],['Social Media',OH.sosmed||0],['Freelance',OH.freelance||0],['Operasional',OH.operasional||0]];
   const mx=Math.max(...ohItems.map(x=>x[1]));
   const cols=['#2A6B8A','#C85B2A','#2D7A4A','#8A5F1A','#6B3A8A','#4A7A6B','#888'];
-  document.getElementById('oh-bars').innerHTML=ohItems.map(([l,v],i)=>`<div class="br"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:${v/mx*100}%;background:${cols[i]}"></div></div><div class="bv">${fmtM(v)}</div></div>`).join('');
+  document.getElementById('oh-bars').innerHTML=ohItems.map(([l,v],i)=>{
+    const val=parseInt(v)||0;
+    return `<div class="br"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:${mx>0?val/mx*100:0}%;background:${cols[i]}"></div></div><div class="bv">${fmtM(val)}</div></div>`;
+  }).join('');
   const komps=[['Foto+Stylist+Prop',30,'#C85B2A'],['Cetak+Shipping',25,'#2A6B8A'],['Desain Layout',20,'#2D7A4A'],['Editing Foto',15,'#8A5F1A'],['PM+Overhead',7,'#6B3A8A'],['E-Book',3,'#888']];
   document.getElementById('komp-bars').innerHTML=komps.map(([l,p,c])=>`<div class="br"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:${p}%;background:${c}"></div></div><div class="bv">${p}%</div></div>`).join('');
   let bepHTML='';
