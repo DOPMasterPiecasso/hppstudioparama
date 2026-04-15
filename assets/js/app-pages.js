@@ -178,8 +178,8 @@ function kalcUpdateCore(){
   });
 
   let basePB=0,baseFlat=0,baseLabel='';
-  if(cfg?.fs){const{harga}=getFSPrice(cfg.pkg,siswa);basePB=harga;baseLabel=`${fmt(harga)}/buku (${siswa} siswa)`}
-  else if(cfg?.bySiswa){const hB=getFSPrice('handy',siswa).harga;basePB=Math.max(cfg.minPerBuku||0,Math.round(hB*ALC_F[cfg.factor]));baseLabel=`${fmt(basePB)}/buku (${siswa} siswa)`}
+  if(cfg?.fs){const{harga}=getFSPrice(cfg.pkg,siswa);basePB=harga;baseLabel=`${fmt(harga)}/buku (${siswa} siswa) • ${hal} hal`}
+  else if(cfg?.bySiswa){const hB=getFSPrice('handy',siswa).harga;basePB=Math.max(cfg.minPerBuku||0,Math.round(hB*ALC_F[cfg.factor]));baseLabel=`${fmt(basePB)}/buku (${siswa} siswa) • ${hal} hal`}
   else if(cfg?.flat){baseFlat=(cfg.flat[0]+cfg.flat[1])/2;baseLabel=`${fmtM(cfg.flat[0])}${cfg.flat[0]!==cfg.flat[1]?' – '+fmtM(cfg.flat[1]):''} (flat/proyek)`}
 
   let addonPB=0,addonVid=0,addonRows='';
