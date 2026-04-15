@@ -116,7 +116,6 @@ include __DIR__ . '/../includes/header.php';
       <button class="btn bp bsm" onclick="saveOH()" style="font-weight:600">💾 Simpan Overhead</button>
       <button class="btn bs bsm" onclick="resetOH()">↺ Reset ke Default</button>
       <span id="ov-status" style="font-size:12px;color:var(--success);display:none;margin-left:auto">✓ Tersimpan ke server</span>
-      <span id="ov-unsaved" style="font-size:12px;color:var(--warning);display:none;margin-left:auto">⚠ Ada perubahan belum tersimpan</span>
     </div>
 
     <!-- Total Display -->
@@ -397,7 +396,7 @@ include __DIR__ . '/../includes/header.php';
   </div>
 
   <!-- ===== PAYMENT TERMS SECTION ===== -->
-  <div class="card mb16">
+  <div class="card mb16" style="display:none">
     <div class="ph"><div class="pt" style="color:#9B59B6">Syarat Pembayaran</div><div class="ps">Kelola opsi pembayaran untuk penawaran dan proyek — DP, cicilan, atau pembayaran penuh</div></div>
     <div class="note grad mb16">💳 Kelola syarat pembayaran yang tersedia untuk penawaran proyek Anda. Setiap syarat mencakup persentase DP, deskripsi, dan warna penanda.</div>
 
@@ -574,10 +573,8 @@ async function saveOH() {
     try {
         console.log('=== saveOH() STARTED ===');
         
-        // Hide unsaved indicator, show loading
-        const unsavedEl = document.getElementById('ov-unsaved');
+        // Show loading indicator
         const savedEl = document.getElementById('ov-status');
-        if (unsavedEl) unsavedEl.style.display = 'none';
         if (savedEl) savedEl.textContent = '⏳ Menyimpan...';
         if (savedEl) savedEl.style.display = 'block';
         
@@ -679,11 +676,9 @@ function updateOHTotal() {
     });
     document.getElementById('oh-total').textContent = 'Rp ' + total.toLocaleString('id-ID');
     
-    // Show "unsaved changes" indicator
-    const unsavedEl = document.getElementById('ov-unsaved');
+    // Hide saved status indicator
     const savedEl = document.getElementById('ov-status');
-    if (unsavedEl && savedEl) {
-        unsavedEl.style.display = 'block';
+    if (savedEl) {
         savedEl.style.display = 'none';
     }
     console.log('Total updated:', total);
@@ -720,8 +715,6 @@ function editOHItem(name) {
     // Update on input change - show unsaved indicator
     input.addEventListener('input', () => {
         console.log('Input changed for', name, ':', input.value);
-        const unsavedEl = document.getElementById('ov-unsaved');
-        if (unsavedEl) unsavedEl.style.display = 'block';
     });
     
     // Handle Enter key to close edit
