@@ -1,332 +1,507 @@
 <?php
+/**
+ * api/pdf.php — Penawaran HTML Print View
+ * Tampilan sama persis dengan penawaran_parama_template.html
+ * Gunakan browser Print → Save as PDF
+ */
 session_start();
 require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../auth/AuthMiddleware.php';
-require_once __DIR__ . '/../vendor/autoload.php';
 
-$db = getDB();
+$user = requireAuth();
+
+// ── Ambil data penawaran dari MySQL ──────────────────────────
+$pdo = getMySQLConnection();
+if (!$pdo) { http_response_code(500); die('Database error'); }
 
 $id = (int)($_GET['id'] ?? 0);
 if (!$id) { http_response_code(400); die('ID penawaran diperlukan'); }
 
-// Get penawaran from DB
-$penawarans = $db->getPenawaran();
-$p = null;
-foreach ($penawarans as $penawaran) {
-    if ($penawaran['id'] == $id) {
-        $p = $penawaran;
-        break;
-    }
-}
+$stmt = $pdo->prepare("
+    SELECT p.*, u.name AS added_by_name
+    FROM penawaran p
+    LEFT JOIN users u ON p.added_by = u.id
+    WHERE p.id = ?
+");
+$stmt->execute([$id]);
+$p = $stmt->fetch(PDO::FETCH_ASSOC);
 if (!$p) { http_response_code(404); die('Penawaran tidak ditemukan'); }
 
-// Get user name
-$users = $db->getUsers();
-$userName = 'Parama Studio';
-foreach ($users as $user) {
-    if ($user['id'] == $p['added_by_id']) {
-        $userName = $user['name'];
-        break;
-    }
-}
-$p['added_by_name'] = $userName;
-
-// ============================================================
-// COLOR PALETTE — Mengikuti template CSS
-// Orange  : #c85b2a (212, 95, 42)
-// Navy    : #1c2e3d (28, 46, 61)
-// Beige   : #f7f5f0 (247, 245, 240)
-// Green   : #2d7a4a (45, 122, 74), #e8f5ed (232, 245, 237)
-// Brown   : #9c9890 (156, 152, 144)
-// Dark brn: #5c5750 (92, 87, 80)
-// Light b : #9db8c8 (157, 184, 200)
-// ============================================================
-
-class ParamaPDF extends FPDF {
-
-    private $logoPath = '';
-    private $pdfId = '';
-
-    function __construct() {
-        parent::__construct('P', 'mm', 'A4');
-        $logoPath = __DIR__ . '/../assets/logopdf/logo.png';
-        if (file_exists($logoPath)) {
-            $this->logoPath = $logoPath;
-        }
-        $this->pdfId = 'PS-' . date('Ymd') . '-' . str_pad($GLOBALS['p']['id'] ?? 0, 3, '0', STR_PAD_LEFT);
-    }
-
-    function Header() {
-        // Navy header background (no left bar)
-        $this->SetFillColor(28, 46, 61);
-        $this->Rect(0, 0, 210, 30, 'F');
-
-        // Logo - larger
-        if ($this->logoPath && file_exists($this->logoPath)) {
-            $this->Image($this->logoPath, 8, 4, 0, 22);
-        } else {
-            $this->SetFillColor(212, 95, 42);
-            $this->Rect(8, 4, 20, 22, 'F');
-            $this->SetFont('Arial', 'B', 11);
-            $this->SetTextColor(255, 255, 255);
-            $this->SetXY(10, 12);
-            $this->Cell(16, 8, 'PS', 0, 0, 'C');
-        }
-
-        // Company name
-        $this->SetXY(32, 5);
-        $this->SetFont('Arial', 'B', 14);
-        $this->SetTextColor(255, 255, 255);
-        $this->Cell(90, 6, 'Parama Studio', 0, 1, 'L');
-
-        // Tagline
-        $this->SetX(32);
-        $this->SetFont('Arial', '', 7.5);
-        $this->SetTextColor(157, 184, 200);
-        $this->Cell(90, 3.5, 'Yearbook & Graduation Agency', 0, 1, 'L');
-
-        // Contact
-        $this->SetX(32);
-        $this->SetFont('Arial', '', 6.5);
-        $this->Cell(90, 3, 'studioparama.com' . ' - ' . '+62 822 9400 8994' . ' - ' . 'Tangerang Selatan', 0, 1, 'L');
-
-        // Right: Document type
-        $this->SetXY(130, 8);
-        $this->SetFont('Arial', 'B', 7.5);
-        $this->SetTextColor(157, 184, 200);
-        $this->Cell(70, 3, 'PENAWARAN HARGA', 0, 1, 'R');
-
-        // Invoice number
-        $this->SetX(130);
-        $this->SetFont('Arial', 'B', 10);
-        $this->SetTextColor(212, 95, 42);
-        $this->Cell(70, 5, $this->pdfId, 0, 1, 'R');
-
-        // Date
-        $this->SetX(130);
-        $this->SetFont('Arial', '', 6.5);
-        $this->SetTextColor(157, 184, 200);
-        $this->Cell(70, 3.5, date('d F Y'), 0, 1, 'R');
-
-        $this->SetY(35);
-        $this->SetTextColor(0, 0, 0);
-    }
-
-    function Footer() {
-        $this->SetY(-14);
-        $this->SetFont('Arial', '', 6.5);
-        $this->SetTextColor(106, 138, 157);
-        $this->Cell(0, 3, 'PT. Parama Kreatif Sukses - Rawa Buntu Utara Blok G1 No.12 - Serpong, Tangerang Selatan 15810', 0, 1, 'L');
-        $this->SetX(120);
-        $this->Cell(90, 3, $this->pdfId . ' - Berlaku s/d ' . date('d M Y', strtotime('+14 days')), 0, 1, 'R');
-    }
-}
-
-// ============================================================
-// Helper
-// ============================================================
-function rupiah(int $n): string {
+// ── Helper functions ─────────────────────────────────────────
+function rp(int $n): string {
     return 'Rp ' . number_format($n, 0, ',', '.');
 }
-function decode($str): string {
-    return html_entity_decode(htmlspecialchars_decode($str ?? ''), ENT_QUOTES, 'UTF-8');
+function e(string $s): string {
+    return htmlspecialchars($s, ENT_QUOTES, 'UTF-8');
+}
+function tanggal(string $dateStr = ''): string {
+    $ts = $dateStr ? strtotime($dateStr) : time();
+    $bulan = ['Januari','Februari','Maret','April','Mei','Juni',
+              'Juli','Agustus','September','Oktober','November','Desember'];
+    return date('j', $ts) . ' ' . $bulan[date('n', $ts) - 1] . ' ' . date('Y', $ts);
 }
 
-// Status labels & warna
-$statLabels = ['deal' => 'DEAL', 'nego' => 'NEGOSIASI', 'pending' => 'PENDING', 'gagal' => 'TIDAK JADI'];
-$statColors = [
-    'deal'    => [45, 140, 90],
-    'nego'    => [26, 46, 80],
-    'pending' => [200, 140, 30],
-    'gagal'   => [180, 40, 40],
-];
-$sc = $statColors[$p['status']] ?? [100, 100, 100];
-$statusLabel = $statLabels[$p['status']] ?? strtoupper($p['status']);
+// ── Compose data ─────────────────────────────────────────────
+$docId     = 'PS-' . date('Ymd', strtotime($p['created_at'])) . '-' . str_pad($p['id'], 3, '0', STR_PAD_LEFT);
+$namaKlien = $p['nama_klien'] ?? '';
+$paket     = $p['paket'] ?? '';
+$siswa     = (int)($p['jumlah_siswa'] ?? 0);
+$harga     = (int)($p['harga'] ?? 0);
+$hargaDP   = (int)($p['harga_sebelum_diskon'] ?? 0);
+$catatan   = $p['catatan'] ?? '';
+$addedBy   = $p['added_by_name'] ?? 'Parama Studio';
+$tglDoc    = tanggal($p['created_at']);
+$tglExp    = tanggal(date('Y-m-d', strtotime($p['created_at'] . ' +14 days')));
+$perBuku   = $siswa > 0 ? round($harga / $siswa) : $harga;
 
-// ============================================================
-// BUILD PDF
-// ============================================================
-$pdf = new ParamaPDF();
-$pdf->AliasNbPages();
-$pdf->AddPage();
-$pdf->SetAutoPageBreak(true, 22);
-$pdf->SetMargins(8, 8, 8);
+// Logo sebagai base64 agar bisa di-print tanpa path issue
+$logoPath = __DIR__ . '/../assets/logopdf/logo.png';
+$logoBase64 = '';
+if (file_exists($logoPath)) {
+    $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
+}
 
-// ==== SECTION 1: DITUJUKAN KEPADA ====
-$pdf->Ln(2);
-
-// Beige background box
-$pdf->SetFillColor(247, 245, 240);
-$yStart = $pdf->GetY();
-$pdf->Rect(8, $yStart, 194, 18, 'F');
-
-// Content
-$pdf->SetXY(12, $yStart + 1);
-$pdf->SetFont('Arial', 'B', 6.5);
-$pdf->SetTextColor(156, 152, 144);
-$pdf->Cell(0, 2.5, 'DITUJUKAN KEPADA', 0, 1, 'L');
-
-$pdf->SetX(12);
-$pdf->SetFont('Arial', 'B', 13);
-$pdf->SetTextColor(28, 46, 61);
-$pdf->Cell(0, 5, decode($p['nama_klien'] ?? ''), 0, 1, 'L');
-
-$pdf->SetX(12);
-$pdf->SetFont('Arial', '', 7.5);
-$pdf->SetTextColor(92, 87, 80);
-$packageLabel = decode($p['paket'] ?? '');
-$siswaLabel = ($p['jumlah_siswa'] > 0 ? $p['jumlah_siswa'] . ' siswa' : '');
-$halamanLabel = (isset($p['halaman']) && $p['halaman'] > 0 ? $p['halaman'] . ' halaman' : '');
-$subtitle = implode(' - ', array_filter([$packageLabel, $siswaLabel, $halamanLabel]));
-$pdf->MultiCell(0, 3.5, $subtitle, 0, 'L');
-
-$pdf->SetY($yStart + 18.5);
-$pdf->Ln(1);
-
-// ==== SECTION 2: SPESIFIKASI BUKU ====
-$pdf->SetFont('Arial', 'B', 6.5);
-$pdf->SetTextColor(156, 152, 144);
-$pdf->Cell(0, 3, 'SPESIFIKASI BUKU', 0, 1, 'L');
-
-// Table header dengan navy
-$pdf->SetFillColor(28, 46, 61);
-$pdf->SetTextColor(255, 255, 255);
-$pdf->SetFont('Arial', 'B', 7.5);
-$pdf->Cell(50, 4, 'Keterangan', 0, 0, 'L', true);
-$pdf->Cell(150, 4, 'Spesifikasi', 0, 1, 'L', true);
-
-// Table rows (alternating beige)
-$altColor = true;
-$specs = [
-    'Jumlah Pesanan' => ($p['jumlah_siswa'] ?? 0) . ' Buku',
-    'Ukuran Buku' => 'Full Service — Sesuai paket',
-    'Halaman' => (isset($p['halaman']) ? $p['halaman'] . ' halaman' : '—'),
-    'Jenis Kertas' => 'Matte Paper 150gsm',
-    'Cover' => 'Hard Cover, AC 190gsm, Laminasi Doff',
-    'Packaging' => 'Slongsong',
-    'Finishing' => 'Binding Jahit',
-    'Jasa Termasuk' => 'Foto • Editing • Desain • Layout • E-Book',
-];
-
-foreach ($specs as $label => $value) {
-    if ($altColor) {
-        $pdf->SetFillColor(247, 245, 240);
-    } else {
-        $pdf->SetFillColor(255, 255, 255);
+// Parse catatan untuk bonus/add-on
+$addons = [];
+$bonusExtra = [];
+if ($catatan) {
+    foreach (explode('|', $catatan) as $part) {
+        $part = trim($part);
+        if (strpos($part, 'bonus:') === 0) {
+            $bonusExtra[] = trim(substr($part, 6));
+        } elseif ($part) {
+            $addons[] = $part;
+        }
     }
-    $pdf->SetTextColor(60, 60, 60);
-    $pdf->SetFont('Arial', '', 7.5);
-    $x = $pdf->GetX();
-    $y = $pdf->GetY();
-    $pdf->Cell(50, 5, $label, 1, 0, 'L', true);
-    $pdf->MultiCell(150, 5, $value, 1, 'L', $altColor);
-    $altColor = !$altColor;
 }
 
-$pdf->Ln(1);
+// Spesifikasi default berdasarkan paket
+$paketLower = strtolower($paket);
+$ukuranBuku = 'A4+ (22 × 30 cm)';
+$hasTipe = 'Handy Book A4+';
+if (strpos($paketLower, 'minimal') !== false) { $ukuranBuku = 'SQ (25 × 25 cm)'; $hasTipe = 'Minimal Book SQ'; }
+if (strpos($paketLower, 'large')   !== false) { $ukuranBuku = 'B4 (25 × 35 cm)'; $hasTipe = 'Large Book B4'; }
 
-// ==== SECTION 3: BONUS & FASILITAS ====
-$pdf->SetFont('Arial', 'B', 6.5);
-$pdf->SetTextColor(156, 152, 144);
-$pdf->Cell(0, 3, 'BONUS ' . chr(38) . ' FASILITAS', 0, 1, 'L');
+$subtitle = implode('  ·  ', array_filter([$paket, $siswa > 0 ? $siswa . ' siswa' : '']));
 
-// Green background
-$pdf->SetFillColor(232, 245, 237);
-$yStart = $pdf->GetY();
-$pdf->Rect(8, $yStart, 194, 18, 'F');
+$filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', $namaKlien) . '_' . $docId . '.pdf';
+?>
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title><?= e($docId) ?> — Penawaran Parama Studio</title>
+<style>
+/* ══════════════ RESET & BASE ══════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-$pdf->SetXY(12, $yStart + 0.5);
-$pdf->SetFont('Arial', 'B', 7.5);
-$pdf->SetTextColor(45, 122, 74);
-
-$bonusItems = [
-    'Studio Foto: Free portable studio delivery, Fashion Stylist, Properti sesuai tema',
-    'Buku Gratis: 4 pcs Buku Tahunan',
-    'Fotografi: Free Photoshoot Graduation (2 Fotografer)',
-    'Pengiriman: Gratis pengiriman area Jabodetabek',
-];
-
-foreach ($bonusItems as $item) {
-    $pdf->SetX(12);
-    $pdf->SetFont('Arial', 'B', 7.5);
-    $pdf->SetTextColor(45, 122, 74);
-    $pdf->Cell(3, 4, chr(10003), 0, 0, 'L');
-    $pdf->SetX(16);
-    $pdf->SetFont('Arial', '', 7);
-    $pdf->SetTextColor(26, 50, 40);
-    $pdf->MultiCell(178, 4, $item, 0, 'L');
+/* Screen styling */
+body {
+    font-family: Arial, sans-serif;
+    background: #e9e9e9;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 24px 16px 60px;
+    min-height: 100vh;
+    color: #1a1714;
 }
 
-$pdf->SetY($yStart + 18.5);
-$pdf->Ln(1);
+/* Toolbar */
+.toolbar {
+    width: 100%;
+    max-width: 595pt;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    background: #1c2e3d;
+    border-radius: 8px;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+.toolbar-left { font-size: 13px; color: rgba(255,255,255,0.7); }
+.toolbar-left b { color: #fff; font-size: 14px; }
+.toolbar-btns { display: flex; gap: 8px; }
+.btn-print {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 8px 18px; border-radius: 6px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; border: none;
+    font-family: Arial, sans-serif;
+    transition: all 0.15s;
+}
+.btn-primary { background: #c85b2a; color: #fff; }
+.btn-primary:hover { background: #a84820; }
+.btn-secondary { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
+.btn-secondary:hover { background: rgba(255,255,255,0.2); }
 
-// ==== SECTION 4: RINCIAN HARGA ====
-$pdf->SetFont('Arial', 'B', 6.5);
-$pdf->SetTextColor(156, 152, 144);
-$pdf->Cell(0, 3, 'RINCIAN HARGA', 0, 1, 'L');
+/* ══════════════ DOCUMENT (A4 proportion) ══════════════ */
+.doc {
+    width: 595pt;
+    min-height: 842pt;
+    background: #ffffff;
+    box-shadow: 0 4px 40px rgba(0,0,0,0.2);
+    border-radius: 2px;
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    overflow: hidden;
+}
+/* Body konten mengisi sisa ruang agar footer selalu di bawah */
+.doc-body { flex: 1; }
 
-// Price table
-$pdf->SetFont('Arial', '', 7.5);
-$pdf->SetTextColor(60, 60, 60);
-$basePrice = (int)($p['harga'] ?? 0);
-$perBuku = round($basePrice / max(1, ($p['jumlah_siswa'] ?? 1)));
+/* ── HEADER ── */
+.doc-header {
+    background: #1c2e3d;
+    padding: 16px 36px 14px;
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0 20px;
+    align-items: center;
+}
+.hd-logo img { width: 52px; height: 52px; object-fit: contain; display: block; }
+.hd-logo-placeholder {
+    width: 52px; height: 52px;
+    background: #c85b2a;
+    border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    color: #fff; font-weight: 700; font-size: 16px;
+}
+.hd-company { padding-left: 4px; }
+.hd-company .co-name { font-size: 18pt; font-weight: 700; color: #ffffff; line-height: 1.2; }
+.hd-company .co-tag { font-size: 8pt; color: #9db8c8; margin-top: 1px; }
+.hd-company .co-contact { font-size: 7pt; color: #6a8a9d; margin-top: 2px; }
+.hd-docinfo { text-align: right; }
+.hd-docinfo .di-label { font-size: 7pt; font-weight: 700; color: #9db8c8; letter-spacing: 0.06em; }
+.hd-docinfo .di-id { font-size: 12pt; font-weight: 700; color: #c85b2a; line-height: 1.3; }
+.hd-docinfo .di-date { font-size: 7.5pt; color: #9db8c8; }
 
-// Row 1: Base price
-$pdf->SetFillColor(255, 255, 255);
-$pdf->SetX(8);
-$pdf->Cell(132, 5, 'Harga Paket (' . ($p['jumlah_siswa'] ?? 0) . ' buku × Rp ' . number_format($perBuku, 0, ',', '.') . ')', 1, 0, 'L');
-$pdf->SetFont('Arial', 'B', 8);
-$pdf->Cell(60, 5, rupiah($basePrice), 1, 1, 'R');
+/* ── BODY ── */
+.doc-body { padding: 22px 36px 0; flex: 1; }
 
-// Row 2: Total box (navy + white text)
-$pdf->SetFillColor(28, 46, 61);
-$pdf->SetTextColor(255, 255, 255);
-$pdf->SetFont('Arial', 'B', 7.5);
-$pdf->SetX(8);
-$pdf->Cell(132, 6, 'TOTAL HARGA PENAWARAN', 1, 0, 'L', true);
-$pdf->SetTextColor(212, 95, 42);
-$pdf->SetFont('Arial', 'B', 10);
-$pdf->Cell(60, 6, rupiah($basePrice), 1, 1, 'R', true);
+/* Ditujukan kepada */
+.to-block {
+    display: flex;
+    margin-bottom: 18px;
+}
+.to-bar { width: 5px; background: #c85b2a; flex-shrink: 0; border-radius: 1px; }
+.to-content { background: #f7f5f0; flex: 1; padding: 10px 14px; }
+.to-label { font-size: 7pt; font-weight: 700; color: #9c9890; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
+.to-name { font-size: 15pt; font-weight: 700; color: #1c2e3d; line-height: 1.2; margin-bottom: 3px; }
+.to-sub { font-size: 8pt; color: #5c5750; }
 
-$pdf->Ln(1);
+/* Section label */
+.sec-label {
+    font-size: 7pt; font-weight: 700; color: #9c9890;
+    letter-spacing: 0.08em; text-transform: uppercase;
+    margin-bottom: 6px;
+}
 
-// ==== KETENTUAN / NOTES ====
-// Beige background
-$pdf->SetFillColor(240, 237, 230);
-$yStart = $pdf->GetY();
-$pdf->Rect(8, $yStart, 194, 8, 'F');
+/* Tabel spesifikasi */
+.spec-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 8pt; }
+.spec-table td { padding: 5px 8px; border: 0.5pt solid #dddddd; vertical-align: middle; }
+.spec-table tr:nth-child(odd) td { background: #f7f5f0; }
+.spec-table tr:nth-child(even) td { background: #ffffff; }
+.spec-table .spec-key { width: 33%; color: #5c5750; font-weight: 400; }
+.spec-table .spec-val { color: #1a1714; font-weight: 700; }
 
-$pdf->SetXY(12, $yStart + 0.5);
-$pdf->SetFont('Arial', '', 7);
-$pdf->SetTextColor(92, 87, 80);
-$pdf->MultiCell(186, 3.5, 'Harga berlaku untuk minimal ' . ($p['jumlah_siswa'] ?? 0) . ' pemesanan Buku Tahunan.' . "\n" . 
-                            'Harga bersifat penawaran dan dapat berubah sesuai kesepakatan.', 0, 'L');
+/* Bonus block */
+.bonus-block {
+    display: flex;
+    margin-bottom: 18px;
+}
+.bonus-bar { width: 5px; background: #2d7a4a; flex-shrink: 0; border-radius: 1px; }
+.bonus-content { background: #e8f5ed; flex: 1; padding: 10px 14px; }
+.bonus-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; font-size: 8pt; line-height: 1.5; }
+.bonus-item:last-child { margin-bottom: 0; }
+.bonus-check { color: #2d7a4a; font-weight: 700; font-size: 9pt; flex-shrink: 0; margin-top: 1px; }
+.bonus-text { color: #1a4a2e; }
+.bonus-text b { color: #2d7a4a; }
 
-$pdf->SetY($yStart + 8.5);
-$pdf->Ln(2);
+/* Rincian harga */
+.price-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 8.5pt; }
+.price-table td { padding: 6px 10px; border: 0.5pt solid #dddddd; }
+.price-table .pt-label { background: #ffffff; color: #5c5750; }
+.price-table .pt-val { background: #ffffff; color: #1a1714; font-weight: 700; text-align: right; width: 30%; }
+.price-total td { background: #1c2e3d !important; }
+.price-total .pt-label { color: #9db8c8 !important; font-weight: 700; font-size: 7.5pt; letter-spacing: 0.04em; }
+.price-total .pt-val { color: #ffffff !important; font-size: 12pt; font-weight: 700; }
+.price-sub { width: 30%; font-size: 7.5pt; text-align: right; }
+.price-sub td { background: #f0ede6; color: #5c5750; border-color: #dddddd; font-size: 7.5pt; }
 
-// ==== SIGNATURE SECTION ====
-$pdf->SetFont('Arial', '', 8);
-$pdf->SetTextColor(60, 60, 60);
+/* Notes */
+.notes-block {
+    display: flex;
+    margin-bottom: 20px;
+}
+.notes-bar { width: 5px; background: #9c9890; flex-shrink: 0; border-radius: 1px; }
+.notes-content { background: #f0ede6; flex: 1; padding: 8px 14px; font-size: 7.5pt; color: #5c5750; line-height: 1.7; }
+.notes-content li { list-style: disc; margin-left: 14px; }
 
-$pdf->Cell(98, 4, 'Hormat kami,', 0, 0, 'C');
-$pdf->Cell(94, 4, 'Disetujui oleh,', 0, 1, 'C');
+/* TTD / Signature */
+.sign-section { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 8px; }
+.sign-col { padding: 8px 10px; }
+.sign-label { font-size: 8pt; color: #5c5750; margin-bottom: 70px; }
+.sign-line { border-top: 0.5pt solid #5c5750; padding-top: 4px; }
+.sign-name { font-size: 9pt; font-weight: 700; color: #1a1714; }
+.sign-role { font-size: 7.5pt; color: #9c9890; }
+.sign-col-right { text-align: right; }
+.sign-col-right .sign-label { text-align: right; }
+.sign-slot { font-size: 9pt; color: #5c5750; font-family: Arial, sans-serif; }
+.sign-slot-role { font-size: 7.5pt; color: #9c9890; text-align: right; }
 
-$pdf->Ln(12);
+/* ── FOOTER ── */
+.doc-footer {
+    background: #1c2e3d;
+    padding: 10px 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 4px;
+    margin-top: auto;
+}
+.ft-address { font-size: 6.5pt; color: #6a8a9d; }
+.ft-validity { font-size: 6.5pt; color: #6a8a9d; text-align: right; }
 
-$pdf->SetFont('Arial', 'B', 8);
-$pdf->SetTextColor(28, 46, 61);
-$pdf->Cell(98, 3.5, 'Parama Studio', 0, 0, 'C');
+/* ══════════════ PRINT STYLES ══════════════ */
+@media print {
+    /* Paksa browser cetak background color */
+    * {
+        -webkit-print-color-adjust: exact !important;
+        print-color-adjust: exact !important;
+        color-adjust: exact !important;
+    }
 
-$pdf->SetTextColor(60, 60, 60);
-$pdf->SetFont('Arial', '', 7.5);
-$pdf->Cell(94, 3.5, '(  _______________________  )', 0, 1, 'C');
+    body {
+        background: #fff;
+        padding: 0;
+        margin: 0;
+        display: block;
+    }
 
-$pdf->SetFont('Arial', '', 7);
-$pdf->SetTextColor(156, 152, 144);
-$pdf->Cell(98, 3, decode($p['added_by_name'] ?? 'Parama Studio'), 0, 0, 'C');
-$pdf->Cell(94, 3, 'Nama & Stempel Klien', 0, 1, 'C');
+    .toolbar { display: none !important; }
 
-// Output PDF
-$filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', decode($p['nama_klien'] ?? 'klien')) . '.pdf';
-$pdf->Output('D', $filename);
+    .doc {
+        width: 210mm;
+        height: 297mm;
+        min-height: 297mm;
+        max-height: 297mm;
+        box-shadow: none;
+        border-radius: 0;
+        margin: 0;
+        overflow: hidden;
+    }
+
+    .doc-body { flex: 1; }
+
+    /* Pastikan header & footer navy tercetak */
+    .doc-header {
+        background: #1c2e3d !important;
+    }
+    .doc-footer {
+        background: #1c2e3d !important;
+    }
+
+    /* Pastikan tabel total navy tercetak */
+    .price-total td {
+        background: #1c2e3d !important;
+    }
+
+    /* Pastikan bonus hijau tercetak */
+    .bonus-content {
+        background: #e8f5ed !important;
+    }
+
+    /* Pastikan notes tercetak */
+    .notes-content {
+        background: #f0ede6 !important;
+    }
+
+    /* Pastikan spek tabel tercetak */
+    .spec-table tr:nth-child(odd) td {
+        background: #f7f5f0 !important;
+    }
+
+    /* to-content & bar */
+    .to-content {
+        background: #f7f5f0 !important;
+    }
+    .to-bar { background: #c85b2a !important; }
+    .bonus-bar { background: #2d7a4a !important; }
+    .notes-bar { background: #9c9890 !important; }
+
+    @page {
+        size: A4;
+        margin: 0;
+    }
+
+    a { text-decoration: none; color: inherit; }
+}
+</style>
+</head>
+<body>
+
+<!-- ── TOOLBAR (screen only) ── -->
+<div class="toolbar">
+    <div class="toolbar-left">
+        <b><?= e($docId) ?></b><br>
+        <?= e($namaKlien) ?>
+    </div>
+    <div class="toolbar-btns">
+        <button class="btn-print btn-secondary" onclick="history.back()">← Kembali</button>
+        <button class="btn-print btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
+    </div>
+</div>
+
+<!-- ══════════════ DOCUMENT ══════════════ -->
+<div class="doc">
+
+    <!-- ── HEADER ── -->
+    <div class="doc-header">
+        <div class="hd-logo">
+            <?php if ($logoBase64): ?>
+                <img src="<?= $logoBase64 ?>" alt="Parama Studio Logo">
+            <?php else: ?>
+                <div class="hd-logo-placeholder">PS</div>
+            <?php endif; ?>
+        </div>
+        <div class="hd-company">
+            <div class="co-name">Parama Studio</div>
+            <div class="co-tag">Yearbook &amp; Graduation Agency</div>
+            <div class="co-contact">studioparama.com &nbsp;·&nbsp; +62 822 9400 8994 &nbsp;·&nbsp; Tangerang Selatan</div>
+        </div>
+        <div class="hd-docinfo">
+            <div class="di-label">PENAWARAN HARGA</div>
+            <div class="di-id"><?= e($docId) ?></div>
+            <div class="di-date"><?= e($tglDoc) ?></div>
+        </div>
+    </div>
+
+    <!-- ── BODY ── -->
+    <div class="doc-body">
+
+        <!-- Ditujukan Kepada -->
+        <div class="to-block">
+            <div class="to-bar"></div>
+            <div class="to-content">
+                <div class="to-label">Ditujukan Kepada</div>
+                <div class="to-name"><?= e($namaKlien) ?></div>
+                <div class="to-sub"><?= e($subtitle) ?></div>
+            </div>
+        </div>
+
+        <!-- Spesifikasi Buku -->
+        <div class="sec-label">Spesifikasi Buku</div>
+        <table class="spec-table">
+            <tr><td class="spec-key">Jumlah Pesanan</td><td class="spec-val"><?= $siswa > 0 ? $siswa . ' Buku' : '—' ?></td></tr>
+            <tr><td class="spec-key">Ukuran Buku</td><td class="spec-val"><?= e($ukuranBuku) ?></td></tr>
+            <tr><td class="spec-key">Jenis Kertas</td><td class="spec-val">Matte Paper 150gsm</td></tr>
+            <tr><td class="spec-key">Cover</td><td class="spec-val">Hard Cover, AC 190gsm, Laminasi Doff</td></tr>
+            <tr><td class="spec-key">Packaging</td><td class="spec-val">Slongsong</td></tr>
+            <tr><td class="spec-key">Finishing</td><td class="spec-val">Binding Jahit</td></tr>
+            <tr><td class="spec-key">Jasa Termasuk</td><td class="spec-val">Foto Produksi (Personal, Konsep, Konten) &nbsp;·&nbsp; Desain Cover &amp; Layout &nbsp;·&nbsp; Editing Foto Terpilih</td></tr>
+        </table>
+
+        <!-- Bonus & Fasilitas -->
+        <div class="sec-label">Bonus &amp; Fasilitas</div>
+        <div class="bonus-block">
+            <div class="bonus-bar"></div>
+            <div class="bonus-content">
+                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b>Studio Foto:</b> Free portable studio delivery, Fashion Stylist, Properti sesuai tema</span></div>
+                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b>Buku Gratis:</b> 4 pcs Buku Tahunan</span></div>
+                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b>Fotografi:</b> Free Photoshoot Graduation (2 Fotografer)</span></div>
+                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b>Pengiriman:</b> Gratis biaya pengiriman area Jabodetabek</span></div>
+                <?php foreach ($bonusExtra as $b): ?>
+                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><?= e($b) ?></span></div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+
+        <!-- Rincian Harga -->
+        <div class="sec-label">Rincian Harga</div>
+        <table class="price-table">
+            <!-- Baris base price -->
+            <tr>
+                <td class="pt-label">
+                    Harga Buku Tahunan
+                    <?php if ($siswa > 0): ?>
+                        &nbsp;(<?= $siswa ?> buku × <?= rp($perBuku) ?>)
+                    <?php endif; ?>
+                </td>
+                <td class="pt-val"><?= rp($harga) ?></td>
+            </tr>
+
+            <!-- Add-on dari catatan -->
+            <?php foreach ($addons as $addon): ?>
+            <tr>
+                <td class="pt-label"><?= e(ucfirst($addon)) ?></td>
+                <td class="pt-val">—</td>
+            </tr>
+            <?php endforeach; ?>
+
+            <!-- Diskon jika ada -->
+            <?php if ($hargaDP > 0 && $hargaDP !== $harga): ?>
+            <tr>
+                <td class="pt-label" style="color:#a02020">Diskon</td>
+                <td class="pt-val" style="color:#a02020">− <?= rp($hargaDP - $harga) ?></td>
+            </tr>
+            <?php endif; ?>
+
+            <!-- Total baris navy -->
+            <tr class="price-total">
+                <td class="pt-label">TOTAL HARGA PENAWARAN</td>
+                <td class="pt-val"><?= rp($harga) ?></td>
+            </tr>
+        </table>
+
+
+
+        <!-- Ketentuan -->
+        <div class="notes-block" style="margin-top:12px">
+            <div class="notes-bar"></div>
+            <div class="notes-content">
+                <ul>
+                    <li>Harga berlaku untuk minimal <?= $siswa > 0 ? $siswa : '—' ?> pemesan Buku Tahunan.</li>
+                    <li>Harga bersifat penawaran dan dapat berubah sesuai kesepakatan.</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Tanda Tangan -->
+        <div class="sign-section">
+            <div class="sign-col">
+                <div class="sign-label">Hormat kami,</div>
+                <div class="sign-line">
+                    <div class="sign-name">Dhamar Singgih Wicaksono</div>
+                    <div class="sign-role">Marketing — Parama Studio</div>
+                </div>
+            </div>
+            <div class="sign-col sign-col-right">
+                <div class="sign-label">Disetujui oleh,</div>
+                <div class="sign-line">
+                    <div class="sign-slot">(________________________)</div>
+                    <div class="sign-slot-role">Nama &amp; Jabatan</div>
+                </div>
+            </div>
+        </div>
+
+    </div><!-- /doc-body -->
+
+    <!-- ── FOOTER ── -->
+    <div class="doc-footer">
+        <div class="ft-address">
+            PT. Parama Kreatif Sukses &nbsp;·&nbsp; Rawa Buntu Utara Blok G1 No.12, Serpong, Tangerang Selatan 15810
+        </div>
+        <div class="ft-validity">
+            <?= e($docId) ?> &nbsp;·&nbsp; Berlaku s/d <?= e($tglExp) ?>
+        </div>
+    </div>
+
+</div><!-- /doc -->
+
+</body>
+</html>

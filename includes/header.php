@@ -16,84 +16,58 @@ $isStaff   = $role === 'staff';
 <?php
 $allSettings = [];
 try {
-    $db = getDB();
-    
-    // Load all pricing data from JSON files
-    $settings = $db->getSettings();
-    
-    // Build OH structure for JavaScript
-    $overhead = $settings['overhead'] ?? [];
-    $ohSettings = $overhead;
-    // Helper to get value case-insensitively and ignoring common delimiters
-    $getOh = function($key) use ($ohSettings) {
-        $cleanKey = str_replace([' ', '_', '.', '-'], '', strtolower($key));
-        foreach ($ohSettings as $k => $v) {
+    // ── Load overhead dari MySQL (sumber kebenaran utama) ──
+    $pdo = getMySQLConnection();
+    if ($pdo) {
+        $masterData = new MySQLMasterData($pdo);
+        $ohFromDB = $masterData->getOverhead(); // ['designer'=>22000000, ..., 'total'=>...]
+        
+        // Normalisasi key agar kompatibel dengan JS (lowercase, tanpa spasi)
+        $oh = [];
+        foreach ($ohFromDB as $k => $v) {
             $cleanK = str_replace([' ', '_', '.', '-'], '', strtolower($k));
-            if ($cleanK === $cleanKey) return (int)$v;
+            $oh[$cleanK] = (int)$v;
         }
-        return null;
-    };
-
-    $oh = [];
-    $sum = 0;
-    foreach ($ohSettings as $k => $v) {
-        $cleanK = str_replace([' ', '_', '.', '-'], '', strtolower($k));
-        $val = (int)$v;
-        $oh[$cleanK] = $val;
-        if ($cleanK !== 'total' && $cleanK !== 'totaloverheadbulanan') {
-            $sum += $val;
+        // Hitung ulang total dari item aktual (bukan dari DB field total)
+        $ohTotal = 0;
+        foreach ($oh as $k => $v) {
+            if ($k !== 'total') $ohTotal += $v;
         }
+        $oh['total'] = $ohTotal;
+        $allSettings['oh'] = json_encode($oh);
+        
+        // Load pricing factors dari MySQL
+        $pricingFactors = $masterData->getPricingFactors();
+        $allSettings['cetak_f'] = json_encode($pricingFactors['cetak'] ?? ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15]);
+        $allSettings['alc_f'] = json_encode($pricingFactors['alacarte'] ?? ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30]);
+        
+        // Full Service dari MySQL
+        $fsData = $masterData->getFullService();
+        $allSettings['fs'] = json_encode($fsData ?: ['handy' => [], 'minimal' => [], 'large' => []]);
+        
+        // Cetak Base dari MySQL
+        $cetakBase = $masterData->getCetakBase();
+        $allSettings['cetak_base'] = json_encode($cetakBase ?: []);
+        
+        // Graduation dari MySQL
+        $graduation = $masterData->getGraduation();
+        $allSettings['grad_packages'] = json_encode($graduation ?: ['packages' => [], 'addons' => [], 'cetak' => []]);
+        
+        // Add-ons: tetap dari MySQL via MySQLMasterData
+        $addons = $masterData->getAddons();
+        $allSettings['addon_data'] = json_encode($addons ?: []);
+    } else {
+        throw new Exception('MySQL connection not available');
     }
-
-    // Ensure common keys are present for compatibility with legacy code
-    $fixedKeys = ['marketing', 'creative', 'designer', 'pm', 'sosmed', 'freelance', 'ops', 'operasional'];
-    foreach ($fixedKeys as $fk) {
-        if (!isset($oh[$fk])) {
-            $val = $getOh($fk);
-            if ($val !== null) $oh[$fk] = $val;
-        }
-    }
     
-    // Ensure all critical overhead keys exist
-    $criticalKeys = ['designer', 'marketing', 'creative', 'pm', 'sosmed', 'freelance', 'operasional'];
-    foreach ($criticalKeys as $ck) {
-        if (!isset($oh[$ck]) || $oh[$ck] === null) {
-            $val = $getOh($ck);
-            $oh[$ck] = ($val !== null) ? $val : 0;
-        }
-    }
-    
-    $oh['total'] = $sum ?: ($getOh('total') ?? $getOh('totaloverheadbulanan') ?? 73586000);
-    $allSettings['oh'] = json_encode($oh);
-    
-    // Load pricing factors
-    $factors = $settings['pricing_factors'] ?? [];
-    $allSettings['cetak_f'] = json_encode($factors['cetak'] ?? ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15]);
-    $allSettings['alc_f'] = json_encode($factors['alacarte'] ?? ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30]);
-    
-    // Load Full Service prices
-    $fs = $settings['fullservice_pricing'] ?? [];
-    $allSettings['fs'] = json_encode($fs);
-    
-    // Load Add-ons
-    $addons = $db->getAddons();
-    $allSettings['addon_data'] = json_encode($addons);
-    
-    // Load Cetak Base
-    $cetakBase = $db->getCetakBase();
-    $allSettings['cetak_base'] = json_encode($cetakBase);
-    
-    // Load Graduation
-    $graduation = $db->getGraduation();
-    $allSettings['grad_packages'] = json_encode($graduation);
-    
-    // Also extract for PHP use in pages like pengaturan.php
+    // Extract untuk PHP use di pages
     $cetakF = json_decode($allSettings['cetak_f'], true);
-    $alcF = json_decode($allSettings['alc_f'], true);
+    $alcF   = json_decode($allSettings['alc_f'], true);
     
 } catch (Exception $e) {
-    // Fallback to default values if settings not available
-    $allSettings['oh'] = json_encode(['designer' => 20000000, 'marketing' => 15000000, 'creative' => 8000000, 'pm' => 8000000, 'sosmed' => 7000000, 'freelance' => 4000000, 'operasional' => 11586000, 'total' => 73586000]);
+    error_log('header.php DB load error: ' . $e->getMessage());
+    // Fallback ke default jika DB tidak bisa diakses
+    $allSettings['oh'] = json_encode(['designer' => 0, 'marketing' => 0, 'creative' => 0, 'pm' => 0, 'sosmed' => 0, 'freelance' => 0, 'operasional' => 0, 'total' => 0]);
     $allSettings['cetak_f'] = json_encode(['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15]);
     $allSettings['alc_f'] = json_encode(['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30]);
     $allSettings['fs'] = json_encode(['handy' => [], 'minimal' => [], 'large' => []]);
@@ -101,29 +75,12 @@ try {
     $allSettings['cetak_base'] = json_encode([]);
     $allSettings['grad_packages'] = json_encode(['packages' => [], 'addons' => [], 'cetak' => []]);
     
-    // Set PHP variables for fallback
     $cetakF = ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15];
-    $alcF = ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30];
+    $alcF   = ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30];
 }
 ?>
 <script>
 const DB_SETTINGS = <?= json_encode($allSettings) ?>;
-console.log('=== DB_SETTINGS LOADED ===');
-console.log('DB_SETTINGS.oh (raw):', DB_SETTINGS['oh']);
-try {
-    const ohObj = JSON.parse(DB_SETTINGS['oh']);
-    console.log('DB_SETTINGS.oh (parsed):', ohObj);
-    console.log('  - designer:', ohObj.designer);
-    console.log('  - marketing:', ohObj.marketing);
-    console.log('  - creative:', ohObj.creative);
-    console.log('  - pm:', ohObj.pm);
-    console.log('  - sosmed:', ohObj.sosmed);
-    console.log('  - freelance:', ohObj.freelance);
-    console.log('  - operasional:', ohObj.operasional, '(type:', typeof ohObj.operasional, ')');
-    console.log('  - total:', ohObj.total);
-} catch (e) {
-    console.error('Failed to parse DB_SETTINGS.oh:', e);
-}
 </script>
 <script>
 // Master Data API Helper — fetch dari master data terpusat

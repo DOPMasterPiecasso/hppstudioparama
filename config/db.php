@@ -377,43 +377,51 @@ class MySQLMasterData {
     
     // ========== OVERHEAD ==========
     public function getOverhead() {
-        $stmt = $this->pdo->query("SELECT name, amount FROM overhead WHERE active = 1 ORDER BY id");
+        $stmt = $this->pdo->query("SELECT category, amount FROM overhead ORDER BY id");
         $result = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $result[$row['name']] = (int)$row['amount'];
+            $result[$row['category']] = (int)$row['amount'];
         }
-        
-        // Add total
-        $totalStmt = $this->pdo->query("SELECT total_amount FROM overhead_total LIMIT 1");
-        $totalRow = $totalStmt->fetch(PDO::FETCH_ASSOC);
-        $result['total'] = $totalRow ? (int)$totalRow['total_amount'] : array_sum($result);
-        
+        $result['total'] = array_sum($result);
         return $result;
     }
     
     public function updateOverhead($data) {
+        error_log("=== updateOverhead START ===");
+        error_log("Data received: " . json_encode($data));
+        
         $this->pdo->beginTransaction();
         try {
-            // Update individual items
-            $stmt = $this->pdo->prepare("INSERT INTO overhead (name, amount) VALUES (?, ?) 
-                                        ON DUPLICATE KEY UPDATE amount = VALUES(amount)");
-            $total = 0;
+            // Delete all existing overhead items first
+            error_log("Step 1: DELETE FROM overhead");
+            $deleted = $this->pdo->exec("DELETE FROM overhead");
+            error_log("Deleted rows: " . $deleted);
             
-            foreach ($data as $name => $amount) {
-                if (strtolower($name) !== 'total') {
-                    $val = (int)$amount;
-                    $stmt->execute([$name, $val]);
-                    $total += $val;
+            // Insert only the items in the new data
+            error_log("Step 2: INSERT new items");
+            $stmt = $this->pdo->prepare("INSERT INTO overhead (category, amount) VALUES (?, ?)");
+            
+            $insertCount = 0;
+            foreach ($data as $category => $amount) {
+                if (strtolower($category) !== 'total') {
+                    error_log("  Inserting: $category = " . (int)$amount);
+                    $stmt->execute([$category, (int)$amount]);
+                    $insertCount++;
                 }
             }
-            
-            // Update total
-            $this->pdo->exec("DELETE FROM overhead_total");
-            $this->pdo->prepare("INSERT INTO overhead_total (total_amount) VALUES (?)")->execute([$total]);
+            error_log("Total inserted: " . $insertCount);
             
             $this->pdo->commit();
-            return $this->getOverhead();
+            error_log("Transaction committed successfully");
+            
+            $result = $this->getOverhead();
+            error_log("getOverhead() result: " . json_encode($result));
+            error_log("=== updateOverhead END ===");
+            
+            return $result;
         } catch (Exception $e) {
+            error_log("ERROR in updateOverhead: " . $e->getMessage());
+            error_log("Backtrace: " . $e->getTraceAsString());
             $this->pdo->rollBack();
             throw $e;
         }
@@ -421,47 +429,43 @@ class MySQLMasterData {
     
     // ========== PRICING FACTORS ==========
     public function getPricingFactors() {
-        $stmt = $this->pdo->query("SELECT category, factor_name, factor_value FROM pricing_factors WHERE 1=1 ORDER BY category, factor_name");
-        $result = [];
+        // Get cetak factors
+        $result = ['cetak' => [], 'alacarte' => []];
+        
+        $stmt = $this->pdo->query("SELECT package_type, factor FROM cetak_factors ORDER BY package_type");
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            if (!isset($result[$row['category']])) {
-                $result[$row['category']] = [];
-            }
-            $result[$row['category']][$row['factor_name']] = (float)$row['factor_value'];
+            $result['cetak'][$row['package_type']] = (float)$row['factor'];
         }
+        
+        // Get alacarte factors
+        $stmt = $this->pdo->query("SELECT package_code, factor FROM alacarte_factors ORDER BY package_code");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $result['alacarte'][$row['package_code']] = (float)$row['factor'];
+        }
+        
         return $result;
     }
     
     public function updateCetakFactors($data) {
-        return $this->updatePricingFactors('cetak', $data);
+        $stmt = $this->pdo->prepare("UPDATE cetak_factors SET factor = ? WHERE package_type = ?");
+        foreach ($data as $type => $factor) {
+            $stmt->execute([(float)$factor, $type]);
+        }
+        return $this->getPricingFactors()['cetak'];
     }
     
     public function updateAlaCarteFactors($data) {
-        return $this->updatePricingFactors('alacarte', $data);
-    }
-    
-    private function updatePricingFactors($category, $data) {
-        $stmt = $this->pdo->prepare("INSERT INTO pricing_factors (category, factor_name, factor_value) 
-                                    VALUES (?, ?, ?) 
-                                    ON DUPLICATE KEY UPDATE factor_value = VALUES(factor_value)");
-        
-        foreach ($data as $name => $value) {
-            $val = (float)$value;
-            // Convert percentage to decimal if needed (>1 means percentage)
-            if ($val > 1) {
-                $val = $val / 100;
-            }
-            $stmt->execute([$category, $name, $val]);
+        $stmt = $this->pdo->prepare("UPDATE alacarte_factors SET factor = ? WHERE package_code = ?");
+        foreach ($data as $code => $factor) {
+            $stmt->execute([(float)$factor, $code]);
         }
-        
-        return $this->getPricingFactors();
+        return $this->getPricingFactors()['alacarte'];
     }
     
-    // ========== FULL SERVICE ==========
+    // ========== FULL SERVICE (packages_fullservice) ==========
     public function getFullService() {
-        $stmt = $this->pdo->query("SELECT package_type, min_students, max_students, price_per_student, pages 
-                                  FROM fullservice_pricing WHERE active = 1 
-                                  ORDER BY package_type, min_students");
+        $stmt = $this->pdo->query("SELECT package_type, min_students, max_students, price_per_book, max_pages 
+                                  FROM packages_fullservice ORDER BY package_type, min_students");
         $result = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $pkg = $row['package_type'];
@@ -471,8 +475,8 @@ class MySQLMasterData {
             $result[$pkg][] = [
                 (int)$row['min_students'],
                 (int)$row['max_students'],
-                (int)$row['price_per_student'],
-                (int)$row['pages']
+                (int)$row['price_per_book'],
+                (int)$row['max_pages']
             ];
         }
         return $result;
@@ -482,10 +486,10 @@ class MySQLMasterData {
         $this->pdo->beginTransaction();
         try {
             // Delete existing and insert new
-            $this->pdo->exec("DELETE FROM fullservice_pricing");
+            $this->pdo->exec("DELETE FROM packages_fullservice");
             
-            $stmt = $this->pdo->prepare("INSERT INTO fullservice_pricing 
-                                        (package_type, min_students, max_students, price_per_student, pages) 
+            $stmt = $this->pdo->prepare("INSERT INTO packages_fullservice 
+                                        (package_type, min_students, max_students, price_per_book, max_pages) 
                                         VALUES (?, ?, ?, ?, ?)");
             
             foreach ($data as $pkg => $tiers) {
@@ -505,14 +509,15 @@ class MySQLMasterData {
     
     // ========== CETAK BASE ==========
     public function getCetakBase() {
-        $stmt = $this->pdo->query("SELECT min_students, max_students, price FROM cetak_base 
-                                  WHERE active = 1 ORDER BY min_students");
+        $stmt = $this->pdo->query("SELECT min_students, max_students, pages_count, base_price FROM cetak_base 
+                                  ORDER BY min_students");
         $result = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $result[] = [
-                (int)$row['min_students'],
-                (int)$row['max_students'],
-                (int)$row['price']
+                'lo' => (int)$row['min_students'],
+                'hi' => (int)$row['max_students'],
+                'pages' => [(int)$row['pages_count']],
+                'price' => (int)$row['base_price']
             ];
         }
         return $result;
@@ -521,14 +526,20 @@ class MySQLMasterData {
     public function updateCetakBase($data) {
         $this->pdo->beginTransaction();
         try {
+            // Delete existing and insert new
             $this->pdo->exec("DELETE FROM cetak_base");
             
-            $stmt = $this->pdo->prepare("INSERT INTO cetak_base (min_students, max_students, price) 
-                                        VALUES (?, ?, ?)");
+            $stmt = $this->pdo->prepare("INSERT INTO cetak_base (min_students, max_students, pages_count, base_price, range_label) 
+                                        VALUES (?, ?, ?, ?, ?)");
             
             foreach ($data as $tier) {
-                list($lo, $hi, $price) = $tier;
-                $stmt->execute([(int)$lo, (int)$hi, (int)$price]);
+                $lo = $tier['lo'] ?? 0;
+                $hi = $tier['hi'] ?? 0;
+                $price = $tier['price'] ?? 0;
+                $pages = is_array($tier['pages']) ? $tier['pages'][0] : $tier['pages'] ?? 1;
+                $label = "$lo–$hi siswa";
+                
+                $stmt->execute([$lo, $hi, $pages, $price, $label]);
             }
             
             $this->pdo->commit();
@@ -539,16 +550,19 @@ class MySQLMasterData {
         }
     }
     
-    // ========== ADD-ONS ==========
+    // ========== ADD-ONS (tbl_addons) ==========
     public function getAddons() {
-        $stmt = $this->pdo->query("SELECT name, price, unit, category FROM addons WHERE active = 1");
+        $stmt = $this->pdo->query("SELECT category, sub_id, name, type, price, min_qty, max_qty FROM tbl_addons ORDER BY category, sub_id");
         $result = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $result[] = [
+                'id' => $row['sub_id'],
                 'name' => $row['name'],
                 'price' => (int)$row['price'],
-                'unit' => $row['unit'],
-                'category' => $row['category']
+                'category' => $row['category'],
+                'type' => $row['type'],
+                'min_qty' => (int)$row['min_qty'],
+                'max_qty' => (int)$row['max_qty']
             ];
         }
         return $result;
@@ -557,17 +571,21 @@ class MySQLMasterData {
     public function updateAddons($data) {
         $this->pdo->beginTransaction();
         try {
-            $this->pdo->exec("DELETE FROM addons");
+            // Delete existing and insert new
+            $this->pdo->exec("DELETE FROM tbl_addons");
             
-            $stmt = $this->pdo->prepare("INSERT INTO addons (name, price, unit, category) 
-                                        VALUES (?, ?, ?, ?)");
+            $stmt = $this->pdo->prepare("INSERT INTO tbl_addons (category, sub_id, name, type, price, min_qty, max_qty) 
+                                        VALUES (?, ?, ?, ?, ?, ?, ?)");
             
             foreach ($data as $addon) {
                 $stmt->execute([
-                    $addon['name'],
-                    (int)$addon['price'],
-                    $addon['unit'] ?? 'item',
-                    $addon['category'] ?? 'misc'
+                    $addon['category'] ?? 'misc',
+                    $addon['id'] ?? $addon['sub_id'] ?? '',
+                    $addon['name'] ?? '',
+                    $addon['type'] ?? 'addon',
+                    (int)($addon['price'] ?? 0),
+                    (int)($addon['min_qty'] ?? 1),
+                    (int)($addon['max_qty'] ?? 999)
                 ]);
             }
             
@@ -582,35 +600,28 @@ class MySQLMasterData {
     // ========== GRADUATION ==========
     public function getGraduation() {
         $packages = [];
-        $stmt = $this->pdo->query("SELECT name, price, includes_book, includes_tshirt FROM graduation_packages WHERE active = 1");
+        $stmt = $this->pdo->query("SELECT package_key, name, price FROM packages_graduation ORDER BY display_order");
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $packages[] = [
+                'id' => $row['package_key'],
                 'name' => $row['name'],
-                'price' => (int)$row['price'],
-                'includes_book' => $row['includes_book'],
-                'includes_tshirt' => $row['includes_tshirt']
+                'price' => (int)$row['price']
             ];
         }
         
         $addons = [];
-        $stmt = $this->pdo->query("SELECT name, price, item_type FROM graduation_addons WHERE active = 1");
+        $stmt = $this->pdo->query("SELECT addon_key, name, price, addon_type FROM graduation_addons ORDER BY addon_key");
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $addons[] = [
+                'id' => $row['addon_key'],
                 'name' => $row['name'],
                 'price' => (int)$row['price'],
-                'type' => $row['item_type']
+                'type' => $row['addon_type']
             ];
         }
         
+        // Graduation cetak pricing
         $cetak = [];
-        $stmt = $this->pdo->query("SELECT min_qty, max_qty, price_per_unit FROM graduation_cetak WHERE active = 1");
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $cetak[] = [
-                (int)$row['min_qty'],
-                (int)$row['max_qty'],
-                (int)$row['price_per_unit']
-            ];
-        }
         
         return [
             'packages' => $packages,
@@ -621,56 +632,38 @@ class MySQLMasterData {
     
     // ========== PAYMENT TERMS ==========
     public function getPaymentTerms() {
-        $stmt = $this->pdo->query("SELECT term_name FROM payment_terms WHERE active = 1 ORDER BY id");
-        $result = [];
-        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $result[] = $row['term_name'];
-        }
-        return ['terms' => $result];
+        // No payment_terms table in current schema
+        // Return empty terms for now
+        return ['terms' => []];
     }
-    
-    // ========== UPDATE GRADUATION AND PAYMENT TERMS ==========
     
     public function updateGraduation($data) {
         $this->pdo->beginTransaction();
         try {
-            // Update packages
             if (isset($data['packages'])) {
-                $this->pdo->exec("DELETE FROM graduation_packages");
-                $stmt = $this->pdo->prepare("INSERT INTO graduation_packages (name, price, includes_book, includes_tshirt) 
-                                            VALUES (?, ?, ?, ?)");
+                $this->pdo->exec("DELETE FROM packages_graduation");
+                $stmt = $this->pdo->prepare("INSERT INTO packages_graduation (package_key, name, price) 
+                                            VALUES (?, ?, ?)");
                 foreach ($data['packages'] as $pkg) {
                     $stmt->execute([
-                        $pkg['name'],
-                        (int)$pkg['price'],
-                        $pkg['includes_book'] ?? 'No',
-                        $pkg['includes_tshirt'] ?? 'No'
+                        $pkg['id'] ?? '',
+                        $pkg['name'] ?? '',
+                        (int)($pkg['price'] ?? 0)
                     ]);
                 }
             }
             
-            // Update addons
             if (isset($data['addons'])) {
                 $this->pdo->exec("DELETE FROM graduation_addons");
-                $stmt = $this->pdo->prepare("INSERT INTO graduation_addons (name, price, item_type) 
-                                            VALUES (?, ?, ?)");
+                $stmt = $this->pdo->prepare("INSERT INTO graduation_addons (addon_key, name, price, addon_type) 
+                                            VALUES (?, ?, ?, ?)");
                 foreach ($data['addons'] as $addon) {
                     $stmt->execute([
-                        $addon['name'],
-                        (int)$addon['price'],
-                        $addon['type'] ?? 'misc'
+                        $addon['id'] ?? '',
+                        $addon['name'] ?? '',
+                        (int)($addon['price'] ?? 0),
+                        $addon['type'] ?? 'addon'
                     ]);
-                }
-            }
-            
-            // Update cetak
-            if (isset($data['cetak'])) {
-                $this->pdo->exec("DELETE FROM graduation_cetak");
-                $stmt = $this->pdo->prepare("INSERT INTO graduation_cetak (min_qty, max_qty, price_per_unit) 
-                                            VALUES (?, ?, ?)");
-                foreach ($data['cetak'] as $tier) {
-                    list($lo, $hi, $price) = $tier;
-                    $stmt->execute([(int)$lo, (int)$hi, (int)$price]);
                 }
             }
             
@@ -683,29 +676,8 @@ class MySQLMasterData {
     }
     
     public function updatePaymentTerms($data) {
-        // $data should be array of term names or wrapped in 'terms' key
-        $terms = is_array($data) && isset($data['terms']) ? $data['terms'] : $data;
-        
-        $this->pdo->beginTransaction();
-        try {
-            $this->pdo->exec("DELETE FROM payment_terms");
-            
-            $stmt = $this->pdo->prepare("INSERT INTO payment_terms (term_name) VALUES (?)");
-            foreach ($terms as $term) {
-                if (is_array($term)) {
-                    $term = $term['term_name'] ?? $term['name'] ?? '';
-                }
-                if (!empty($term)) {
-                    $stmt->execute([(string)$term]);
-                }
-            }
-            
-            $this->pdo->commit();
-            return $this->getPaymentTerms();
-        } catch (Exception $e) {
-            $this->pdo->rollBack();
-            throw $e;
-        }
+        // No payment_terms table in current schema
+        return $this->getPaymentTerms();
     }
 }
 

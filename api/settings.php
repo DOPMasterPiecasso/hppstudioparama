@@ -4,97 +4,107 @@ require_once __DIR__ . '/../config/db.php';
 require_once __DIR__ . '/../auth/AuthMiddleware.php';
 
 $user = requireAuth();
-header('Content-Type: application/json');
+header('Content-Type: application/json; charset=utf-8');
 
 try {
-    $db = getDB();
+    // Get MySQL connection and master data handler
+    $pdo = getMySQLConnection();
+    if (!$pdo) {
+        throw new Exception('Database connection failed. Check DB configuration.');
+    }
+    $masterData = new MySQLMasterData($pdo);
+    
     $method = $_SERVER['REQUEST_METHOD'];
     
-    // GET — ambil semua settings
+    // GET — ambil semua settings dari database
     if ($method === 'GET') {
-        $settings = $db->getSettings();
-        $addons = $db->getAddons();
-        $cetakBase = $db->getCetakBase();
-        $graduation = $db->getGraduation();
+        $pricingFactors = $masterData->getPricingFactors();
         
         // Format response dengan struktur yang diharapkan app.js
         $response = [
-            'overhead' => $settings['overhead'] ?? [],
-            'cetak_f' => $settings['pricing_factors']['cetak'] ?? ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15],
-            'alc_f' => $settings['pricing_factors']['alacarte'] ?? ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30],
-            'cetak_base' => is_array($cetakBase) ? array_values($cetakBase) : [],
-            'fs_prices' => $settings['fullservice_pricing'] ?? [],
-            'grad_packages' => $graduation['packages'] ?? [],
-            'grad_addons' => $graduation['addons'] ?? [],
-            'grad_cetak' => $graduation['cetak'] ?? [],
-            'addon_data' => $addons,
+            'overhead' => $masterData->getOverhead(),
+            'cetak_f' => $pricingFactors['cetak'] ?? ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15],
+            'alc_f' => $pricingFactors['alacarte'] ?? ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30],
+            'cetak_base' => $masterData->getCetakBase(),
+            'fs_prices' => $masterData->getFullService(),
+            'grad_packages' => $masterData->getGraduation()['packages'] ?? [],
+            'grad_addons' => $masterData->getGraduation()['addons'] ?? [],
+            'grad_cetak' => $masterData->getGraduation()['cetak'] ?? [],
+            'addon_data' => $masterData->getAddons(),
+            'payment_terms' => $masterData->getPaymentTerms(),
+            'source' => 'MySQL Database'
         ];
         
-        echo json_encode(['data' => $response]);
+        echo json_encode(['success' => true, 'data' => $response], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         exit;
     }
     
-    // POST — update settings
+    // POST — update settings dan save ke database
     if ($method === 'POST') {
         requireRole('admin', 'manager');
         
         $body = json_decode(file_get_contents('php://input'), true) ?? [];
-        $settings = $db->getSettings();
+        $updates = [];
         
-        // Handle each setting type
+        // Update overhead
         if (isset($body['overhead'])) {
-            $settings['overhead'] = $body['overhead'];
+            $masterData->updateOverhead($body['overhead']);
+            $updates[] = 'overhead';
         }
         
+        // Update cetak factors
         if (isset($body['cetak_f'])) {
-            $settings['pricing_factors']['cetak'] = $body['cetak_f'];
+            $masterData->updateCetakFactors($body['cetak_f']);
+            $updates[] = 'cetak_factors';
         }
         
+        // Update alacarte factors
         if (isset($body['alc_f'])) {
-            $settings['pricing_factors']['alacarte'] = $body['alc_f'];
+            $masterData->updateAlaCarteFactors($body['alc_f']);
+            $updates[] = 'alacarte_factors';
         }
         
+        // Update cetak base
         if (isset($body['cetak_base'])) {
-            $cetakData = $body['cetak_base'];
-            if (is_array($cetakData) && !empty($cetakData)) {
-                // Re-index the cetak base data and save to cetak_base.json
-                $formattedCetak = [];
-                foreach ($cetakData as $item) {
-                    $formattedCetak[] = [
-                        'lo' => $item['lo'] ?? 0,
-                        'hi' => $item['hi'] ?? 0,
-                        'label' => $item['label'] ?? '',
-                        'pages' => $item['pages'] ?? []
-                    ];
-                }
-                $db->saveFile('cetak_base.json', $formattedCetak);
-            } elseif ($body['cetak_base'] === null) {
-                // Reset to default
-                $db->saveFile('cetak_base.json', []);
-            }
+            $masterData->updateCetakBase($body['cetak_base']);
+            $updates[] = 'cetak_base';
         }
         
+        // Update full service pricing
         if (isset($body['fs_prices'])) {
-            $settings['fullservice_pricing'] = $body['fs_prices'];
+            $masterData->updateFullService($body['fs_prices']);
+            $updates[] = 'fullservice_prices';
         }
         
+        // Update graduation packages
         if (isset($body['grad_packages']) || isset($body['grad_addons']) || isset($body['grad_cetak'])) {
-            $graduation = $db->getGraduation();
-            if (isset($body['grad_packages'])) $graduation['packages'] = $body['grad_packages'];
-            if (isset($body['grad_addons'])) $graduation['addons'] = $body['grad_addons'];
-            if (isset($body['grad_cetak'])) $graduation['cetak'] = $body['grad_cetak'];
+            $graduationData = [];
+            if (isset($body['grad_packages'])) $graduationData['packages'] = $body['grad_packages'];
+            if (isset($body['grad_addons'])) $graduationData['addons'] = $body['grad_addons'];
+            if (isset($body['grad_cetak'])) $graduationData['cetak'] = $body['grad_cetak'];
             
-            $db->saveFile('graduation.json', $graduation);
+            $masterData->updateGraduation($graduationData);
+            $updates[] = 'graduation';
         }
         
+        // Update add-ons
         if (isset($body['addon_data'])) {
-            $db->saveFile('addons.json', $body['addon_data']);
+            $masterData->updateAddons($body['addon_data']);
+            $updates[] = 'addons';
         }
         
-        // Save main settings.json
-        $db->saveSettings($settings);
+        // Update payment terms
+        if (isset($body['payment_terms'])) {
+            $masterData->updatePaymentTerms($body['payment_terms']);
+            $updates[] = 'payment_terms';
+        }
         
-        echo json_encode(['success' => true, 'message' => 'Settings updated']);
+        echo json_encode([
+            'success' => true, 
+            'message' => 'Settings updated: ' . implode(', ', $updates),
+            'updates' => $updates,
+            'source' => 'MySQL Database'
+        ], JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
         exit;
     }
     

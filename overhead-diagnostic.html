@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Overhead Diagnostic</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background: #f5f5f5; }
+        .card { background: white; padding: 15px; margin-bottom: 15px; border-radius: 5px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .success { color: green; background: #e8f5e9; padding: 10px; border-radius: 3px; margin: 10px 0; }
+        .error { color: red; background: #ffebee; padding: 10px; border-radius: 3px; margin: 10px 0; }
+        .warning { color: orange; background: #fff3e0; padding: 10px; border-radius: 3px; margin: 10px 0; }
+        input { padding: 8px; margin: 5px; border: 1px solid #ddd; border-radius: 3px; }
+        button { padding: 8px 15px; background: #2196F3; color: white; border: none; border-radius: 3px; cursor: pointer; }
+        button:hover { background: #1976D2; }
+        pre { background: #f5f5f5; padding: 10px; border-radius: 3px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background: #f5f5f5; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <h1>Overhead Database Diagnostic Tool</h1>
+    
+    <div class="card">
+        <h2>1. Current Database State</h2>
+        <button onclick="loadDBState()">🔄 Reload from Database</button>
+        <div id="db-state"></div>
+    </div>
+
+    <div class="card">
+        <h2>2. Test Add New Item</h2>
+        <input type="text" id="test-name" placeholder="Item name (e.g., TestItem)" value="TestItem">
+        <input type="number" id="test-value" placeholder="Value Rp" value="1000000">
+        <button onclick="testAddItem()">➕ Add & Test Save</button>
+        <div id="test-result"></div>
+    </div>
+
+    <div class="card">
+        <h2>3. Test Delete Item</h2>
+        <select id="item-to-delete">
+            <option>Select an item to delete...</option>
+        </select>
+        <button onclick="testDeleteItem()">➖ Delete & Test Save</button>
+        <div id="delete-result"></div>
+    </div>
+
+    <div class="card">
+        <h2>4. API Response Log</h2>
+        <button onclick="clearLog()">Clear Log</button>
+        <div id="log"></div>
+    </div>
+
+    <script>
+        const LOG_LIMIT = 10;
+        let postLog = [];
+
+        function log(msg, type = 'info') {
+            const timestamp = new Date().toLocaleTimeString();
+            const logEntry = `[${timestamp}] ${msg}`;
+            postLog.push( { msg: logEntry, type });
+            if (postLog.length > LOG_LIMIT) postLog.shift();
+            
+            const logDiv = document.getElementById('log');
+            logDiv.innerHTML = postLog.map(e => `<p style="color: ${e.type === 'error' ? 'red' : e.type === 'success' ? 'green' : 'black'}">${e.msg}</p>`).join('');
+        }
+
+        function clearLog() { postLog = []; document.getElementById('log').innerHTML = ''; }
+
+        async function loadDBState() {
+            try {
+                log('Fetching database state...');
+                const response = await fetch('/api/master-data.php?action=get_overhead');
+                const result = await response.json();
+                
+                if (result.success) {
+                    const data = result.data;
+                    let html = '<table><tr><th>Item</th><th>Value (Rp)</th></tr>';
+                    for (let key in data) {
+                        if (key !== 'total') {
+                            html += `<tr><td>${key}</td><td>${data[key].toLocaleString('id-ID')}</td></tr>`;
+                        }
+                    }
+                    html += `<tr style="background: #f0f0f0;"><th>TOTAL</th><th>Rp ${data.total.toLocaleString('id-ID')}</th></tr></table>`;
+                    
+                    document.getElementById('db-state').innerHTML = html;
+                    
+                    // Update delete dropdown
+                    const select = document.getElementById('item-to-delete');
+                    select.innerHTML = '<option>Select an item to delete...</option>';
+                    for (let key in data) {
+                        if (key !== 'total') {
+                            select.innerHTML += `<option value="${key}">${key} (Rp ${data[key].toLocaleString('id-ID')})</option>`;
+                        }
+                    }
+                    
+                    log(`Loaded ${Object.keys(data).length - 1} items from database`, 'success');
+                } else {
+                    document.getElementById('db-state').innerHTML = `<div class="error">Error: ${result.error}</div>`;
+                    log(`Error loading data: ${result.error}`, 'error');
+                }
+            } catch (e) {
+                document.getElementById('db-state').innerHTML = `<div class="error">Network error: ${e.message}</div>`;
+                log(`Network error: ${e.message}`, 'error');
+            }
+        }
+
+        async function testAddItem() {
+            const name = document.getElementById('test-name').value.trim();
+            const value = parseInt(document.getElementById('test-value').value);
+            
+            if (!name || !value || value <= 0) {
+                log('Validation failed: name and value required', 'error');
+                document.getElementById('test-result').innerHTML = '<div class="error">Name and positive value required</div>';
+                return;
+            }
+
+            try {
+                log(`TEST: Adding "${name}" = Rp ${value.toLocaleString('id-ID')}...`);
+                
+                // Get current items
+                let currentResponse = await fetch('/api/master-data.php?action=get_overhead');
+                let currentData = await currentResponse.json();
+                if (!currentData.success) throw new Error(currentData.error);
+                
+                let items = { ...currentData.data };
+                delete items.total;
+                items[name] = value;
+                
+                // Send update
+                const updateResponse = await fetch('/api/master-data.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'overhead', data: items })
+                });
+                const updateResult = await updateResponse.json();
+                
+                if (updateResult.success) {
+                    log(`✓ Item added successfully`, 'success');
+                    
+                    // Verify it's in the database
+                    let verifyResponse = await fetch('/api/master-data.php?action=get_overhead');
+                    let verifyData = await verifyResponse.json();
+                    
+                    if (verifyData.data[name] === value) {
+                        document.getElementById('test-result').innerHTML = `<div class="success">✓ SUCCESS: Item "${name}" added and verified in database!<br>Database now has ${Object.keys(verifyData.data).length - 1} items, total Rp ${verifyData.data.total.toLocaleString('id-ID')}</div>`;
+                        log(`✓ Verified: Item exists in database`, 'success');
+                        loadDBState(); // Refresh UI
+                    } else {
+                        document.getElementById('test-result').innerHTML = `<div class="error">✗ FAILED: Item added but NOT found in database after save!<br>This indicates a database persistence problem.</div>`;
+                        log(`✗ ERROR: Item not found after save`, 'error');
+                    }
+                } else {
+                    document.getElementById('test-result').innerHTML = `<div class="error">API Error: ${updateResult.error}</div>`;
+                    log(`API Error: ${updateResult.error}`, 'error');
+                }
+            } catch (e) {
+                document.getElementById('test-result').innerHTML = `<div class="error">Error: ${e.message}</div>`;
+                log(`Error: ${e.message}`, 'error');
+            }
+        }
+
+        async function testDeleteItem() {
+            const name = document.getElementById('item-to-delete').value;
+            if (!name || name.includes('Select')) {
+                log('No item selected', 'warning');
+                document.getElementById('delete-result').innerHTML = '<div class="warning">Select an item first</div>';
+                return;
+            }
+
+            try {
+                log(`TEST: Deleting "${name}"...`);
+                
+                // Get current items
+                let currentResponse = await fetch('/api/master-data.php?action=get_overhead');
+                let currentData = await currentResponse.json();
+                if (!currentData.success) throw new Error(currentData.error);
+                
+                let items = { ...currentData.data };
+                delete items.total;
+                delete items[name]; // DELETE IT
+                
+                // Send update
+                const updateResponse = await fetch('/api/master-data.php', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ type: 'overhead', data: items })
+                });
+                const updateResult = await updateResponse.json();
+                
+                if (updateResult.success) {
+                    log(`✓ Item deleted successfully`, 'success');
+                    
+                    // Verify it's gone from the database
+                    let verifyResponse = await fetch('/api/master-data.php?action=get_overhead');
+                    let verifyData = await verifyResponse.json();
+                    
+                    if (!verifyData.data[name]) {
+                        document.getElementById('delete-result').innerHTML = `<div class="success">✓ SUCCESS: Item "${name}" deleted and verified gone from database!<br>Database now has ${Object.keys(verifyData.data).length - 1} items, total Rp ${verifyData.data.total.toLocaleString('id-ID')}</div>`;
+                        log(`✓ Verified: Item deleted from database`, 'success');
+                        loadDBState(); // Refresh UI
+                    } else {
+                        document.getElementById('delete-result').innerHTML = `<div class="error">✗ FAILED: Item deleted from UI but REAPPEARED in database!<br>This is the bug you're experiencing.</div>`;
+                        log(`✗ ERROR: Item reappeared in database`, 'error');
+                    }
+                } else {
+                    document.getElementById('delete-result').innerHTML = `<div class="error">API Error: ${updateResult.error}</div>`;
+                    log(`API Error: ${updateResult.error}`, 'error');
+                }
+            } catch (e) {
+                document.getElementById('delete-result').innerHTML = `<div class="error">Error: ${e.message}</div>`;
+                log(`Error: ${e.message}`, 'error');
+            }
+        }
+
+        // Load on page open
+        window.onload = loadDBState;
+    </script>
+</body>
+</html>

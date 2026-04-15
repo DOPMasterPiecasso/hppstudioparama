@@ -7,80 +7,32 @@ $user = requireRole('admin', 'manager');
 $pageTitle = 'Pengaturan Harga — Parama Studio';
 $currentPage = 'pengaturan';
 
-// Load master data untuk ditampilkan di form
+// Load master data dari database
 try {
-    $db = getDB();
-    $settings = $db->getSettings();
-    $overhead = $settings['overhead'] ?? [];
-    $cetakF = $settings['pricing_factors']['cetak'] ?? ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15];
-    $alcF = $settings['pricing_factors']['alacarte'] ?? ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30];
+    // Koneksi ke database
+    $pdo = getMySQLConnection();
+    $masterData = new MySQLMasterData($pdo);
     
-    // Load graduation data
-    $graduationPath = __DIR__ . '/../data/graduation.json';
-    $graduation = [];
-    if (file_exists($graduationPath)) {
-        $graduation = json_decode(file_get_contents($graduationPath), true) ?? [];
-    }
-    $gradPackages = $graduation['packages'] ?? [];
-    $gradAddons = $graduation['addons'] ?? [];
-    $gradCetak = $graduation['cetak'] ?? [];
+    // Load semua data dari database
+    $overhead = $masterData->getOverhead();
+    $pricingFactors = $masterData->getPricingFactors();
+    $cetakF = $pricingFactors['cetak'] ?? ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15];
+    $alcF = $pricingFactors['alacarte'] ?? ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30];
     
-    // Load payment terms data
-    $paymentTermsPath = __DIR__ . '/../data/payment_terms.json';
-    $paymentTerms = [];
-    if (file_exists($paymentTermsPath)) {
-        $paymentTermsData = json_decode(file_get_contents($paymentTermsPath), true) ?? [];
-        $paymentTerms = $paymentTermsData['terms'] ?? [];
-    }
+    // Load graduation data dari database
+    $graduationData = $masterData->getGraduation();
+    $gradPackages = $graduationData['packages'] ?? [];
+    $gradAddons = $graduationData['addons'] ?? [];
+    $gradCetak = $graduationData['cetak'] ?? [];
+    
+    // Load payment terms data dari database
+    $paymentTermsData = $masterData->getPaymentTerms();
+    $paymentTerms = $paymentTermsData['terms'] ?? [];
     
 } catch (Exception $e) {
-    // Fallback to defaults
-    $ohSettings = [
-        'Designer' => 16700000,
-        'Marketing' => 12750000,
-        'Creative Prod.' => 7670000,
-        'Project Mgr' => 7200000,
-        'Social Media' => 6430000,
-        'Freelance' => 3204000,
-        'Operasional' => 11586000,
-    ];
-    // Helper to get value case-insensitively and ignoring spaces/underscores
-    $getOh = function($key) use ($ohSettings) {
-        $cleanKey = str_replace([' ', '_', '.', '-'], '', strtolower($key));
-        foreach ($ohSettings as $k => $v) {
-            $cleanK = str_replace([' ', '_', '.', '-'], '', strtolower($k));
-            if ($cleanK === $cleanKey) return $v;
-        }
-        return null;
-    };
-
-    $oh = [];
-    $sum = 0;
-    foreach ($ohSettings as $k => $v) {
-        $cleanK = str_replace([' ', '_', '.', '-'], '', strtolower($k));
-        $val = (int)$v;
-        $oh[$cleanK] = $val;
-        if ($cleanK !== 'total' && $cleanK !== 'totaloverheadbulanan') {
-            $sum += $val;
-        }
-    }
-
-    // Ensure common keys are present for compatibility
-    $fixedKeys = ['marketing', 'creative', 'designer', 'pm', 'sosmed', 'freelance', 'ops'];
-    foreach ($fixedKeys as $fk) {
-        if (!isset($oh[$fk])) {
-            $val = $getOh($fk);
-            if ($val !== null) $oh[$fk] = (int)$val;
-            else {
-                // Fallbacks
-                $defaults = ['marketing'=>12750000, 'creative'=>7670000, 'designer'=>16700000, 'pm'=>7200000, 'sosmed'=>6430000, 'freelance'=>3204000, 'ops'=>11586000];
-                $oh[$fk] = $defaults[$fk] ?? 0;
-            }
-        }
-    }
-    
-    $oh['total'] = $sum ?: ($getOh('total') ?? $getOh('totaloverheadbulanan') ?? 65540000);
-    $overhead = $oh;
+    // Fallback jika koneksi database gagal — tidak ada data hardcoded
+    error_log('pengaturan.php DB error: ' . $e->getMessage());
+    $overhead = [];
     $cetakF = ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15];
     $alcF = ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30];
     $gradPackages = [];
@@ -121,12 +73,13 @@ include __DIR__ . '/../includes/header.php';
     <!-- Total Display -->
     <div style="padding:12px;background:#fff9f0;border-radius:4px;border:1px solid var(--border);margin-bottom:16px">
       <div style="font-size:12px;color:var(--text2)">Total Overhead Bulanan</div>
-      <div id="oh-total" style="font-size:20px;font-weight:700;color:var(--accent)">Rp 0</div>
+      <div id="oh-total" style="font-size:20px;font-weight:700;color:var(--accent)">Rp <?= isset($overhead['total']) ? number_format($overhead['total'], 0, ',', '.') : '0' ?></div>
     </div>
     
     <!-- Daftar Overhead Items -->
     <div id="overhead-items" style="margin-bottom:16px">
       <?php foreach ($overhead as $name => $value): ?>
+        <?php if (strtolower($name) === 'total') continue; ?>
       <div class="overhead-item" data-name="<?= htmlspecialchars($name) ?>" data-value="<?= htmlspecialchars($value) ?>" style="display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;margin-bottom:8px;padding:10px;background:#fafafa;border-radius:4px">
         <div style="font-size:13px;font-weight:500"><?= htmlspecialchars($name) ?></div>
         <div class="oh-display" style="font-size:13px;font-weight:600;color:var(--accent);min-width:120px;text-align:right;cursor:pointer;padding:4px 0" onclick="editOHItem('<?= htmlspecialchars($name) ?>')">Rp <?= number_format($value, 0, ',', '.') ?></div>
@@ -596,7 +549,8 @@ async function saveOH() {
         document.querySelectorAll('.overhead-item').forEach(item => {
             const name = item.dataset.name;
             const value = parseInt(item.dataset.value || 0);
-            if (name) {
+            // SKIP 'total' - jangan disimpan ke database
+            if (name && name.toLowerCase() !== 'total') {
                 overhead[name] = value;
                 console.log('  Collected:', name, '=', value);
             }
@@ -626,7 +580,6 @@ async function saveOH() {
                 savedEl.style.color = 'var(--success)';
                 savedEl.style.display = 'block';
             }
-            if (unsavedEl) unsavedEl.style.display = 'none';
             
             // Update local JS state if available
             if (typeof OH !== 'undefined') {
@@ -671,10 +624,20 @@ function updateOHTotal() {
     console.log('updateOHTotal() called');
     let total = 0;
     document.querySelectorAll('.overhead-item').forEach(item => {
+        const name = item.dataset.name;
         const value = parseInt(item.dataset.value || 0);
-        total += value;
+        // Only sum items yang bukan 'total'
+        if (name && name.toLowerCase() !== 'total') {
+            total += value;
+            console.log('  Adding to total:', name, '=', value, ', running total =', total);
+        }
     });
-    document.getElementById('oh-total').textContent = 'Rp ' + total.toLocaleString('id-ID');
+    
+    const totalEl = document.getElementById('oh-total');
+    if (totalEl) {
+        totalEl.textContent = 'Rp ' + total.toLocaleString('id-ID');
+        console.log('Updated oh-total display:', total);
+    }
     
     // Hide saved status indicator
     const savedEl = document.getElementById('ov-status');
