@@ -32,155 +32,93 @@ foreach ($users as $user) {
 $p['added_by_name'] = $userName;
 
 // ============================================================
-// COLOR PALETTE — Mengikuti template penawaran Parama Studio
-// Navy  : 26, 46, 80
-// Orange: 212, 95, 38
-// Light : 245, 243, 240
-// Dark  : 40, 40, 40
-// Mid   : 100, 100, 100
-// White : 255, 255, 255
+// COLOR PALETTE — Mengikuti template CSS
+// Orange  : #c85b2a (212, 95, 42)
+// Navy    : #1c2e3d (28, 46, 61)
+// Beige   : #f7f5f0 (247, 245, 240)
+// Green   : #2d7a4a (45, 122, 74), #e8f5ed (232, 245, 237)
+// Brown   : #9c9890 (156, 152, 144)
+// Dark brn: #5c5750 (92, 87, 80)
+// Light b : #9db8c8 (157, 184, 200)
 // ============================================================
 
 class ParamaPDF extends FPDF {
 
-    // Logo path — isi dengan path logo jika sudah ada
     private $logoPath = '';
+    private $pdfId = '';
 
     function __construct() {
         parent::__construct('P', 'mm', 'A4');
-        // Coba load logo jika ada
-        $possiblePaths = [
-            __DIR__ . '/../assets/images/logo.png',
-            __DIR__ . '/../assets/images/logo.jpg',
-            __DIR__ . '/../assets/logo.png',
-            __DIR__ . '/../assets/logo.jpg',
-        ];
-        foreach ($possiblePaths as $path) {
-            if (file_exists($path)) {
-                $this->logoPath = $path;
-                break;
-            }
+        $logoPath = __DIR__ . '/../assets/logopdf/logo.png';
+        if (file_exists($logoPath)) {
+            $this->logoPath = $logoPath;
         }
+        $this->pdfId = 'PS-' . date('Ymd') . '-' . str_pad($GLOBALS['p']['id'] ?? 0, 3, '0', STR_PAD_LEFT);
     }
 
     function Header() {
-        // ---- HEADER ATAS: Navy background ----
-        $this->SetFillColor(26, 46, 80);
-        $this->Rect(0, 0, 210, 28, 'F');
+        // Navy header background (no left bar)
+        $this->SetFillColor(28, 46, 61);
+        $this->Rect(0, 0, 210, 30, 'F');
 
-        // ---- Accent bar: Orange strip bawah header ----
-        $this->SetFillColor(212, 95, 38);
-        $this->Rect(0, 28, 210, 4, 'F');
-
-        // Logo atau teks nama perusahaan
+        // Logo - larger
         if ($this->logoPath && file_exists($this->logoPath)) {
-            // Tampilkan logo jika ada
-            $this->Image($this->logoPath, 12, 4, 0, 20);
-            // Teks di samping logo
-            $this->SetXY(45, 5);
-            $this->SetFont('Arial', 'B', 16);
-            $this->SetTextColor(255, 255, 255);
-            $this->Cell(0, 8, 'PARAMA STUDIO', 0, 1, 'L');
-            $this->SetX(45);
-            $this->SetFont('Arial', '', 8);
-            $this->SetTextColor(180, 200, 230);
-            $this->Cell(0, 5, 'Photography & Yearbook Production', 0, 1, 'L');
+            $this->Image($this->logoPath, 8, 4, 0, 22);
         } else {
-            // Placeholder jika logo belum ada
-            // Kotak logo placeholder
-            $this->SetFillColor(212, 95, 38);
-            $this->Rect(10, 5, 18, 18, 'F');
+            $this->SetFillColor(212, 95, 42);
+            $this->Rect(8, 4, 20, 22, 'F');
             $this->SetFont('Arial', 'B', 11);
             $this->SetTextColor(255, 255, 255);
-            $this->SetXY(10, 9);
-            $this->Cell(18, 10, 'PS', 0, 0, 'C');
-
-            // Nama perusahaan
-            $this->SetXY(32, 5);
-            $this->SetFont('Arial', 'B', 17);
-            $this->SetTextColor(255, 255, 255);
-            $this->Cell(100, 9, 'PARAMA STUDIO', 0, 1, 'L');
-            $this->SetX(32);
-            $this->SetFont('Arial', '', 8);
-            $this->SetTextColor(180, 200, 230);
-            $this->Cell(100, 5, 'Photography & Yearbook Production', 0, 1, 'L');
-            $this->SetX(32);
-            $this->SetFont('Arial', '', 7);
-            $this->SetTextColor(150, 175, 210);
-            $this->Cell(100, 4, 'Instagram: @paramastudio  |  WA: 0812-XXXX-XXXX', 0, 1, 'L');
+            $this->SetXY(10, 12);
+            $this->Cell(16, 8, 'PS', 0, 0, 'C');
         }
 
-        // Kanan: label dokumen
-        $docLabel = 'SURAT PENAWARAN HARGA';
-        $this->SetXY(120, 6);
-        $this->SetFont('Arial', 'B', 10);
+        // Company name
+        $this->SetXY(32, 5);
+        $this->SetFont('Arial', 'B', 14);
         $this->SetTextColor(255, 255, 255);
-        $this->Cell(80, 6, $docLabel, 0, 1, 'R');
+        $this->Cell(90, 6, 'Parama Studio', 0, 1, 'L');
 
-        $this->SetX(120);
+        // Tagline
+        $this->SetX(32);
         $this->SetFont('Arial', '', 7.5);
-        $this->SetTextColor(180, 200, 230);
-        $this->Cell(80, 5, 'No: SP-' . str_pad($GLOBALS['p']['id'] ?? 0, 4, '0', STR_PAD_LEFT) . '/' . date('m/Y'), 0, 1, 'R');
-        $this->SetX(120);
-        $this->SetFont('Arial', '', 7.5);
-        $this->Cell(80, 5, 'Tanggal: ' . date('d F Y'), 0, 1, 'R');
+        $this->SetTextColor(157, 184, 200);
+        $this->Cell(90, 3.5, 'Yearbook & Graduation Agency', 0, 1, 'L');
 
-        // Reset posisi setelah header (32mm dari atas)
-        $this->SetY(38);
-        $this->SetTextColor(40, 40, 40);
+        // Contact
+        $this->SetX(32);
+        $this->SetFont('Arial', '', 6.5);
+        $this->Cell(90, 3, 'studioparama.com' . ' - ' . '+62 822 9400 8994' . ' - ' . 'Tangerang Selatan', 0, 1, 'L');
+
+        // Right: Document type
+        $this->SetXY(130, 8);
+        $this->SetFont('Arial', 'B', 7.5);
+        $this->SetTextColor(157, 184, 200);
+        $this->Cell(70, 3, 'PENAWARAN HARGA', 0, 1, 'R');
+
+        // Invoice number
+        $this->SetX(130);
+        $this->SetFont('Arial', 'B', 10);
+        $this->SetTextColor(212, 95, 42);
+        $this->Cell(70, 5, $this->pdfId, 0, 1, 'R');
+
+        // Date
+        $this->SetX(130);
+        $this->SetFont('Arial', '', 6.5);
+        $this->SetTextColor(157, 184, 200);
+        $this->Cell(70, 3.5, date('d F Y'), 0, 1, 'R');
+
+        $this->SetY(35);
+        $this->SetTextColor(0, 0, 0);
     }
 
     function Footer() {
-        $this->SetY(-18);
-        // Garis footer
-        $this->SetDrawColor(212, 95, 38);
-        $this->SetLineWidth(0.5);
-        $this->Line(10, $this->GetY(), 200, $this->GetY());
-        $this->SetLineWidth(0.2);
-        $this->Ln(3);
-        $this->SetFont('Arial', 'I', 7.5);
-        $this->SetTextColor(130, 130, 130);
-        $this->Cell(95, 5, 'Parama Studio — Dokumen ini dibuat secara digital pada ' . date('d/m/Y H:i'), 0, 0, 'L');
-        $this->Cell(95, 5, 'Halaman ' . $this->PageNo() . '/{nb}', 0, 0, 'R');
-    }
-
-    // Fungsi helper: baris info 2 kolom
-    function InfoRow($label, $value) {
-        $this->SetFont('Arial', 'B', 9);
-        $this->SetTextColor(100, 100, 100);
-        $this->Cell(48, 6, $label, 0, 0, 'L');
-        $this->SetFont('Arial', '', 9);
-        $this->SetTextColor(40, 40, 40);
-        $this->Cell(2, 6, ':', 0, 0);
-        $this->MultiCell(0, 6, $value, 0, 'L');
-    }
-
-    // Fungsi helper: header section
-    function SectionTitle($title) {
-        $this->Ln(5);
-        $this->SetFillColor(26, 46, 80);
-        $this->SetTextColor(255, 255, 255);
-        $this->SetFont('Arial', 'B', 9);
-        $this->Cell(0, 7, '  ' . strtoupper($title), 0, 1, 'L', true);
-        $this->SetTextColor(40, 40, 40);
-        $this->Ln(3);
-    }
-
-    // Fungsi helper: baris tabel harga
-    function PriceRow($label, $value, $bold = false, $color = null) {
-        if ($color) {
-            $this->SetTextColor($color[0], $color[1], $color[2]);
-        } else {
-            $this->SetTextColor(60, 60, 60);
-        }
-        if ($bold) {
-            $this->SetFont('Arial', 'B', 10);
-        } else {
-            $this->SetFont('Arial', '', 9.5);
-        }
-        $this->Cell(120, 7, $label, 0, 0, 'L');
-        $this->Cell(0, 7, $value, 0, 1, 'R');
-        $this->SetTextColor(40, 40, 40);
+        $this->SetY(-14);
+        $this->SetFont('Arial', '', 6.5);
+        $this->SetTextColor(106, 138, 157);
+        $this->Cell(0, 3, 'PT. Parama Kreatif Sukses - Rawa Buntu Utara Blok G1 No.12 - Serpong, Tangerang Selatan 15810', 0, 1, 'L');
+        $this->SetX(120);
+        $this->Cell(90, 3, $this->pdfId . ' - Berlaku s/d ' . date('d M Y', strtotime('+14 days')), 0, 1, 'R');
     }
 }
 
@@ -211,138 +149,184 @@ $statusLabel = $statLabels[$p['status']] ?? strtoupper($p['status']);
 $pdf = new ParamaPDF();
 $pdf->AliasNbPages();
 $pdf->AddPage();
-$pdf->SetAutoPageBreak(true, 25);
-$pdf->SetMargins(10, 10, 10);
+$pdf->SetAutoPageBreak(true, 22);
+$pdf->SetMargins(8, 8, 8);
 
-// ---- STATUS BADGE ----
-$pdf->SetFillColor($sc[0], $sc[1], $sc[2]);
-$pdf->SetTextColor(255, 255, 255);
-$pdf->SetFont('Arial', 'B', 9);
-$pdf->Rect(10, $pdf->GetY(), 190, 7, 'F');
-$pdf->SetXY(10, $pdf->GetY());
-$pdf->Cell(190, 7, '  STATUS: ' . $statusLabel, 0, 1, 'L');
-$pdf->Ln(5);
+// ==== SECTION 1: DITUJUKAN KEPADA ====
+$pdf->Ln(2);
 
-// ---- SECTION: DATA KLIEN ----
-$pdf->SectionTitle('Data Klien');
-
-$pdf->InfoRow('Nama Klien / Sekolah', decode($p['nama_klien'] ?? ''));
-$pdf->InfoRow('Paket Layanan', decode($p['paket'] ?? ''));
-$pdf->InfoRow('Jumlah Siswa', ($p['jumlah_siswa'] > 0 ? $p['jumlah_siswa'] . ' siswa' : '—'));
-$pdf->InfoRow('Tanggal Penawaran', date('d F Y', strtotime($p['created_at'] ?? 'now')));
-$pdf->InfoRow('Staf Parama', decode($p['added_by_name'] ?? 'Parama Studio'));
-
-// ---- SECTION: RINCIAN HARGA ----
-$pdf->SectionTitle('Rincian Harga');
-
-// Background box harga
+// Beige background box
+$pdf->SetFillColor(247, 245, 240);
 $yStart = $pdf->GetY();
-$pdf->SetFillColor(247, 246, 243);
-$pdf->Rect(10, $yStart, 190, 1, 'F'); // placeholder — diperluas nanti
+$pdf->Rect(8, $yStart, 194, 18, 'F');
 
-$hasDiskon = ($p['harga_sebelum_diskon'] > 0 && $p['harga_sebelum_diskon'] != $p['harga']);
+// Content
+$pdf->SetXY(12, $yStart + 1);
+$pdf->SetFont('Arial', 'B', 6.5);
+$pdf->SetTextColor(156, 152, 144);
+$pdf->Cell(0, 2.5, 'DITUJUKAN KEPADA', 0, 1, 'L');
 
-if ($hasDiskon) {
-    $selisih = (int)$p['harga_sebelum_diskon'] - (int)$p['harga'];
-    $pct = round($selisih / $p['harga_sebelum_diskon'] * 100);
-    $pdf->PriceRow('Harga Paket (sebelum diskon)', rupiah((int)$p['harga_sebelum_diskon']));
-    $pdf->PriceRow('Diskon (' . $pct . '%)', '- ' . rupiah($selisih), false, [180, 40, 40]);
-    // Garis pemisah
-    $pdf->SetDrawColor(200, 200, 200);
-    $pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
-    $pdf->Ln(3);
-}
-
-// Total harga — besar dan mencolok
-$pdf->SetFillColor(26, 46, 80);
-$pdf->Rect(10, $pdf->GetY(), 190, 12, 'F');
+$pdf->SetX(12);
 $pdf->SetFont('Arial', 'B', 13);
+$pdf->SetTextColor(28, 46, 61);
+$pdf->Cell(0, 5, decode($p['nama_klien'] ?? ''), 0, 1, 'L');
+
+$pdf->SetX(12);
+$pdf->SetFont('Arial', '', 7.5);
+$pdf->SetTextColor(92, 87, 80);
+$packageLabel = decode($p['paket'] ?? '');
+$siswaLabel = ($p['jumlah_siswa'] > 0 ? $p['jumlah_siswa'] . ' siswa' : '');
+$halamanLabel = (isset($p['halaman']) && $p['halaman'] > 0 ? $p['halaman'] . ' halaman' : '');
+$subtitle = implode(' - ', array_filter([$packageLabel, $siswaLabel, $halamanLabel]));
+$pdf->MultiCell(0, 3.5, $subtitle, 0, 'L');
+
+$pdf->SetY($yStart + 18.5);
+$pdf->Ln(1);
+
+// ==== SECTION 2: SPESIFIKASI BUKU ====
+$pdf->SetFont('Arial', 'B', 6.5);
+$pdf->SetTextColor(156, 152, 144);
+$pdf->Cell(0, 3, 'SPESIFIKASI BUKU', 0, 1, 'L');
+
+// Table header dengan navy
+$pdf->SetFillColor(28, 46, 61);
 $pdf->SetTextColor(255, 255, 255);
-$yPriceBox = $pdf->GetY();
-$pdf->SetXY(10, $yPriceBox);
-$pdf->Cell(110, 12, '  TOTAL HARGA', 0, 0, 'L');
-$pdf->SetTextColor(212, 95, 38); // orange untuk angka total
-$pdf->SetFont('Arial', 'B', 14);
-$pdf->Cell(90, 12, rupiah((int)($p['harga'] ?? 0)) . '  ', 0, 1, 'R');
-$pdf->SetTextColor(40, 40, 40);
-$pdf->Ln(4);
+$pdf->SetFont('Arial', 'B', 7.5);
+$pdf->Cell(50, 4, 'Keterangan', 0, 0, 'L', true);
+$pdf->Cell(150, 4, 'Spesifikasi', 0, 1, 'L', true);
 
-// ---- CATATAN / NEGOSIASI ----
-if (!empty($p['catatan'])) {
-    $catatanList = explode(' | ', decode($p['catatan']));
-    $pdf->SectionTitle('Catatan & Negosiasi');
-
-    foreach ($catatanList as $item) {
-        $item = trim($item);
-        if (!$item) continue;
-        $pdf->SetFont('Arial', '', 9);
-        $pdf->SetTextColor(60, 60, 60);
-        $pdf->SetX(14);
-        $pdf->MultiCell(180, 5.5, chr(183) . '  ' . $item, 0, 'L');
-    }
-    $pdf->Ln(2);
-}
-
-// ---- SYARAT & KETENTUAN ----
-$pdf->SectionTitle('Syarat & Ketentuan');
-$terms = [
-    'Penawaran ini berlaku selama 14 (empat belas) hari sejak tanggal diterbitkan.',
-    'Pembayaran DP minimal 50% dari total harga untuk konfirmasi proyek.',
-    'Pelunasan dilakukan maksimal 7 hari setelah serah terima hasil pekerjaan.',
-    'Revisi desain buku tahunan maksimal 3 (tiga) kali sesuai kontrak.',
-    'Pembatalan proyek setelah konfirmasi DP dikenakan biaya pembatalan sesuai kebijakan.',
-    'Harga dapat berubah jika ada perubahan spesifikasi yang disepakati bersama.',
+// Table rows (alternating beige)
+$altColor = true;
+$specs = [
+    'Jumlah Pesanan' => ($p['jumlah_siswa'] ?? 0) . ' Buku',
+    'Ukuran Buku' => 'Full Service — Sesuai paket',
+    'Halaman' => (isset($p['halaman']) ? $p['halaman'] . ' halaman' : '—'),
+    'Jenis Kertas' => 'Matte Paper 150gsm',
+    'Cover' => 'Hard Cover, AC 190gsm, Laminasi Doff',
+    'Packaging' => 'Slongsong',
+    'Finishing' => 'Binding Jahit',
+    'Jasa Termasuk' => 'Foto • Editing • Desain • Layout • E-Book',
 ];
-foreach ($terms as $i => $term) {
-    $pdf->SetFont('Arial', '', 8.5);
-    $pdf->SetTextColor(80, 80, 80);
-    $pdf->SetX(14);
-    $pdf->MultiCell(180, 5, ($i + 1) . '. ' . $term, 0, 'L');
+
+foreach ($specs as $label => $value) {
+    if ($altColor) {
+        $pdf->SetFillColor(247, 245, 240);
+    } else {
+        $pdf->SetFillColor(255, 255, 255);
+    }
+    $pdf->SetTextColor(60, 60, 60);
+    $pdf->SetFont('Arial', '', 7.5);
+    $x = $pdf->GetX();
+    $y = $pdf->GetY();
+    $pdf->Cell(50, 5, $label, 1, 0, 'L', true);
+    $pdf->MultiCell(150, 5, $value, 1, 'L', $altColor);
+    $altColor = !$altColor;
 }
 
-// ---- AREA TANDA TANGAN ----
-$pdf->Ln(8);
-$pdf->SetDrawColor(212, 95, 38);
-$pdf->SetLineWidth(0.4);
-$pdf->Line(10, $pdf->GetY(), 200, $pdf->GetY());
-$pdf->SetLineWidth(0.2);
-$pdf->Ln(6);
+$pdf->Ln(1);
 
-$pdf->SetFont('Arial', '', 9);
-$pdf->SetTextColor(80, 80, 80);
+// ==== SECTION 3: BONUS & FASILITAS ====
+$pdf->SetFont('Arial', 'B', 6.5);
+$pdf->SetTextColor(156, 152, 144);
+$pdf->Cell(0, 3, 'BONUS ' . chr(38) . ' FASILITAS', 0, 1, 'L');
 
-// Kiri: Hormat kami
-$pdf->Cell(95, 5, 'Hormat kami,', 0, 0, 'C');
-// Kanan: Disetujui oleh
-$pdf->Cell(95, 5, 'Disetujui oleh,', 0, 1, 'C');
+// Green background
+$pdf->SetFillColor(232, 245, 237);
+$yStart = $pdf->GetY();
+$pdf->Rect(8, $yStart, 194, 18, 'F');
 
-$pdf->Ln(18); // ruang tanda tangan
+$pdf->SetXY(12, $yStart + 0.5);
+$pdf->SetFont('Arial', 'B', 7.5);
+$pdf->SetTextColor(45, 122, 74);
 
-// Nama & jabatan Parama
-$pdf->SetFont('Arial', 'B', 9);
-$pdf->SetTextColor(26, 46, 80);
-$pdf->Cell(95, 5, 'Parama Studio', 0, 0, 'C');
+$bonusItems = [
+    'Studio Foto: Free portable studio delivery, Fashion Stylist, Properti sesuai tema',
+    'Buku Gratis: 4 pcs Buku Tahunan',
+    'Fotografi: Free Photoshoot Graduation (2 Fotografer)',
+    'Pengiriman: Gratis pengiriman area Jabodetabek',
+];
+
+foreach ($bonusItems as $item) {
+    $pdf->SetX(12);
+    $pdf->SetFont('Arial', 'B', 7.5);
+    $pdf->SetTextColor(45, 122, 74);
+    $pdf->Cell(3, 4, chr(10003), 0, 0, 'L');
+    $pdf->SetX(16);
+    $pdf->SetFont('Arial', '', 7);
+    $pdf->SetTextColor(26, 50, 40);
+    $pdf->MultiCell(178, 4, $item, 0, 'L');
+}
+
+$pdf->SetY($yStart + 18.5);
+$pdf->Ln(1);
+
+// ==== SECTION 4: RINCIAN HARGA ====
+$pdf->SetFont('Arial', 'B', 6.5);
+$pdf->SetTextColor(156, 152, 144);
+$pdf->Cell(0, 3, 'RINCIAN HARGA', 0, 1, 'L');
+
+// Price table
+$pdf->SetFont('Arial', '', 7.5);
 $pdf->SetTextColor(60, 60, 60);
-$pdf->Cell(95, 5, '(  ________________________________  )', 0, 1, 'C');
-$pdf->SetFont('Arial', 'I', 8);
-$pdf->SetTextColor(130, 130, 130);
-$pdf->Cell(95, 4, decode($p['added_by_name'] ?? 'Tim Parama Studio'), 0, 0, 'C');
-$pdf->Cell(95, 4, 'Nama & Stempel Klien', 0, 1, 'C');
+$basePrice = (int)($p['harga'] ?? 0);
+$perBuku = round($basePrice / max(1, ($p['jumlah_siswa'] ?? 1)));
 
-$pdf->Ln(3);
+// Row 1: Base price
+$pdf->SetFillColor(255, 255, 255);
+$pdf->SetX(8);
+$pdf->Cell(132, 5, 'Harga Paket (' . ($p['jumlah_siswa'] ?? 0) . ' buku × Rp ' . number_format($perBuku, 0, ',', '.') . ')', 1, 0, 'L');
+$pdf->SetFont('Arial', 'B', 8);
+$pdf->Cell(60, 5, rupiah($basePrice), 1, 1, 'R');
 
-// ---- PESAN PENUTUP ----
-$pdf->Ln(4);
-$pdf->SetFillColor(245, 243, 238);
-$pdf->SetDrawColor(212, 95, 38);
-$pdf->SetLineWidth(0.4);
-$closingY = $pdf->GetY();
-$pdf->Rect(10, $closingY, 190, 12, 'FD');
-$pdf->SetXY(10, $closingY);
-$pdf->SetFont('Arial', 'I', 8.5);
+// Row 2: Total box (navy + white text)
+$pdf->SetFillColor(28, 46, 61);
+$pdf->SetTextColor(255, 255, 255);
+$pdf->SetFont('Arial', 'B', 7.5);
+$pdf->SetX(8);
+$pdf->Cell(132, 6, 'TOTAL HARGA PENAWARAN', 1, 0, 'L', true);
+$pdf->SetTextColor(212, 95, 42);
+$pdf->SetFont('Arial', 'B', 10);
+$pdf->Cell(60, 6, rupiah($basePrice), 1, 1, 'R', true);
+
+$pdf->Ln(1);
+
+// ==== KETENTUAN / NOTES ====
+// Beige background
+$pdf->SetFillColor(240, 237, 230);
+$yStart = $pdf->GetY();
+$pdf->Rect(8, $yStart, 194, 8, 'F');
+
+$pdf->SetXY(12, $yStart + 0.5);
+$pdf->SetFont('Arial', '', 7);
+$pdf->SetTextColor(92, 87, 80);
+$pdf->MultiCell(186, 3.5, 'Harga berlaku untuk minimal ' . ($p['jumlah_siswa'] ?? 0) . ' pemesanan Buku Tahunan.' . "\n" . 
+                            'Harga bersifat penawaran dan dapat berubah sesuai kesepakatan.', 0, 'L');
+
+$pdf->SetY($yStart + 8.5);
+$pdf->Ln(2);
+
+// ==== SIGNATURE SECTION ====
+$pdf->SetFont('Arial', '', 8);
 $pdf->SetTextColor(60, 60, 60);
-$pdf->Cell(190, 12, '  Terima kasih atas kepercayaan Anda kepada Parama Studio. Kami siap memberikan layanan terbaik untuk kenangan tak terlupakan.', 0, 1, 'L');
+
+$pdf->Cell(98, 4, 'Hormat kami,', 0, 0, 'C');
+$pdf->Cell(94, 4, 'Disetujui oleh,', 0, 1, 'C');
+
+$pdf->Ln(12);
+
+$pdf->SetFont('Arial', 'B', 8);
+$pdf->SetTextColor(28, 46, 61);
+$pdf->Cell(98, 3.5, 'Parama Studio', 0, 0, 'C');
+
+$pdf->SetTextColor(60, 60, 60);
+$pdf->SetFont('Arial', '', 7.5);
+$pdf->Cell(94, 3.5, '(  _______________________  )', 0, 1, 'C');
+
+$pdf->SetFont('Arial', '', 7);
+$pdf->SetTextColor(156, 152, 144);
+$pdf->Cell(98, 3, decode($p['added_by_name'] ?? 'Parama Studio'), 0, 0, 'C');
+$pdf->Cell(94, 3, 'Nama & Stempel Klien', 0, 1, 'C');
 
 // Output PDF
-$filename = 'Penawaran_SP' . str_pad($p['id'], 4, '0', STR_PAD_LEFT) . '_' . preg_replace('/[^a-z0-9]/i', '_', decode($p['nama_klien'] ?? 'klien')) . '.pdf';
+$filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', decode($p['nama_klien'] ?? 'klien')) . '.pdf';
 $pdf->Output('D', $filename);
