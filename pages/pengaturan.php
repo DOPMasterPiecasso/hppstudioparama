@@ -211,12 +211,12 @@ include __DIR__ . '/../includes/header.php';
   </div>
 
   <!-- ===== GRADUATION SECTION ===== -->
+  <!-- Card 1: Edit Harga Paket Utama -->
   <div class="card mb16">
-    <div class="ph"><div class="pt" style="color:var(--grad)">Graduation Package</div><div class="ps">Dokumentasi wisuda — foto, video, photobooth &amp; glamation 360°</div></div>
+    <div class="ph"><div class="pt" style="color:var(--grad)">Graduation Package — Paket Utama</div><div class="ps">Dokumentasi wisuda — foto, video, photobooth &amp; glamation 360°</div></div>
     <div class="note grad mb16">✏️ Klik angka harga mana saja untuk edit langsung. Semua harga juga bisa diubah di menu <b>Edit Semua Harga</b>.</div>
 
-    <div class="sec">Edit Harga Paket Utama</div>
-    <div class="note mb12">Kelola paket utama — edit, tambah item baru, atau hapus.</div>
+    <div class="note mb12">Kelola paket utama — edit, tambah item baru, atau hapus. Perubahan langsung tersimpan ke database.</div>
     
     <!-- Daftar Paket Items -->
     <div id="grad-pkg-items" style="margin-bottom:16px">
@@ -250,8 +250,11 @@ include __DIR__ . '/../includes/header.php';
       <button class="btn bs bsm" onclick="resetGrad()">Reset ke Default</button>
       <span id="grad-pkg-status" style="font-size:12px;color:var(--success);display:none">✓ Tersimpan</span>
     </div>
+  </div>
 
-    <div class="sec">Edit Add-on &amp; Cetak Foto</div>
+  <!-- Card 2: Edit Add-on & Cetak Foto -->
+  <div class="card mb16">
+    <div class="ph"><div class="pt" style="color:var(--grad)">Edit Add-on &amp; Cetak Foto</div><div class="ps">Kelola add-on ekstra dan harga cetak foto satuan</div></div>
     <div class="note mb12">Kelola add-on dan cetak foto — edit harga, tambah item baru, atau hapus.</div>
     
     <!-- Daftar Add-on Items -->
@@ -309,41 +312,44 @@ include __DIR__ . '/../includes/header.php';
       <button class="btn bgrad bsm" onclick="saveGradAddon()">Simpan Add-on &amp; Cetak</button>
       <span id="grad-addon-status" style="font-size:12px;color:var(--success);display:none">✓ Tersimpan</span>
     </div>
+  </div>
 
-    <hr style="margin:20px 0;border:none;border-top:1px solid var(--border)">
+  <!-- Card 3: Preview Paket Utama & Add-On -->
+  <div class="card mb16">
+    <div class="ph"><div class="pt" style="color:var(--grad)">Preview Paket &amp; Add-on</div><div class="ps">Tampilan data sebagaimana akan dilihat oleh client</div></div>
 
-    <div class="sec">Paket Utama</div>
     <div class="pkgrid mb20" id="grad-grid"></div>
 
     <div class="g2 mb20">
       <div>
-        <div class="sec">Add-on Graduation</div>
-        <div class="card"><div class="tw"><table><thead><tr><th>Item</th><th>Harga</th></tr></thead><tbody id="grad-addon"></tbody></table></div></div>
+        <div class="sec" style="margin-bottom:8px">Add-on Graduation</div>
+        <div style="border:1px solid var(--border);border-radius:6px;overflow:hidden"><div class="tw" style="margin:0"><table><thead><tr><th>Item</th><th>Harga</th></tr></thead><tbody id="grad-addon"></tbody></table></div></div>
       </div>
       <div>
-        <div class="sec">Cetak Foto Tambahan</div>
-        <div class="card"><div class="tw"><table><thead><tr><th>Ukuran</th><th>Harga/lembar</th></tr></thead><tbody id="grad-cetak"></tbody></table></div></div>
+        <div class="sec" style="margin-bottom:8px">Cetak Foto Tambahan</div>
+        <div style="border:1px solid var(--border);border-radius:6px;overflow:hidden"><div class="tw" style="margin:0"><table><thead><tr><th>Ukuran</th><th>Harga/lembar</th></tr></thead><tbody id="grad-cetak"></tbody></table></div></div>
       </div>
     </div>
+  </div>
 
-    <div class="card">
-      <div class="grad-card-header">Kalkulator Graduation</div>
-      <div class="g2">
-        <div>
-          <div class="fg mb12">
-            <label class="fl">Pilih Paket</label>
-            <select id="gc-pkg" onchange="gcUpdate()"><option value="">— Pilih paket —</option></select>
-          </div>
-          <div id="gc-addons"></div>
+  <!-- Card 4: Kalkulator Graduation -->
+  <div class="card mb16">
+    <div class="ph"><div class="pt" style="color:var(--grad)">Kalkulator Graduation</div><div class="ps">Simulasi perhitungan interaktif untuk client</div></div>
+    <div class="g2">
+      <div>
+        <div class="fg mb12">
+          <label class="fl">Pilih Paket</label>
+          <select id="gc-pkg" onchange="gcUpdate()"><option value="">— Pilih paket —</option></select>
         </div>
-        <div>
-          <div class="ct">Ringkasan</div>
-          <div id="gc-result"></div>
-          <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
-            <div class="rr tot"><span class="rl">Total</span><span class="rv" id="gc-total" style="color:var(--grad)">—</span></div>
-          </div>
-          <div id="gc-note" class="note grad mt10"></div>
+        <div id="gc-addons"></div>
+      </div>
+      <div>
+        <div class="ct">Ringkasan</div>
+        <div id="gc-result"></div>
+        <div style="margin-top:10px;padding-top:8px;border-top:1px solid var(--border)">
+          <div class="rr tot"><span class="rl">Total</span><span class="rv" id="gc-total" style="color:var(--grad)">—</span></div>
         </div>
+        <div id="gc-note" class="note grad mt10"></div>
       </div>
     </div>
   </div>
