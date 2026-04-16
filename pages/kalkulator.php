@@ -14,7 +14,7 @@ include __DIR__ . '/../includes/header.php';
   <div class="mobile-navbar-title">Parama Studio</div>
 </div>
 <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileMenu()"></div>
-
+<!-- tetst -->
 <div class="app">
 <?php include __DIR__ . '/../includes/sidebar.php'; ?>
 <main class="main">
