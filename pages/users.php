@@ -11,9 +11,8 @@ $db = getDB();
 // Get all users with role information
 $allUsers = $db->getAllUsers();
 
-// Get all roles
-$data = json_decode(file_get_contents(__DIR__ . '/../data/users.json'), true);
-$roles = $data['roles'] ?? [];
+// Get all roles dari database
+$roles = $db->getRoles();
 ?>
 <body>
 <!-- Mobile Navbar Fixed -->

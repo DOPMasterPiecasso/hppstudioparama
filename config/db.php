@@ -361,7 +361,7 @@ class JSONDb {
     }
 }
 
-// Global DB instance
+// Global DB instance (JSON legacy — masih dipertahankan untuk non-user data)
 $GLOBALS['jsonDb'] = new JSONDb();
 
 /**
@@ -551,44 +551,103 @@ class MySQLMasterData {
     }
     
     // ========== ADD-ONS (tbl_addons) ==========
+    /**
+     * Kembalikan format grouped by category dengan tiers:
+     * { finishing:[{id,name,type,tiers:[[lo,hi,price],...]},...], kertas:[...], ... }
+     * Format ini cocok dengan addons.json dan dipakai app.js.
+     */
     public function getAddons() {
-        $stmt = $this->pdo->query("SELECT category, sub_id, name, type, price, min_qty, max_qty FROM tbl_addons ORDER BY category, sub_id");
-        $result = [];
+        $stmt = $this->pdo->query(
+            "SELECT category, sub_id, name, type, price, min_qty, max_qty
+             FROM tbl_addons
+             ORDER BY category, sub_id, min_qty ASC"
+        );
+
+        // Group rows menjadi: category -> sub_id -> {meta, tiers[]}
+        $grouped = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $result[] = [
-                'id' => $row['sub_id'],
-                'name' => $row['name'],
-                'price' => (int)$row['price'],
-                'category' => $row['category'],
-                'type' => $row['type'],
-                'min_qty' => (int)$row['min_qty'],
-                'max_qty' => (int)$row['max_qty']
-            ];
+            $cat = $row['category'];
+            $sid = $row['sub_id'];
+
+            if (!isset($grouped[$cat][$sid])) {
+                $grouped[$cat][$sid] = [
+                    'id'   => $sid,
+                    'name' => $row['name'],
+                    'type' => $row['type'],
+                ];
+            }
+
+            // Video (flat_video) tidak pakai tiers, pakai price langsung
+            if ($row['type'] === 'flat_video') {
+                $grouped[$cat][$sid]['price'] = (int)$row['price'];
+            } else {
+                $grouped[$cat][$sid]['tiers'][] = [
+                    (int)$row['min_qty'],
+                    (int)$row['max_qty'],
+                    (int)$row['price'],
+                ];
+            }
+        }
+
+        // Ubah menjadi format final: {category: [item,...], ...}
+        $result = [];
+        foreach ($grouped as $cat => $items) {
+            $result[$cat] = array_values($items);
         }
         return $result;
     }
-    
+
+    /**
+     * Simpan addon data dari format grouped:
+     * { finishing:[{id,name,type,tiers:[[lo,hi,price],...]},...], ... }
+     * atau flat list (kompatibilitas).
+     */
     public function updateAddons($data) {
         $this->pdo->beginTransaction();
         try {
-            // Delete existing and insert new
             $this->pdo->exec("DELETE FROM tbl_addons");
-            
-            $stmt = $this->pdo->prepare("INSERT INTO tbl_addons (category, sub_id, name, type, price, min_qty, max_qty) 
-                                        VALUES (?, ?, ?, ?, ?, ?, ?)");
-            
-            foreach ($data as $addon) {
-                $stmt->execute([
-                    $addon['category'] ?? 'misc',
-                    $addon['id'] ?? $addon['sub_id'] ?? '',
-                    $addon['name'] ?? '',
-                    $addon['type'] ?? 'addon',
-                    (int)($addon['price'] ?? 0),
-                    (int)($addon['min_qty'] ?? 1),
-                    (int)($addon['max_qty'] ?? 999)
-                ]);
+            $stmt = $this->pdo->prepare(
+                "INSERT INTO tbl_addons (category, sub_id, name, type, price, min_qty, max_qty)
+                 VALUES (?, ?, ?, ?, ?, ?, ?)"
+            );
+
+            // Deteksi format: grouped (assoc array dengan key = category)
+            // vs flat list (array of items)
+            $isGrouped = is_array($data) && !isset($data[0]);
+
+            if ($isGrouped) {
+                // Format: {category: [{id,name,type,tiers:[...]}, ...]}
+                foreach ($data as $category => $items) {
+                    foreach ($items as $item) {
+                        $id   = $item['id'] ?? '';
+                        $name = $item['name'] ?? '';
+                        $type = $item['type'] ?? 'flat';
+
+                        if ($type === 'flat_video') {
+                            // Simpan sebagai satu baris
+                            $stmt->execute([$category, $id, $name, $type, (int)($item['price'] ?? 0), 0, 9999]);
+                        } else {
+                            foreach ($item['tiers'] ?? [] as $tier) {
+                                $stmt->execute([$category, $id, $name, $type, (int)($tier[2] ?? 0), (int)($tier[0] ?? 0), (int)($tier[1] ?? 9999)]);
+                            }
+                        }
+                    }
+                }
+            } else {
+                // Format lama: flat list
+                foreach ($data as $addon) {
+                    $stmt->execute([
+                        $addon['category'] ?? 'misc',
+                        $addon['id'] ?? $addon['sub_id'] ?? '',
+                        $addon['name'] ?? '',
+                        $addon['type'] ?? 'addon',
+                        (int)($addon['price'] ?? 0),
+                        (int)($addon['min_qty'] ?? 1),
+                        (int)($addon['max_qty'] ?? 999)
+                    ]);
+                }
             }
-            
+
             $this->pdo->commit();
             return $this->getAddons();
         } catch (Exception $e) {
@@ -681,11 +740,273 @@ class MySQLMasterData {
     }
 }
 
+// ============================================================
+// MySQL User/Role DB Handler
+// Menggantikan JSONDb untuk operasi user & role
+// ============================================================
+
+class MySQLDb {
+    private $pdo;
+
+    public function __construct($pdo) {
+        $this->pdo = $pdo;
+    }
+
+    /**
+     * Get user by username (join roles)
+     */
+    public function getUserByUsername($username) {
+        $stmt = $this->pdo->prepare(
+            "SELECT u.id, u.username, u.password, u.name, u.role_id, u.is_active,
+                    r.name as role, r.label as role_label, r.permissions
+             FROM users u
+             JOIN roles r ON r.id = u.role_id
+             WHERE u.username = ? LIMIT 1"
+        );
+        $stmt->execute([$username]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$user) return null;
+
+        // Decode permissions JSON
+        $perms = json_decode($user['permissions'], true);
+        $user['permissions'] = is_array($perms) ? $perms : [];
+        $user['is_active']   = (bool)$user['is_active'];
+        return $user;
+    }
+
+    /**
+     * Get user by ID
+     */
+    public function getUserById($id) {
+        $stmt = $this->pdo->prepare(
+            "SELECT u.id, u.username, u.password, u.name, u.role_id, u.is_active,
+                    r.name as role, r.label as role_label, r.permissions
+             FROM users u
+             JOIN roles r ON r.id = u.role_id
+             WHERE u.id = ? LIMIT 1"
+        );
+        $stmt->execute([$id]);
+        $user = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$user) return null;
+
+        $perms = json_decode($user['permissions'], true);
+        $user['permissions'] = is_array($perms) ? $perms : [];
+        $user['is_active']   = (bool)$user['is_active'];
+        return $user;
+    }
+
+    /**
+     * Get all users with role info
+     */
+    public function getAllUsers() {
+        $stmt = $this->pdo->query(
+            "SELECT u.id, u.username, u.name, u.role_id, u.is_active, u.created_at,
+                    r.name as role, r.label as role_label
+             FROM users u
+             JOIN roles r ON r.id = u.role_id
+             ORDER BY u.id"
+        );
+        $users = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $row['is_active'] = (bool)$row['is_active'];
+            $users[] = $row;
+        }
+        return $users;
+    }
+
+    /**
+     * Add user — return new id
+     */
+    public function addUser($username, $password, $name, $email, $role_id) {
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO users (username, password, name, role_id, is_active) VALUES (?, ?, ?, ?, 1)"
+        );
+        $stmt->execute([$username, $password, $name, (int)$role_id]);
+        return (int)$this->pdo->lastInsertId();
+    }
+
+    /**
+     * Update user fields
+     */
+    public function updateUser($id, $fields) {
+        $allowed = ['username','name','role_id','is_active','password'];
+        $sets = [];
+        $vals = [];
+        foreach ($allowed as $col) {
+            if (array_key_exists($col, $fields)) {
+                $sets[] = "$col = ?";
+                $vals[] = $fields[$col];
+            }
+        }
+        if (empty($sets)) return false;
+        $vals[] = (int)$id;
+        $sql = "UPDATE users SET " . implode(', ', $sets) . " WHERE id = ?";
+        $stmt = $this->pdo->prepare($sql);
+        return $stmt->execute($vals);
+    }
+
+    /**
+     * Soft-delete user (set inactive)
+     */
+    public function deactivateUser($id) {
+        $stmt = $this->pdo->prepare("UPDATE users SET is_active = 0 WHERE id = ?");
+        return $stmt->execute([(int)$id]);
+    }
+
+    /**
+     * Check if username exists (optionally exclude an id)
+     */
+    public function usernameExists($username, $excludeId = null) {
+        if ($excludeId) {
+            $stmt = $this->pdo->prepare("SELECT 1 FROM users WHERE username = ? AND id != ? LIMIT 1");
+            $stmt->execute([$username, (int)$excludeId]);
+        } else {
+            $stmt = $this->pdo->prepare("SELECT 1 FROM users WHERE username = ? LIMIT 1");
+            $stmt->execute([$username]);
+        }
+        return (bool)$stmt->fetch();
+    }
+
+    /**
+     * Get all roles
+     */
+    public function getRoles() {
+        $stmt = $this->pdo->query("SELECT id, name, label, permissions FROM roles ORDER BY id");
+        $roles = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $perms = json_decode($row['permissions'], true);
+            $row['permissions'] = is_array($perms) ? $perms : [];
+            $roles[] = $row;
+        }
+        return $roles;
+    }
+
+    /**
+     * Get role by id
+     */
+    public function getRoleById($id) {
+        $stmt = $this->pdo->prepare("SELECT id, name, label, permissions FROM roles WHERE id = ? LIMIT 1");
+        $stmt->execute([(int)$id]);
+        $role = $stmt->fetch(PDO::FETCH_ASSOC);
+        if (!$role) return null;
+        $perms = json_decode($role['permissions'], true);
+        $role['permissions'] = is_array($perms) ? $perms : [];
+        return $role;
+    }
+
+    // ---- Proxy ke JSONDb untuk data non-user (tetap kompatibel) ----
+    public function getSettings()         { return $GLOBALS['jsonDb']->getSettings(); }
+    public function saveSettings($s)      { return $GLOBALS['jsonDb']->saveSettings($s); }
+    public function getFullServicePricing() { return $GLOBALS['jsonDb']->getFullServicePricing(); }
+    public function getAddons()           { return $GLOBALS['jsonDb']->getAddons(); }
+    public function getCetakBase()        { return $GLOBALS['jsonDb']->getCetakBase(); }
+    public function getGraduation()       { return $GLOBALS['jsonDb']->getGraduation(); }
+    public function getOverhead()         { return $GLOBALS['jsonDb']->getOverhead(); }
+    public function getPricingFactors()   { return $GLOBALS['jsonDb']->getPricingFactors(); }
+
+    // ---- Penawaran — langsung dari MySQL ----
+
+    /**
+     * Get semua penawaran, join dengan nama user
+     */
+    public function getPenawaran() {
+        $stmt = $this->pdo->query(
+            "SELECT p.id, p.nama_klien, p.paket, p.harga, p.harga_sebelum_diskon,
+                    p.jumlah_siswa, p.catatan, p.status,
+                    p.added_by, u.username as added_by_username, u.name as added_by_name,
+                    p.created_at, p.updated_at
+             FROM penawaran p
+             LEFT JOIN users u ON u.id = p.added_by
+             ORDER BY p.id DESC"
+        );
+        $result = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $row['harga']                = (int)$row['harga'];
+            $row['harga_sebelum_diskon'] = (int)$row['harga_sebelum_diskon'];
+            $row['jumlah_siswa']         = (int)$row['jumlah_siswa'];
+            $row['added_by_name']        = $row['added_by_name'] ?: ($row['added_by_username'] ?: 'Unknown');
+            $result[] = $row;
+        }
+        return $result;
+    }
+
+    /**
+     * Tambah penawaran baru, return id
+     */
+    public function addPenawaran($data) {
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO penawaran (nama_klien, paket, harga, harga_sebelum_diskon, jumlah_siswa, catatan, status, added_by)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?)"
+        );
+        $stmt->execute([
+            $data['nama_klien']           ?? '',
+            $data['paket']                ?? '',
+            (int)($data['harga']          ?? 0),
+            (int)($data['harga_sebelum_diskon'] ?? 0),
+            (int)($data['jumlah_siswa']   ?? 0),
+            $data['catatan']              ?? '',
+            $data['status']               ?? 'pending',
+            (int)($data['added_by_id']    ?? 0) ?: null,
+        ]);
+        return (int)$this->pdo->lastInsertId();
+    }
+
+    /**
+     * Update penawaran by id
+     */
+    public function updatePenawaran($id, $fields) {
+        $allowed = ['nama_klien','paket','harga','harga_sebelum_diskon','jumlah_siswa','catatan','status'];
+        $sets = [];
+        $vals = [];
+        foreach ($allowed as $col) {
+            if (array_key_exists($col, $fields)) {
+                $sets[] = "$col = ?";
+                $cast = in_array($col, ['harga','harga_sebelum_diskon','jumlah_siswa'])
+                    ? (int)$fields[$col]
+                    : $fields[$col];
+                $vals[] = $cast;
+            }
+        }
+        if (empty($sets)) return false;
+        $vals[] = (int)$id;
+        $stmt = $this->pdo->prepare("UPDATE penawaran SET " . implode(', ', $sets) . " WHERE id = ?");
+        return $stmt->execute($vals);
+    }
+
+    /**
+     * Hapus penawaran by id
+     */
+    public function deletePenawaran($id) {
+        $stmt = $this->pdo->prepare("DELETE FROM penawaran WHERE id = ?");
+        return $stmt->execute([(int)$id]);
+    }
+
+    /**
+     * Cek apakah penawaran ada
+     */
+    public function getPenawaranById($id) {
+        $stmt = $this->pdo->prepare("SELECT id FROM penawaran WHERE id = ? LIMIT 1");
+        $stmt->execute([(int)$id]);
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+    }
+}
+
+
 /**
- * Get DB instance for compatibility with existing code
+ * Get DB instance — MySQL jika koneksi tersedia, fallback ke JSONDb
  */
 function getDB() {
-    return $GLOBALS['jsonDb'];
+    if (!isset($GLOBALS['_db_instance'])) {
+        $pdo = getMySQLConnection();
+        if ($pdo) {
+            $GLOBALS['_db_instance'] = new MySQLDb($pdo);
+        } else {
+            // fallback: tetap pakai JSON (development tanpa MySQL)
+            error_log('getDB(): MySQL tidak tersedia, fallback ke JSONDb');
+            $GLOBALS['_db_instance'] = $GLOBALS['jsonDb'];
+        }
+    }
+    return $GLOBALS['_db_instance'];
 }
 
 /**
