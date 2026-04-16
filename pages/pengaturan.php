@@ -26,8 +26,7 @@ try {
     $gradCetak = $graduationData['cetak'] ?? [];
     
     // Load addon data dari database
-    $db = getDB();
-    $addonsData = $db->getAddons();
+    $addonsData = $masterData->getAddons();
     
     // Load payment terms data dari database
     $paymentTermsData = $masterData->getPaymentTerms();
@@ -3184,6 +3183,7 @@ function editAddonPrice(priceElement) {
     input.onblur = () => {
         const newPrice = parseInt(input.value || 0);
         priceElement.textContent = 'Rp ' + newPrice.toLocaleString('id-ID');
+        input.replaceWith(priceElement);
     };
     
     input.onkeypress = (e) => {

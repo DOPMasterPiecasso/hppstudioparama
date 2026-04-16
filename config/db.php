@@ -612,76 +612,73 @@ class MySQLMasterData {
      * { finishing:[{id,name,type,tiers:[[lo,hi,price],...]},...], ... }
      * atau flat list (kompatibilitas).
      */
-    public function updateAddons($data) {
-        error_log("updateAddons: Starting transaction");
+  public function updateAddons($data) {
+    if (!$this->pdo->inTransaction()) {
         $this->pdo->beginTransaction();
-        try {
-            error_log("updateAddons: Deleting old records");
-            $this->pdo->exec("DELETE FROM tbl_addons");
-            
-            error_log("updateAddons: Preparing insert statement");
-            $stmt = $this->pdo->prepare(
-                "INSERT INTO tbl_addons (category, sub_id, name, type, price, min_qty, max_qty)
-                 VALUES (?, ?, ?, ?, ?, ?, ?)"
-            );
+    }
+    
+    try {
+        // 1. Kosongkan tabel lama
+        $this->pdo->exec("DELETE FROM tbl_addons");
+        
+        // 2. Siapkan statement insert
+        $stmt = $this->pdo->prepare(
+            "INSERT INTO tbl_addons (category, sub_id, name, type, price, min_qty, max_qty)
+             VALUES (?, ?, ?, ?, ?, ?, ?)"
+        );
 
-            // Deteksi format: grouped (assoc array dengan key = category)
-            // vs flat list (array of items)
-            $isGrouped = is_array($data) && !isset($data[0]);
-            error_log("updateAddons: isGrouped = " . ($isGrouped ? 'true' : 'false'));
+        // 3. Pastikan format data adalah array
+        if (!is_array($data)) {
+            throw new Exception("Data addon bukan array yang valid.");
+        }
 
-            if ($isGrouped) {
-                // Format: {category: [{id,name,type,tiers:[...]}, ...]}
-                $totalCount = 0;
-                foreach ($data as $category => $items) {
-                    error_log("updateAddons: Processing category '$category' with " . count($items) . " items");
-                    foreach ($items as $item) {
-                        $id   = $item['id'] ?? '';
-                        $name = $item['name'] ?? '';
-                        $type = $item['type'] ?? 'flat';
+        foreach ($data as $category => $items) {
+            // Pastikan items adalah array (kategori: [addon1, addon2])
+            if (!is_array($items)) continue;
 
-                        if ($type === 'flat_video') {
-                            // Simpan sebagai satu baris
-                            $stmt->execute([$category, $id, $name, $type, (int)($item['price'] ?? 0), 0, 9999]);
-                            $totalCount++;
-                        } else {
-                            foreach ($item['tiers'] ?? [] as $tier) {
-                                $stmt->execute([$category, $id, $name, $type, (int)($tier[2] ?? 0), (int)($tier[0] ?? 0), (int)($tier[1] ?? 9999)]);
-                                $totalCount++;
-                            }
+            foreach ($items as $item) {
+                $id   = $item['id'] ?? '';
+                $name = $item['name'] ?? '';
+                $type = $item['type'] ?? 'flat';
+
+                if ($type === 'flat_video') {
+                    // Tipe Flat (Video/Drone): Harga tunggal
+                    $price = (int)($item['price'] ?? 0);
+                    $stmt->execute([$category, $id, $name, $type, $price, 0, 9999]);
+                } else {
+                    // Tipe Tiered (Finishing/Kertas): Banyak harga per qty
+                    $tiers = $item['tiers'] ?? [];
+                    if (empty($tiers)) {
+                        // Fallback jika tidak ada tiers, jangan sampai data hilang
+                        $stmt->execute([$category, $id, $name, $type, 0, 0, 9999]);
+                    } else {
+                        foreach ($tiers as $tier) {
+                            // Format tier: [min, max, price]
+                            $stmt->execute([
+                                $category, 
+                                $id, 
+                                $name, 
+                                $type, 
+                                (int)($tier[2] ?? 0), 
+                                (int)($tier[0] ?? 0), 
+                                (int)($tier[1] ?? 9999)
+                            ]);
                         }
                     }
                 }
-                error_log("updateAddons: Inserted $totalCount rows");
-            } else {
-                // Format lama: flat list
-                $totalCount = 0;
-                foreach ($data as $addon) {
-                    $stmt->execute([
-                        $addon['category'] ?? 'misc',
-                        $addon['id'] ?? $addon['sub_id'] ?? '',
-                        $addon['name'] ?? '',
-                        $addon['type'] ?? 'addon',
-                        (int)($addon['price'] ?? 0),
-                        (int)($addon['min_qty'] ?? 1),
-                        (int)($addon['max_qty'] ?? 999)
-                    ]);
-                    $totalCount++;
-                }
-                error_log("updateAddons: Inserted $totalCount rows (flat format)");
             }
-
-            error_log("updateAddons: Committing transaction");
-            $this->pdo->commit();
-            error_log("updateAddons: Transaction committed successfully");
-            // Return true instead of calling getAddons() which could be slow
-            return true;
-        } catch (Exception $e) {
-            error_log("updateAddons: ERROR - " . $e->getMessage());
-            $this->pdo->rollBack();
-            throw $e;
         }
+
+        $this->pdo->commit();
+        return true;
+    } catch (Exception $e) {
+        if ($this->pdo->inTransaction()) {
+            $this->pdo->rollBack();
+        }
+        error_log("updateAddons ERROR: " . $e->getMessage());
+        throw $e;
     }
+}
     
     // ========== GRADUATION ==========
     public function getGraduation() {
@@ -976,15 +973,15 @@ class MySQLDb {
         return $role;
     }
 
-    // ---- Proxy ke JSONDb untuk data non-user (tetap kompatibel) ----
+    // ---- Proxy ke MySQLMasterData untuk data master ----
     public function getSettings()         { return $GLOBALS['jsonDb']->getSettings(); }
     public function saveSettings($s)      { return $GLOBALS['jsonDb']->saveSettings($s); }
-    public function getFullServicePricing() { return $GLOBALS['jsonDb']->getFullServicePricing(); }
-    public function getAddons()           { return $GLOBALS['jsonDb']->getAddons(); }
-    public function getCetakBase()        { return $GLOBALS['jsonDb']->getCetakBase(); }
-    public function getGraduation()       { return $GLOBALS['jsonDb']->getGraduation(); }
-    public function getOverhead()         { return $GLOBALS['jsonDb']->getOverhead(); }
-    public function getPricingFactors()   { return $GLOBALS['jsonDb']->getPricingFactors(); }
+    public function getFullServicePricing() { return (new MySQLMasterData($this->pdo))->getFullService(); }
+    public function getAddons()           { return (new MySQLMasterData($this->pdo))->getAddons(); }
+    public function getCetakBase()        { return (new MySQLMasterData($this->pdo))->getCetakBase(); }
+    public function getGraduation()       { return (new MySQLMasterData($this->pdo))->getGraduation(); }
+    public function getOverhead()         { return (new MySQLMasterData($this->pdo))->getOverhead(); }
+    public function getPricingFactors()   { return (new MySQLMasterData($this->pdo))->getPricingFactors(); }
 
     // ---- Penawaran — langsung dari MySQL ----
 
