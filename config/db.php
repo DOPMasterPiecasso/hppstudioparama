@@ -63,6 +63,8 @@ $MySQL_Config = [
     'charset' => 'utf8mb4'
 ];
 
+
+
 function getMySQLConnection() {
     global $MySQL_Config;
     
@@ -611,9 +613,13 @@ class MySQLMasterData {
      * atau flat list (kompatibilitas).
      */
     public function updateAddons($data) {
+        error_log("updateAddons: Starting transaction");
         $this->pdo->beginTransaction();
         try {
+            error_log("updateAddons: Deleting old records");
             $this->pdo->exec("DELETE FROM tbl_addons");
+            
+            error_log("updateAddons: Preparing insert statement");
             $stmt = $this->pdo->prepare(
                 "INSERT INTO tbl_addons (category, sub_id, name, type, price, min_qty, max_qty)
                  VALUES (?, ?, ?, ?, ?, ?, ?)"
@@ -622,10 +628,13 @@ class MySQLMasterData {
             // Deteksi format: grouped (assoc array dengan key = category)
             // vs flat list (array of items)
             $isGrouped = is_array($data) && !isset($data[0]);
+            error_log("updateAddons: isGrouped = " . ($isGrouped ? 'true' : 'false'));
 
             if ($isGrouped) {
                 // Format: {category: [{id,name,type,tiers:[...]}, ...]}
+                $totalCount = 0;
                 foreach ($data as $category => $items) {
+                    error_log("updateAddons: Processing category '$category' with " . count($items) . " items");
                     foreach ($items as $item) {
                         $id   = $item['id'] ?? '';
                         $name = $item['name'] ?? '';
@@ -634,15 +643,19 @@ class MySQLMasterData {
                         if ($type === 'flat_video') {
                             // Simpan sebagai satu baris
                             $stmt->execute([$category, $id, $name, $type, (int)($item['price'] ?? 0), 0, 9999]);
+                            $totalCount++;
                         } else {
                             foreach ($item['tiers'] ?? [] as $tier) {
                                 $stmt->execute([$category, $id, $name, $type, (int)($tier[2] ?? 0), (int)($tier[0] ?? 0), (int)($tier[1] ?? 9999)]);
+                                $totalCount++;
                             }
                         }
                     }
                 }
+                error_log("updateAddons: Inserted $totalCount rows");
             } else {
                 // Format lama: flat list
+                $totalCount = 0;
                 foreach ($data as $addon) {
                     $stmt->execute([
                         $addon['category'] ?? 'misc',
@@ -653,12 +666,18 @@ class MySQLMasterData {
                         (int)($addon['min_qty'] ?? 1),
                         (int)($addon['max_qty'] ?? 999)
                     ]);
+                    $totalCount++;
                 }
+                error_log("updateAddons: Inserted $totalCount rows (flat format)");
             }
 
+            error_log("updateAddons: Committing transaction");
             $this->pdo->commit();
-            return $this->getAddons();
+            error_log("updateAddons: Transaction committed successfully");
+            // Return true instead of calling getAddons() which could be slow
+            return true;
         } catch (Exception $e) {
+            error_log("updateAddons: ERROR - " . $e->getMessage());
             $this->pdo->rollBack();
             throw $e;
         }

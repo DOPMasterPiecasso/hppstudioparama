@@ -25,6 +25,10 @@ try {
     $gradAddons = $graduationData['addons'] ?? [];
     $gradCetak = $graduationData['cetak'] ?? [];
     
+    // Load addon data dari database
+    $db = getDB();
+    $addonsData = $db->getAddons();
+    
     // Load payment terms data dari database
     $paymentTermsData = $masterData->getPaymentTerms();
     $paymentTerms = $paymentTermsData['terms'] ?? [];
@@ -38,6 +42,8 @@ try {
     $gradPackages = [];
     $gradAddons = [];
     $gradCetak = [];
+    $addonsData = [];
+    $paymentTerms = [];
 }
 
 include __DIR__ . '/../includes/header.php';
@@ -210,14 +216,223 @@ include __DIR__ . '/../includes/header.php';
     <button class="btn bp bsm" onclick="saveALC()">Simpan Faktor À La Carte</button>
   </div>
 
+  <!-- ===== ADD-ON SECTION ===== -->
+  <div style="margin-bottom:30px">
+    <div class="ph"><div class="pt">Manajemen Add-on (Full Service)</div><div class="ps">Kelola harga finishing, kertas, halaman, video, dan packaging — pisah per kategori</div></div>
+    
+    <!-- FINISHING & BINDING -->
+    <div class="card mb16">
+      <div class="ph"><div class="pt" style="color:#2c3e50">Finishing &amp; Binding</div><div class="ps">Layanan finishing tambahan — binding, pop up, tunnel, klip, cover bahan</div></div>
+      <div class="note mb12">Klik harga untuk edit. Tier: range qty (min-max) dengan harga masing-masing.</div>
+      <div id="addon-finishing-items" style="margin-bottom:12px">
+        <?php foreach ($addonsData['finishing'] ?? [] as $item): ?>
+        <div class="addon-item" data-category="finishing" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #3498db">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
+            <?php if ($item['type'] === 'flat'): ?>
+              <span style="display:inline-block;background:#e3f2fd;padding:2px 6px;border-radius:3px">Flat</span>
+            <?php else: ?>
+              <span style="display:inline-block;background:#f3e5f5;padding:2px 6px;border-radius:3px"><?= htmlspecialchars($item['type']) ?></span>
+            <?php endif; ?>
+          </div>
+          <!-- Tiers -->
+          <div style="display:grid;gap:6px">
+            <?php if ($item['type'] === 'flat' && isset($item['tiers'])): ?>
+              <?php foreach ($item['tiers'] as $tier): ?>
+              <div style="display:grid;grid-template-columns:auto auto auto 1fr;gap:8px;align-items:center;padding:6px;background:white;border-radius:3px;font-size:12px">
+                <span style="color:var(--text2)"><?= $tier[0] ?></span>
+                <span style="color:var(--text2)">–</span>
+                <span style="color:var(--text2)"><?= $tier[1] ?></span>
+                <div class="addon-price-display" style="text-align:right;color:var(--accent);font-weight:600;cursor:pointer" onclick="editAddonPrice(this)">Rp <?= number_format($tier[2], 0, ',', '.') ?></div>
+              </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px">
+            <button class="btn bs bsm" onclick="editAddonItem('finishing','<?= htmlspecialchars($item['id']) ?>')">✏️ Edit</button>
+            <button class="btn bs bsm" style="background:#f44336;color:white;border:none;cursor:pointer;padding:4px 8px;border-radius:3px;font-size:11px" onclick="deleteAddonItem('finishing','<?= htmlspecialchars($item['id']) ?>')">✕ Hapus</button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <button class="btn bp bsm" onclick="showAddAddonModal('finishing')">+ Tambah Item</button>
+    </div>
+
+    <!-- UPGRADE KERTAS -->
+    <div class="card mb16">
+      <div class="ph"><div class="pt" style="color:#2c3e50">Upgrade Kertas</div><div class="ps">Pilihan upgrade kertas — Ivory Paper, Laminasi Paper</div></div>
+      <div class="note mb12">Per halaman. Tier: range qty (min-max) dengan harga per halaman masing-masing.</div>
+      <div id="addon-kertas-items" style="margin-bottom:12px">
+        <?php foreach ($addonsData['kertas'] ?? [] as $item): ?>
+        <div class="addon-item" data-category="kertas" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #27ae60">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
+            <span style="display:inline-block;background:#e8f5e9;padding:2px 6px;border-radius:3px">Per Halaman</span>
+          </div>
+          <!-- Tiers -->
+          <div style="display:grid;gap:6px">
+            <?php if (isset($item['tiers'])): ?>
+              <?php foreach ($item['tiers'] as $tier): ?>
+              <div style="display:grid;grid-template-columns:auto auto auto 1fr;gap:8px;align-items:center;padding:6px;background:white;border-radius:3px;font-size:12px">
+                <span style="color:var(--text2)"><?= $tier[0] ?></span>
+                <span style="color:var(--text2)">–</span>
+                <span style="color:var(--text2)"><?= $tier[1] ?></span>
+                <div class="addon-price-display" style="text-align:right;color:var(--accent);font-weight:600;cursor:pointer" onclick="editAddonPrice(this)">Rp <?= number_format($tier[2], 0, ',', '.') ?></div>
+              </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px">
+            <button class="btn bs bsm" onclick="editAddonItem('kertas','<?= htmlspecialchars($item['id']) ?>')">✏️ Edit</button>
+            <button class="btn bs bsm" style="background:#f44336;color:white;border:none;cursor:pointer;padding:4px 8px;border-radius:3px;font-size:11px" onclick="deleteAddonItem('kertas','<?= htmlspecialchars($item['id']) ?>')">✕ Hapus</button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <button class="btn bp bsm" onclick="showAddAddonModal('kertas')">+ Tambah Item</button>
+    </div>
+
+    <!-- HALAMAN TAMBAHAN -->
+    <div class="card mb16">
+      <div class="ph"><div class="pt" style="color:#2c3e50">Halaman Tambahan</div><div class="ps">Harga per halaman tambahan — berbeda per tier order</div></div>
+      <div class="note mb12">Tier: range qty dengan harga/halaman masing-masing.</div>
+      <div id="addon-halaman-items" style="margin-bottom:12px">
+        <?php foreach ($addonsData['halaman'] ?? [] as $item): ?>
+        <div class="addon-item" data-category="halaman" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #f39c12">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
+            <span style="display:inline-block;background:#fff3e0;padding:2px 6px;border-radius:3px">Extra Halaman</span>
+          </div>
+          <!-- Tiers -->
+          <div style="display:grid;gap:6px">
+            <?php if (isset($item['tiers'])): ?>
+              <?php foreach ($item['tiers'] as $tier): ?>
+              <div style="display:grid;grid-template-columns:auto auto auto 1fr;gap:8px;align-items:center;padding:6px;background:white;border-radius:3px;font-size:12px">
+                <span style="color:var(--text2)"><?= $tier[0] ?></span>
+                <span style="color:var(--text2)">–</span>
+                <span style="color:var(--text2)"><?= $tier[1] ?></span>
+                <div class="addon-price-display" style="text-align:right;color:var(--accent);font-weight:600;cursor:pointer" onclick="editAddonPrice(this)">Rp <?= number_format($tier[2], 0, ',', '.') ?></div>
+              </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px">
+            <button class="btn bs bsm" onclick="editAddonItem('halaman','<?= htmlspecialchars($item['id']) ?>')">✏️ Edit</button>
+            <button class="btn bs bsm" style="background:#f44336;color:white;border:none;cursor:pointer;padding:4px 8px;border-radius:3px;font-size:11px" onclick="deleteAddonItem('halaman','<?= htmlspecialchars($item['id']) ?>')">✕ Hapus</button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <button class="btn bp bsm" onclick="showAddAddonModal('halaman')">+ Tambah Item</button>
+    </div>
+
+    <!-- VIDEO -->
+    <div class="card mb16">
+      <div class="ph"><div class="pt" style="color:#2c3e50">Video</div><div class="ps">Layanan video — Drone, Docudrama (flat price, tidak tier)</div></div>
+      <div class="note mb12">Harga flat untuk seluruh project, tidak berdasar tier qty.</div>
+      <div id="addon-video-items" style="margin-bottom:12px">
+        <?php foreach ($addonsData['video'] ?? [] as $item): ?>
+        <div class="addon-item" data-category="video" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #e74c3c">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
+            <span style="display:inline-block;background:#ffebee;padding:2px 6px;border-radius:3px">Flat Video</span>
+          </div>
+          <div style="padding:6px;background:white;border-radius:3px;font-size:12px">
+            <div class="addon-price-display" style="color:var(--accent);font-weight:600;cursor:pointer" onclick="editAddonPrice(this)">Rp <?= number_format($item['price'] ?? 0, 0, ',', '.') ?></div>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px">
+            <button class="btn bs bsm" onclick="editAddonItem('video','<?= htmlspecialchars($item['id']) ?>')">✏️ Edit</button>
+            <button class="btn bs bsm" style="background:#f44336;color:white;border:none;cursor:pointer;padding:4px 8px;border-radius:3px;font-size:11px" onclick="deleteAddonItem('video','<?= htmlspecialchars($item['id']) ?>')">✕ Hapus</button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <button class="btn bp bsm" onclick="showAddAddonModal('video')">+ Tambah Item</button>
+    </div>
+
+    <!-- PACKAGING - SLIDE & STANDARD -->
+    <div class="card mb16">
+      <div class="ph"><div class="pt" style="color:#2c3e50">Packaging — Slide Box &amp; Standard</div><div class="ps">Packaging dengan tier berdasar jumlah order</div></div>
+      <div class="note mb12">Tier: 25-50, 51-100, 101-150, 151-200, >200 buku.</div>
+      <div id="addon-pkg1-items" style="margin-bottom:12px">
+        <?php foreach ($addonsData['pkg1'] ?? [] as $item): ?>
+        <div class="addon-item" data-category="pkg1" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #9c27b0">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
+            <span style="display:inline-block;background:#f3e5f5;padding:2px 6px;border-radius:3px">Packaging Standar</span>
+          </div>
+          <!-- Tiers -->
+          <div style="display:grid;gap:6px">
+            <?php if (isset($item['tiers'])): ?>
+              <?php foreach ($item['tiers'] as $tier): ?>
+              <div style="display:grid;grid-template-columns:auto auto auto 1fr;gap:8px;align-items:center;padding:6px;background:white;border-radius:3px;font-size:12px">
+                <span style="color:var(--text2)"><?= $tier[0] ?></span>
+                <span style="color:var(--text2)">–</span>
+                <span style="color:var(--text2)"><?= $tier[1] ?></span>
+                <div class="addon-price-display" style="text-align:right;color:var(--accent);font-weight:600;cursor:pointer" onclick="editAddonPrice(this)">Rp <?= number_format($tier[2], 0, ',', '.') ?></div>
+              </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px">
+            <button class="btn bs bsm" onclick="editAddonItem('pkg1','<?= htmlspecialchars($item['id']) ?>')">✏️ Edit</button>
+            <button class="btn bs bsm" style="background:#f44336;color:white;border:none;cursor:pointer;padding:4px 8px;border-radius:3px;font-size:11px" onclick="deleteAddonItem('pkg1','<?= htmlspecialchars($item['id']) ?>')">✕ Hapus</button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <button class="btn bp bsm" onclick="showAddAddonModal('pkg1')">+ Tambah Item</button>
+    </div>
+
+    <!-- PACKAGING - CUSTOM BOX -->
+    <div class="card mb16">
+      <div class="ph"><div class="pt" style="color:#2c3e50">Packaging — Custom Box</div><div class="ps">Custom printed box dengan tier berdasar jumlah order</div></div>
+      <div class="note mb12">Tier: 25-50, 51-100, 101-150, 151-200, >200 buku.</div>
+      <div id="addon-pkg2-items" style="margin-bottom:12px">
+        <?php foreach ($addonsData['pkg2'] ?? [] as $item): ?>
+        <div class="addon-item" data-category="pkg2" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #00bcd4">
+          <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
+          <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
+            <span style="display:inline-block;background:#e0f2f1;padding:2px 6px;border-radius:3px">Custom Box</span>
+          </div>
+          <!-- Tiers -->
+          <div style="display:grid;gap:6px">
+            <?php if (isset($item['tiers'])): ?>
+              <?php foreach ($item['tiers'] as $tier): ?>
+              <div style="display:grid;grid-template-columns:auto auto auto 1fr;gap:8px;align-items:center;padding:6px;background:white;border-radius:3px;font-size:12px">
+                <span style="color:var(--text2)"><?= $tier[0] ?></span>
+                <span style="color:var(--text2)">–</span>
+                <span style="color:var(--text2)"><?= $tier[1] ?></span>
+                <div class="addon-price-display" style="text-align:right;color:var(--accent);font-weight:600;cursor:pointer" onclick="editAddonPrice(this)">Rp <?= number_format($tier[2], 0, ',', '.') ?></div>
+              </div>
+              <?php endforeach; ?>
+            <?php endif; ?>
+          </div>
+          <div style="margin-top:8px;display:flex;gap:6px">
+            <button class="btn bs bsm" onclick="editAddonItem('pkg2','<?= htmlspecialchars($item['id']) ?>')">✏️ Edit</button>
+            <button class="btn bs bsm" style="background:#f44336;color:white;border:none;cursor:pointer;padding:4px 8px;border-radius:3px;font-size:11px" onclick="deleteAddonItem('pkg2','<?= htmlspecialchars($item['id']) ?>')">✕ Hapus</button>
+          </div>
+        </div>
+        <?php endforeach; ?>
+      </div>
+      <button class="btn bp bsm" onclick="showAddAddonModal('pkg2')">+ Tambah Item</button>
+    </div>
+
+    <!-- Save All Addons Button -->
+    <div style="display:flex;gap:8px;margin-bottom:20px">
+      <button class="btn bp bsm" onclick="saveAllAddons()" style="font-weight:600">💾 Simpan Semua Perubahan Add-on</button>
+      <button class="btn bs bsm" onclick="resetAddons()">↩ Reset ke Default</button>
+      <span id="addon-status" style="font-size:12px;color:var(--success);display:none">✓ Tersimpan ke database</span>
+    </div>
+  </div>
+
   <!-- ===== GRADUATION SECTION ===== -->
   <!-- Card 1: Edit Harga Paket Utama -->
   <div class="card mb16">
     <div class="ph"><div class="pt" style="color:var(--grad)">Graduation Package — Paket Utama</div><div class="ps">Dokumentasi wisuda — foto, video, photobooth &amp; glamation 360°</div></div>
     <div class="note grad mb16">✏️ Klik angka harga mana saja untuk edit langsung. Semua harga juga bisa diubah di menu <b>Edit Semua Harga</b>.</div>
 
-    <div class="note mb12">Kelola paket utama — edit, tambah item baru, atau hapus. Perubahan langsung tersimpan ke database.</div>
-    
+    <div class="note mb12">Kelola paket utama — edit, tambah item baru, atau hapus. Perubahan langsung tersimpan ke database.</div>    
     <!-- Daftar Paket Items -->
     <div id="grad-pkg-items" style="margin-bottom:16px">
       <?php foreach ($gradPackages as $pkg): ?>
@@ -2587,6 +2802,514 @@ function setCetakRange(idx, btn) {
         if (delSpan) delSpan.style.color = i === idx ? 'rgba(255,255,255,.7)' : 'var(--danger)';
     });
     renderCetakTable();
+}
+
+// ============================================================
+// ADD-ON MANAGEMENT FUNCTIONS
+// ============================================================
+
+async function showAddAddonModal(category) {
+    const modalHtml = `
+        <div id="addon-modal" style="display:flex;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
+            <div style="background:white;padding:30px;border-radius:10px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto">
+                <div style="font-size:18px;font-weight:600;margin-bottom:20px">Tambah Add-on Baru — ${category.toUpperCase()}</div>
+                <div class="form-row" style="margin-bottom:15px">
+                    <label style="font-weight:600;margin-bottom:5px">Nama Item</label>
+                    <input type="text" id="new-addon-name" placeholder="Nama add-on baru" style="border:1px solid var(--border);padding:8px;border-radius:3px;width:100%;box-sizing:border-box;font-size:13px">
+                </div>
+                <div id="addon-tiers-section" style="margin-bottom:15px">
+                    <label style="font-weight:600;margin-bottom:8px;display:block">Tier Harga</label>
+                    <div id="addon-tiers-list"></div>
+                    <button type="button" class="btn bs bsm" onclick="addAddonTierRow()" style="margin-top:8px">+ Tambah Tier</button>
+                </div>
+                <div style="display:flex;gap:10px;margin-top:20px">
+                    <button class="btn bp" onclick="confirmAddAddon('${category}')" style="flex:1">Tambah Item</button>
+                    <button class="btn bs" onclick="closeAddonModal()" style="flex:1">Batal</button>
+                </div>
+            </div>
+        </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+    
+    // Render default tiers based on category
+    const tiersList = document.getElementById('addon-tiers-list');
+    tiersList.innerHTML = '';
+    
+    const defaultTiers = {
+        finishing: [[25, 75, 50000], [76, 150, 35000], [151, 9999, 30000]],
+        kertas: [[25, 50, 450], [51, 100, 250], [101, 150, 200], [151, 9999, 150]],
+        halaman: [[25, 50, 3000], [51, 100, 2000], [101, 150, 1300], [151, 9999, 1000]],
+        pkg1: [[25, 50, 45000], [51, 100, 40000], [101, 150, 35000], [151, 200, 30000], [201, 9999, 25000]],
+        pkg2: [[25, 50, 200000], [51, 100, 170000], [101, 150, 130000], [151, 200, 120000], [201, 9999, 110000]]
+    };
+    
+    const tiers = defaultTiers[category] || [[0, 9999, 0]];
+    tiers.forEach((tier, idx) => {
+        const tierRow = document.createElement('div');
+        tierRow.style.cssText = 'display:grid;grid-template-columns:80px 80px 120px auto;gap:8px;margin-bottom:8px;align-items:center';
+        tierRow.innerHTML = `
+            <input type="number" class="tier-min" value="${tier[0]}" placeholder="Min" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+            <input type="number" class="tier-max" value="${tier[1]}" placeholder="Max" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+            <input type="number" class="tier-price" value="${tier[2]}" placeholder="Harga" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+            <button type="button" class="btn bs bsm" onclick="this.parentElement.remove()" style="padding:4px 8px;font-size:11px">✕</button>
+        `;
+        tiersList.appendChild(tierRow);
+    });
+}
+
+function closeAddonModal() {
+    const modal = document.getElementById('addon-modal');
+    if (modal) modal.remove();
+}
+
+function addAddonTierRow() {
+    const tiersList = document.getElementById('addon-tiers-list');
+    const tierRow = document.createElement('div');
+    tierRow.style.cssText = 'display:grid;grid-template-columns:80px 80px 120px auto;gap:8px;margin-bottom:8px;align-items:center';
+    tierRow.innerHTML = `
+        <input type="number" class="tier-min" placeholder="Min" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+        <input type="number" class="tier-max" placeholder="Max" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+        <input type="number" class="tier-price" placeholder="Harga" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+        <button type="button" class="btn bs bsm" onclick="this.parentElement.remove()" style="padding:4px 8px;font-size:11px">✕</button>
+    `;
+    tiersList.appendChild(tierRow);
+}
+
+async function confirmAddAddon(category) {
+    const name = document.getElementById('new-addon-name')?.value?.trim();
+    if (!name) {
+        showToast('Masukkan nama item', 'error');
+        return;
+    }
+    
+    const tierRows = document.querySelectorAll('#addon-tiers-list > div');
+    const tiers = [];
+    
+    tierRows.forEach(row => {
+        const min = parseInt(row.querySelector('.tier-min')?.value || 0);
+        const max = parseInt(row.querySelector('.tier-max')?.value || 9999);
+        const price = parseInt(row.querySelector('.tier-price')?.value || 0);
+        if (price > 0) tiers.push([min, max, price]);
+    });
+    
+    if (tiers.length === 0) {
+        showToast('Tambahkan minimal 1 tier dengan harga > 0', 'error');
+        return;
+    }
+    
+    // Send to server
+    const newAddon = {
+        id: 'addon_' + Date.now(),
+        name: name,
+        type: category === 'video' ? 'flat_video' : 'flat',
+        tiers: tiers,
+        price: tiers[0][2] // For flat_video
+    };
+    
+    try {
+        const response = await fetch('/api/addons.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                operation: 'add_addon',
+                category: category,
+                name: name,
+                type: category === 'video' ? 'flat_video' : 'flat',
+                tiers: tiers,
+                price: tiers[0][2]
+            })
+        });
+        
+        console.log('Add Addon Response - Status:', response.status);
+        const text = await response.text();
+        console.log('Add Addon Response Body:', text.substring(0, 500));
+        
+        if (!text || text.trim() === '') {
+            showToast('✕ Server tidak memberi respons. Status: ' + response.status, 'error');
+            return;
+        }
+        
+        const data = JSON.parse(text);
+        if (data.success) {
+            showToast(`✓ Add-on "${name}" ditambahkan`, 'success');
+            closeAddonModal();
+            setTimeout(() => location.reload(), 500);
+        } else {
+            showToast('✕ ' + (data.message || 'Gagal menambahkan add-on'), 'error');
+        }
+    } catch (err) {
+        console.error('Add Addon Error:', err);
+        showToast('✕ Error: ' + err.message, 'error');
+    }
+}
+
+async function editAddonItem(category, id) {
+    // Find the item element to get all data
+    const item = document.querySelector(`.addon-item[data-category="${category}"][data-id="${id}"]`);
+    if (!item) return;
+    
+    const itemName = item.querySelector('div:nth-child(1)').textContent;
+    const priceElements = item.querySelectorAll('.addon-price-display');
+    
+    // Build modal HTML
+    let tierHtml = '';
+    if (category === 'video') {
+        // Video: single flat price
+        const price = parseInt(priceElements[0].textContent.replace(/\D/g, '') || 0);
+        tierHtml = `
+            <div class="form-row" style="margin-bottom:15px">
+                <label style="font-weight:600;margin-bottom:5px">Harga (Rp)</label>
+                <input type="number" id="edit-video-price" value="${price}" style="border:1px solid var(--border);padding:8px;border-radius:3px;width:100%;box-sizing:border-box;font-size:13px">
+            </div>
+        `;
+    } else {
+        // Tiered: multiple price ranges
+        const tiers = [];
+        priceElements.forEach(el => {
+            const row = el.parentElement;
+            const spans = row.querySelectorAll('span');
+            if (spans.length >= 3) {
+                const min = parseInt(spans[0].textContent);
+                const max = parseInt(spans[2].textContent);
+                const price = parseInt(el.textContent.replace(/\D/g, ''));
+                tiers.push({min, max, price});
+            }
+        });
+        
+        tierHtml = `
+            <div style="margin-bottom:15px">
+                <label style="font-weight:600;margin-bottom:8px;display:block">Tier Harga</label>
+                <div id="edit-addon-tiers">
+                    ${tiers.map((tier, idx) => `
+                        <div style="display:grid;grid-template-columns:80px 80px 120px auto;gap:8px;margin-bottom:8px;align-items:center" class="tier-row">
+                            <input type="number" class="tier-min" value="${tier.min}" placeholder="Min" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+                            <input type="number" class="tier-max" value="${tier.max}" placeholder="Max" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+                            <input type="number" class="tier-price" value="${tier.price}" placeholder="Harga" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+                            <button type="button" class="btn bs bsm" onclick="this.parentElement.remove()" style="padding:4px 8px;font-size:11px">✕</button>
+                        </div>
+                    `).join('')}
+                </div>
+                <button type="button" class="btn bs bsm" onclick="addEditAddonTierRow()" style="margin-top:8px;font-size:11px">+ Tambah Tier</button>
+            </div>
+        `;
+    }
+    
+    const modalHtml = `
+        <div id="edit-addon-modal" style="display:flex;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:9999;align-items:center;justify-content:center">
+            <div style="background:white;padding:30px;border-radius:10px;max-width:600px;width:90%;max-height:80vh;overflow-y:auto">
+                <div style="font-size:18px;font-weight:600;margin-bottom:20px">
+                    Edit Add-on: <span style="color:var(--accent)">${itemName}</span>
+                </div>
+                
+                <div class="form-row" style="margin-bottom:15px">
+                    <label style="font-weight:600;margin-bottom:5px">Nama Item</label>
+                    <input type="text" id="edit-addon-name" value="${itemName}" style="border:1px solid var(--border);padding:8px;border-radius:3px;width:100%;box-sizing:border-box;font-size:13px">
+                </div>
+                
+                ${tierHtml}
+                
+                <div style="display:flex;gap:10px;margin-top:20px">
+                    <button class="btn bp" onclick="saveEditAddonItem('${category}', '${id}')" style="flex:1;font-weight:600">💾 Simpan Perubahan</button>
+                    <button class="btn bs" onclick="closeEditAddonModal()" style="flex:1">Batal</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.insertAdjacentHTML('beforeend', modalHtml);
+}
+
+function closeEditAddonModal() {
+    const modal = document.getElementById('edit-addon-modal');
+    if (modal) modal.remove();
+}
+
+function addEditAddonTierRow() {
+    const tiersList = document.getElementById('edit-addon-tiers');
+    if (!tiersList) return;
+    
+    const tierRow = document.createElement('div');
+    tierRow.style.cssText = 'display:grid;grid-template-columns:80px 80px 120px auto;gap:8px;margin-bottom:8px;align-items:center';
+    tierRow.className = 'tier-row';
+    tierRow.innerHTML = `
+        <input type="number" class="tier-min" placeholder="Min" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+        <input type="number" class="tier-max" placeholder="Max" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+        <input type="number" class="tier-price" placeholder="Harga" style="border:1px solid var(--border);padding:6px;border-radius:3px;font-size:12px">
+        <button type="button" class="btn bs bsm" onclick="this.parentElement.remove()" style="padding:4px 8px;font-size:11px">✕</button>
+    `;
+    tiersList.appendChild(tierRow);
+}
+
+async function saveEditAddonItem(category, id) {
+    const newName = document.getElementById('edit-addon-name')?.value?.trim();
+    if (!newName) {
+        showToast('Nama item tidak boleh kosong', 'error');
+        return;
+    }
+    
+    let updatedAddon = {
+        operation: 'update_addon',
+        id: id,
+        name: newName,
+        type: category === 'video' ? 'flat_video' : 'flat',
+        category: category
+    };
+    
+    if (category === 'video') {
+        // Video: flat price
+        const price = parseInt(document.getElementById('edit-video-price')?.value || 0);
+        if (price <= 0) {
+            showToast('Harga harus lebih dari 0', 'error');
+            return;
+        }
+        updatedAddon.price = price;
+    } else {
+        // Tiered addons
+        const tierRows = document.querySelectorAll('.tier-row');
+        const tiers = [];
+        
+        tierRows.forEach(row => {
+            const min = parseInt(row.querySelector('.tier-min')?.value || 0);
+            const max = parseInt(row.querySelector('.tier-max')?.value || 9999);
+            const price = parseInt(row.querySelector('.tier-price')?.value || 0);
+            
+            if (price > 0) {
+                tiers.push([min, max, price]);
+            }
+        });
+        
+        if (tiers.length === 0) {
+            showToast('Tambahkan minimal 1 tier dengan harga > 0', 'error');
+            return;
+        }
+        
+        updatedAddon.tiers = tiers;
+    }
+    
+    try {
+        console.log('Sending update request:', JSON.stringify(updatedAddon));
+        const response = await fetch('/api/addons.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(updatedAddon)
+        });
+        
+        console.log('Response received - Status:', response.status, 'OK:', response.ok);
+        console.log('Response Headers:', {
+            'Content-Type': response.headers.get('Content-Type'),
+            'Content-Length': response.headers.get('Content-Length')
+        });
+        
+        const text = await response.text();
+        console.log('Response Body Length:', text.length);
+        console.log('API Response Text:', text.substring(0, 500));
+        
+        if (!text || text.trim() === '') {
+            console.error('Empty response body!');
+            showToast('✕ Server tidak memberi respons (response kosong). Status: ' + response.status, 'error');
+            return;
+        }
+        
+        let data;
+        try {
+            data = JSON.parse(text);
+        } catch (e) {
+            console.error('JSON Parse Error:', e);
+            console.error('Raw Response (full):', text);
+            showToast('✕ Respons tidak valid dari server: ' + text.substring(0, 100), 'error');
+            return;
+        }
+        
+        if (data.success) {
+            showToast(`✓ "${newName}" berhasil diperbarui`, 'success');
+            closeEditAddonModal();
+            setTimeout(() => location.reload(), 500);
+        } else {
+            showToast('✕ ' + (data.message || data.error || 'Gagal menyimpan'), 'error');
+        }
+    } catch (err) {
+        console.error('Fetch Error:', err);
+        console.error('Error Stack:', err.stack);
+        showToast('✕ Fetch Error: ' + err.message, 'error');
+    }
+}
+
+async function deleteAddonItem(category, id) {
+    if (!confirm('Hapus add-on ini?')) return;
+    
+    try {
+        const response = await fetch('/api/addons.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                operation: 'delete_addon',
+                category: category,
+                id: id
+            })
+        });
+        
+        console.log('Delete Addon Response - Status:', response.status);
+        const text = await response.text();
+        console.log('Delete Addon Response Body:', text.substring(0, 500));
+        
+        if (!text || text.trim() === '') {
+            showToast('✕ Server tidak memberi respons. Status: ' + response.status, 'error');
+            return;
+        }
+        
+        const data = JSON.parse(text);
+        if (data.success) {
+            showToast('✓ Add-on dihapus', 'success');
+            setTimeout(() => location.reload(), 500);
+        } else {
+            showToast('✕ ' + (data.message || 'Gagal menghapus add-on'), 'error');
+        }
+    } catch (err) {
+        console.error('Delete Addon Error:', err);
+        showToast('✕ Error menghapus: ' + err.message, 'error');
+    }
+}
+
+function editAddonPrice(priceElement) {
+    // Enable inline price editing
+    const currentPrice = priceElement.textContent.replace(/\D/g, '');
+    const input = document.createElement('input');
+    input.type = 'number';
+    input.value = currentPrice;
+    input.style.cssText = 'border:2px solid var(--accent);padding:4px;border-radius:3px;width:150px;font-size:12px;font-weight:600';
+    
+    input.onblur = () => {
+        const newPrice = parseInt(input.value || 0);
+        priceElement.textContent = 'Rp ' + newPrice.toLocaleString('id-ID');
+    };
+    
+    input.onkeypress = (e) => {
+        if (e.key === 'Enter') input.blur();
+    };
+    
+    priceElement.replaceWith(input);
+    input.focus();
+    input.select();
+}
+
+async function saveAllAddons() {
+    showToast('💾 Menyimpan semua perubahan add-on...', 'info');
+    
+    // Collect all addon data from DOM
+    const categories = ['finishing', 'kertas', 'halaman', 'video', 'pkg1', 'pkg2'];
+    const allAddonsData = {};
+    
+    for (let cat of categories) {
+        allAddonsData[cat] = collectAddonsByCategory(cat);
+    }
+    
+    try {
+        // Prepare payload with all category data
+        const payload = {
+            operation: 'update_all_categories',
+            data: allAddonsData
+        };
+        
+        const response = await fetch('/api/addons.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify(payload)
+        });
+        
+        const text = await response.text();
+        const data = JSON.parse(text);
+        if (data.success) {
+            const statusEl = document.getElementById('addon-status');
+            if (statusEl) {
+                statusEl.style.display = 'inline';
+                setTimeout(() => statusEl.style.display = 'none', 3000);
+            }
+            showToast('✓ Semua perubahan add-on tersimpan ke database', 'success');
+        } else {
+            showToast('✕ ' + (data.message || 'Gagal menyimpan add-on'), 'error');
+        }
+    } catch (err) {
+        console.error('Error:', err);
+        showToast('✕ Error: ' + err.message, 'error');
+    }
+}
+
+function collectAddonsByCategory(category) {
+    const items = document.querySelectorAll(`.addon-item[data-category="${category}"]`);
+    const result = [];
+    
+    items.forEach(item => {
+        const priceElements = item.querySelectorAll('.addon-price-display');
+        if (priceElements.length === 0) return;
+        
+        // Single price (for video)
+        if (category === 'video') {
+            const price = parseInt(priceElements[0].textContent.replace(/\D/g, '') || 0);
+            result.push({
+                id: item.dataset.id,
+                name: item.querySelector('div:nth-child(1)').textContent,
+                type: 'flat_video',
+                price: price
+            });
+        } else {
+            // Multiple tiers
+            const tiers = [];
+            priceElements.forEach(el => {
+                const row = el.parentElement;
+                const spans = row.querySelectorAll('span');
+                if (spans.length >= 3) {
+                    const min = parseInt(spans[0].textContent);
+                    const max = parseInt(spans[2].textContent);
+                    const price = parseInt(el.textContent.replace(/\D/g, ''));
+                    tiers.push([min, max, price]);
+                }
+            });
+            
+            if (tiers.length > 0) {
+                result.push({
+                    id: item.dataset.id,
+                    name: item.querySelector('div:nth-child(1)').textContent,
+                    type: 'flat',
+                    tiers: tiers
+                });
+            }
+        }
+    });
+    
+    return result;
+}
+
+async function resetAddons() {
+    if (!confirm('Reset semua add-on ke default?\n\nPerubahan manual akan hilang.')) return;
+    
+    showToast('💾 Mereset add-on ke default...', 'info');
+    
+    try {
+        const response = await fetch('/api/addons.php', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'include',
+            body: JSON.stringify({
+                operation: 'reset_addons'
+            })
+        });
+        
+        const text = await response.text();
+        const data = JSON.parse(text);
+        if (data.success) {
+            showToast('✓ Add-on direset ke default', 'success');
+            setTimeout(() => location.reload(), 500);
+        } else {
+            showToast('✕ ' + (data.message || 'Gagal mereset add-on'), 'error');
+        }
+    } catch (err) {
+        console.error('Error:', err);
+        showToast('✕ Error: ' + err.message, 'error');
+    }
 }
 </script>
 </body>
