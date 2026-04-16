@@ -26,7 +26,9 @@ header('Content-Type: application/json; charset=utf-8');
 try {
     $pdo = getMySQLConnection();
     if (!$pdo) {
-        throw new Exception('Database connection failed. Check DB configuration.');
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Database connection failed. Check DB configuration in .env.']);
+        exit;
     }
     $method = $_SERVER['REQUEST_METHOD'];
     $action = $_GET['action'] ?? 'get_all';

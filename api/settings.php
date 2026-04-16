@@ -10,7 +10,9 @@ try {
     // Get MySQL connection and master data handler
     $pdo = getMySQLConnection();
     if (!$pdo) {
-        throw new Exception('Database connection failed. Check DB configuration.');
+        http_response_code(500);
+        echo json_encode(['success' => false, 'error' => 'Database connection failed. Please check .env or DB credentials. Check PHP error logs for more info.']);
+        exit;
     }
     $masterData = new MySQLMasterData($pdo);
     

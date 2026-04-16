@@ -509,18 +509,24 @@ class MySQLMasterData {
     
     // ========== CETAK BASE ==========
     public function getCetakBase() {
-        $stmt = $this->pdo->query("SELECT min_students, max_students, pages_count, base_price FROM cetak_base 
-                                  ORDER BY min_students");
-        $result = [];
+        $stmt = $this->pdo->query("SELECT min_students, max_students, pages_count, base_price, range_label FROM cetak_base 
+                                  ORDER BY min_students, pages_count");
+        $grouped = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
-            $result[] = [
-                'lo' => (int)$row['min_students'],
-                'hi' => (int)$row['max_students'],
-                'pages' => [(int)$row['pages_count']],
-                'price' => (int)$row['base_price']
-            ];
+            $lo = (int)$row['min_students'];
+            $hi = (int)$row['max_students'];
+            $key = $lo . '-' . $hi;
+            if (!isset($grouped[$key])) {
+                $grouped[$key] = [
+                    'lo' => $lo,
+                    'hi' => $hi,
+                    'label' => $row['range_label'],
+                    'pages' => []
+                ];
+            }
+            $grouped[$key]['pages'][(string)$row['pages_count']] = (int)$row['base_price'];
         }
-        return $result;
+        return array_values($grouped);
     }
     
     public function updateCetakBase($data) {
@@ -535,11 +541,13 @@ class MySQLMasterData {
             foreach ($data as $tier) {
                 $lo = $tier['lo'] ?? 0;
                 $hi = $tier['hi'] ?? 0;
-                $price = $tier['price'] ?? 0;
-                $pages = is_array($tier['pages']) ? $tier['pages'][0] : $tier['pages'] ?? 1;
-                $label = "$lo–$hi siswa";
+                $label = $tier['label'] ?? "$lo–$hi siswa";
                 
-                $stmt->execute([$lo, $hi, $pages, $price, $label]);
+                if (isset($tier['pages']) && is_array($tier['pages'])) {
+                    foreach ($tier['pages'] as $pages => $price) {
+                        $stmt->execute([$lo, $hi, (int)$pages, (int)$price, $label]);
+                    }
+                }
             }
             
             $this->pdo->commit();
@@ -659,12 +667,14 @@ class MySQLMasterData {
     // ========== GRADUATION ==========
     public function getGraduation() {
         $packages = [];
-        $stmt = $this->pdo->query("SELECT package_key, name, price FROM packages_graduation ORDER BY display_order");
+        $stmt = $this->pdo->query("SELECT package_key, name, price, `desc`, color FROM packages_graduation ORDER BY display_order, id");
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
             $packages[] = [
                 'id' => $row['package_key'],
                 'name' => $row['name'],
-                'price' => (int)$row['price']
+                'price' => (int)$row['price'],
+                'desc' => $row['desc'] ?? '',
+                'color' => $row['color'] ?? ''
             ];
         }
         
@@ -681,6 +691,14 @@ class MySQLMasterData {
         
         // Graduation cetak pricing
         $cetak = [];
+        $stmt = $this->pdo->query("SELECT cetak_key, name, price_per_unit FROM graduation_cetak ORDER BY id");
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $cetak[] = [
+                'id' => $row['cetak_key'],
+                'name' => $row['name'],
+                'price' => (int)$row['price_per_unit']
+            ];
+        }
         
         return [
             'packages' => $packages,
@@ -691,9 +709,18 @@ class MySQLMasterData {
     
     // ========== PAYMENT TERMS ==========
     public function getPaymentTerms() {
-        // No payment_terms table in current schema
-        // Return empty terms for now
-        return ['terms' => []];
+        $stmt = $this->pdo->query("SELECT term_key, term_name, deposit, description, color FROM payment_terms ORDER BY id");
+        $terms = [];
+        while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            $terms[] = [
+                'id' => $row['term_key'] ?? '',
+                'name' => $row['term_name'],
+                'deposit' => (int)$row['deposit'],
+                'desc' => $row['description'] ?? '',
+                'color' => $row['color'] ?? ''
+            ];
+        }
+        return ['terms' => $terms];
     }
     
     public function updateGraduation($data) {
@@ -701,13 +728,17 @@ class MySQLMasterData {
         try {
             if (isset($data['packages'])) {
                 $this->pdo->exec("DELETE FROM packages_graduation");
-                $stmt = $this->pdo->prepare("INSERT INTO packages_graduation (package_key, name, price) 
-                                            VALUES (?, ?, ?)");
+                $stmt = $this->pdo->prepare("INSERT INTO packages_graduation (package_key, name, price, `desc`, color, display_order) 
+                                            VALUES (?, ?, ?, ?, ?, ?)");
+                $order = 0;
                 foreach ($data['packages'] as $pkg) {
                     $stmt->execute([
                         $pkg['id'] ?? '',
                         $pkg['name'] ?? '',
-                        (int)($pkg['price'] ?? 0)
+                        (int)($pkg['price'] ?? 0),
+                        $pkg['desc'] ?? '',
+                        $pkg['color'] ?? '',
+                        $order++
                     ]);
                 }
             }
@@ -726,6 +757,19 @@ class MySQLMasterData {
                 }
             }
             
+            if (isset($data['cetak'])) {
+                $this->pdo->exec("DELETE FROM graduation_cetak");
+                $stmt = $this->pdo->prepare("INSERT INTO graduation_cetak (cetak_key, name, price_per_unit) 
+                                            VALUES (?, ?, ?)");
+                foreach ($data['cetak'] as $ctk) {
+                    $stmt->execute([
+                        $ctk['id'] ?? '',
+                        $ctk['name'] ?? '',
+                        (int)($ctk['price'] ?? 0)
+                    ]);
+                }
+            }
+            
             $this->pdo->commit();
             return $this->getGraduation();
         } catch (Exception $e) {
@@ -735,8 +779,27 @@ class MySQLMasterData {
     }
     
     public function updatePaymentTerms($data) {
-        // No payment_terms table in current schema
-        return $this->getPaymentTerms();
+        $this->pdo->beginTransaction();
+        try {
+            $this->pdo->exec("DELETE FROM payment_terms");
+            if (isset($data['terms']) && is_array($data['terms'])) {
+                $stmt = $this->pdo->prepare("INSERT INTO payment_terms (term_key, term_name, deposit, description, color) VALUES (?, ?, ?, ?, ?)");
+                foreach ($data['terms'] as $term) {
+                    $stmt->execute([
+                        $term['id'] ?? '',
+                        $term['name'] ?? '',
+                        (int)($term['deposit'] ?? 0),
+                        $term['desc'] ?? '',
+                        $term['color'] ?? ''
+                    ]);
+                }
+            }
+            $this->pdo->commit();
+            return $this->getPaymentTerms();
+        } catch (Exception $e) {
+            $this->pdo->rollBack();
+            throw $e;
+        }
     }
 }
 
@@ -1001,9 +1064,7 @@ function getDB() {
         if ($pdo) {
             $GLOBALS['_db_instance'] = new MySQLDb($pdo);
         } else {
-            // fallback: tetap pakai JSON (development tanpa MySQL)
-            error_log('getDB(): MySQL tidak tersedia, fallback ke JSONDb');
-            $GLOBALS['_db_instance'] = $GLOBALS['jsonDb'];
+            throw new Exception("MySQL Connection Failed. Please check .env file and database credentials.");
         }
     }
     return $GLOBALS['_db_instance'];
