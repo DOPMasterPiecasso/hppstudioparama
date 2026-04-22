@@ -120,7 +120,7 @@ $jsUser = json_encode([
 ]);
 ?>
 <script>const PHP_USER = <?= $jsUser ?>;</script>
-<script src="/assets/js/app.js"></script>
+<script src="/assets/js/app.js?v=1.2"></script>
 
 <script>
 const API = '/api/users.php';

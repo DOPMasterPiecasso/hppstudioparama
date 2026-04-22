@@ -707,8 +707,8 @@ $jsUser = json_encode([
     'isAdmin'  => $isAdmin,
 ]);
 ?>
-<script src="/assets/js/app.js"></script>
-<script src="/assets/js/app-pages.js"></script>
+<script src="/assets/js/app.js?v=1.2"></script>
+<script src="/assets/js/app-pages.js?v=1.2"></script>
 <script>
 const PHP_USER = <?= $jsUser ?>;
 // MASTER_API sudah didefinisikan di header.php — jangan redeclare
