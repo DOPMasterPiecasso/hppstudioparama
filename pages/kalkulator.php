@@ -60,6 +60,26 @@ include __DIR__ . '/../includes/header.php';
         </div>
       </div>
       <div class="card"><div class="ct">Add-on (Opsional)</div><div style="max-height:300px;overflow-y:auto" id="k-addon-list"></div></div>
+
+      <!-- Bonus & Fasilitas -->
+      <div class="card" id="k-bonus-card">
+        <div class="ct">🎁 Bonus &amp; Fasilitas
+          <span style="font-size:11px;font-weight:400;color:var(--text3);margin-left:6px">tercetak di PDF penawaran</span>
+        </div>
+        <!-- Bonus standar otomatis -->
+        <div id="k-bonus-list" style="margin-top:8px"></div>
+        <!-- Separator -->
+        <div style="border-top:1px dashed var(--border2);margin:10px 0 8px"></div>
+        <!-- Input tambah manual -->
+        <div style="font-size:11px;font-weight:600;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">+ Tambah Bonus Khusus</div>
+        <div style="display:flex;gap:6px;margin-bottom:6px">
+          <input type="text" id="bns-input" placeholder="contoh: Softcover gratis, 5 jam sesi foto..." style="flex:1;font-size:12px;padding:5px 10px" onkeydown="if(event.key==='Enter'){addBonusTag();event.preventDefault()}">
+          <input type="number" id="bns-nominal" placeholder="≈ Nilai" style="width:85px;font-size:12px;padding:5px 8px" oninput="applyDiskon()">
+          <button class="btn bs bsm" onclick="addBonusTag()" style="flex-shrink:0;padding:5px 12px;font-weight:700" title="Tambahkan">+</button>
+        </div>
+        <div style="display:flex;gap:5px;flex-wrap:wrap;min-height:22px" id="bns-tags"></div>
+        <div style="font-size:10px;color:var(--text3);margin-top:5px">Ketik bonus lalu tekan Enter atau klik +. Bonus ini muncul di bagian Bonus &amp; Fasilitas PDF.</div>
+      </div>
     </div>
     <div style="display:flex;flex-direction:column;gap:13px">
       <div class="card">
@@ -84,14 +104,7 @@ include __DIR__ . '/../includes/header.php';
               <span id="dk-nominal-fmt" style="font-size:12px;color:var(--text3)"></span>
             </div>
           </div>
-          <div style="font-size:12px;font-weight:500;color:var(--text2);margin-bottom:6px;margin-top:4px">Bonus Produk <span style="font-size:11px;font-weight:400;color:var(--text3)">(opsional)</span></div>
-          <div style="display:flex;gap:6px;margin-bottom:6px">
-            <input type="text" id="bns-input" placeholder="contoh: +10 halaman gratis..." style="flex:1;font-size:12px;padding:5px 10px" onkeydown="if(event.key==='Enter'){addBonusTag();event.preventDefault()}">
-            <input type="number" id="bns-nominal" placeholder="Rp nilai" style="width:100px;font-size:12px;padding:5px 8px" oninput="applyDiskon()">
-            <button class="btn bs bsm" onclick="addBonusTag()" style="flex-shrink:0;padding:5px 10px">+</button>
-          </div>
-          <div style="display:flex;gap:5px;flex-wrap:wrap;min-height:24px" id="bns-tags"></div>
-          <div id="dk-result" style="margin-top:10px"></div>
+          <div id="dk-result" style="margin-top:6px"></div>
           <div id="dk-warn" class="dk-warn" style="display:none"></div>
         </div>
       </div>
@@ -112,6 +125,7 @@ include __DIR__ . '/../includes/header.php';
         </div>
         <div id="k-save-msg" style="font-size:11px;margin-top:5px;display:none"></div>
       </div>
+
     </div>
   </div>
 </div>

@@ -41,15 +41,16 @@ try {
             case 'get_all':
                 // Return ALL master data sekaligus
                 $response = [
-                    'overhead' => getMasterOverhead($pdo),
-                    'cetak_f' => getMasterCetakFactors($pdo),
-                    'cetak_base' => getMasterCetakBase($pdo),
-                    'alc_f' => getMasterAlaCarteFactors($pdo),
-                    'fs' => getMasterFullService($pdo),
-                    'addon_data' => getMasterAddons($pdo),
-                    'grad' => getMasterGraduation($pdo),
-                    'payment_terms' => getMasterPaymentTerms($pdo),
-                    'timestamp' => date('Y-m-d H:i:s'),
+                    'overhead'        => getMasterOverhead($pdo),
+                    'cetak_f'         => getMasterCetakFactors($pdo),
+                    'cetak_base'      => getMasterCetakBase($pdo),
+                    'alc_f'           => getMasterAlaCarteFactors($pdo),
+                    'fs'              => getMasterFullService($pdo),
+                    'addon_data'      => getMasterAddons($pdo),
+                    'grad'            => getMasterGraduation($pdo),
+                    'payment_terms'   => getMasterPaymentTerms($pdo),
+                    'bonus_fasilitas' => getMasterBonusFasilitas($pdo),
+                    'timestamp'       => date('Y-m-d H:i:s'),
                 ];
                 break;
                 
@@ -83,6 +84,10 @@ try {
                 
             case 'get_payment_terms':
                 $response = getMasterPaymentTerms($pdo);
+                break;
+                
+            case 'get_bonus_fasilitas':
+                $response = getMasterBonusFasilitas($pdo);
                 break;
                 
             default:
@@ -176,6 +181,21 @@ function getMasterGraduation($pdo) {
 function getMasterPaymentTerms($pdo) {
     $masterData = new MySQLMasterData($pdo);
     return $masterData->getPaymentTerms();
+}
+
+function getMasterBonusFasilitas($pdo) {
+    try {
+        $stmt = $pdo->query("SELECT id, package_type, kategori, label, detail, display_order, active FROM bonus_fasilitas WHERE active = 1 ORDER BY display_order ASC, id ASC");
+        $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $result = ['fullservice' => [], 'graduation' => [], 'alacarte' => []];
+        foreach ($all as $row) {
+            $result[$row['package_type']][] = $row;
+        }
+        return $result;
+    } catch (Exception $e) {
+        return ['fullservice' => [], 'graduation' => [], 'alacarte' => []];
+    }
 }
 
 // ============================================================

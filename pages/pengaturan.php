@@ -568,6 +568,76 @@ include __DIR__ . '/../includes/header.php';
     </div>
   </div>
 
+  <!-- ===== BONUS & FASILITAS MASTER DATA ===== -->
+  <div class="card mb16" id="bonus-fasilitas-card">
+    <div class="ph">
+      <div class="pt" style="color:var(--success)">🎁 Bonus &amp; Fasilitas</div>
+      <div class="ps">Master data bonus per tipe paket — tampil di kalkulator &amp; tercetak di PDF penawaran</div>
+    </div>
+    <div class="note mb12">Setiap tipe paket memiliki daftar bonus standar tersendiri. Perubahan langsung berlaku di kalkulator dan PDF.</div>
+
+    <!-- Tab Switcher -->
+    <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+      <button class="bf-tab-btn active" data-pkg="fullservice"
+        onclick="bfSwitchTab('fullservice',this)"
+        style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+        📚 Full Service
+      </button>
+      <button class="bf-tab-btn" data-pkg="graduation"
+        onclick="bfSwitchTab('graduation',this)"
+        style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+        🎓 Graduation
+      </button>
+      <button class="bf-tab-btn" data-pkg="alacarte"
+        onclick="bfSwitchTab('alacarte',this)"
+        style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+        🛒 À La Carte
+      </button>
+    </div>
+
+    <!-- Deskripsi Paket per Tab -->
+    <div id="bf-tab-desc" style="font-size:11px;color:var(--text3);margin-bottom:12px;padding:6px 10px;background:var(--surface2);border-radius:6px"></div>
+
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2)">Kategori:</label>
+      <select id="bf-kategori-select" onchange="bfFilterKategori()" style="padding:6px; font-size:12px; border-radius:4px; border:1px solid var(--border); min-width:200px">
+        <option value="all">Berlaku Semua (All)</option>
+      </select>
+    </div>
+
+    <!-- Daftar Bonus Items -->
+    <div id="bf-list" style="margin-bottom:16px;min-height:60px">
+      <div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">⏳ Memuat data...</div>
+    </div>
+
+    <!-- Separator -->
+    <div style="border-top:1px dashed var(--border2);margin-bottom:14px"></div>
+
+    <!-- Form Tambah Bonus Baru -->
+    <div style="background:var(--surface2);border-radius:8px;padding:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">+ Tambah Bonus Baru</div>
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:8px;margin-bottom:8px">
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">Judul Bonus <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="bf-new-label" placeholder="cth: Studio Foto, Buku Gratis..."
+            style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">Deskripsi Detail <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="bf-new-detail" placeholder="cth: Free portable studio, Fashion Stylist, Properti sesuai tema"
+            style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"
+            onkeydown="if(event.key==='Enter'){bfAddItem();event.preventDefault()}">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn bp bsm" onclick="bfAddItem()" style="padding:7px 18px;font-size:13px;font-weight:600">+ Tambah</button>
+        <span id="bf-add-status" style="font-size:12px;display:none"></span>
+      </div>
+    </div>
+  </div>
+
+
+
   <!-- ===== PAYMENT TERMS SECTION ===== -->
   <div class="card mb16" style="display:none">
     <div class="ph"><div class="pt" style="color:#9B59B6">Syarat Pembayaran</div><div class="ps">Kelola opsi pembayaran untuk penawaran dan proyek — DP, cicilan, atau pembayaran penuh</div></div>
@@ -2501,12 +2571,330 @@ document.addEventListener('DOMContentLoaded', function() {
     if (typeof renderCetakTable === 'function') {
         renderCetakTable();
     }
+
+    // ── Init Bonus & Fasilitas ditangani di script Bonus & Fasilitas sendiri
 });
 </script>
 
-<!-- ============================================================ -->
-<!-- GRADUATION OVERRIDE — patch renderGraduation untuk pengaturan -->
-<!-- ============================================================ -->
+<script>
+// ============================================================
+// BONUS & FASILITAS CRUD — pengaturan.php
+// API: /api/bonus-fasilitas.php
+// ============================================================
+
+const BF_API = '/api/bonus-fasilitas.php';
+let bfCurrentPkg  = 'fullservice';
+let bfData        = {};    // cache { fullservice:[], graduation:[], alacarte:[] }
+let bfEditingId   = null;  // id item yang sedang diedit
+
+const BF_PKG_META = {
+  fullservice: {
+    label : '📚 Full Service',
+    desc  : 'Berlaku untuk semua sub-paket Full Service (Handy Book A4+, Minimal Book SQ, Large Book B4).',
+    color : 'var(--success)',
+  },
+  graduation: {
+    label : '🎓 Graduation',
+    desc  : 'Berlaku untuk semua paket Graduation (Photo & Video, Video Only, Photo Only, dll.).',
+    color : 'var(--info, #2A6B8A)',
+  },
+  alacarte: {
+    label : '🛒 À La Carte',
+    desc  : 'Berlaku untuk semua sub-paket À La Carte (E-Book, Edit+Desain+Cetak, Foto Only, dll.).',
+    color : '#8A5F1A',
+  },
+};
+
+// ── Tab switcher ─────────────────────────────────────────
+function bfSwitchTab(pkg, btn) {
+  bfCurrentPkg = pkg;
+
+  // Update tab button styles
+  document.querySelectorAll('.bf-tab-btn').forEach(b => {
+    const isActive = b === btn;
+    b.style.color       = isActive ? BF_PKG_META[pkg].color : 'var(--text2)';
+    b.style.borderBottom = isActive ? `2px solid ${BF_PKG_META[pkg].color}` : '2px solid transparent';
+    b.style.background  = isActive ? 'var(--surface2)' : 'none';
+  });
+
+  // Description
+  const descEl = document.getElementById('bf-tab-desc');
+  if (descEl) descEl.textContent = BF_PKG_META[pkg]?.desc || '';
+
+  // Update Kategori Options
+  bfUpdateKategoriOptions(pkg);
+
+  bfLoadItems(pkg);
+}
+
+let bfCurrentKategori = 'all';
+
+function bfUpdateKategoriOptions(pkg) {
+  const sel = document.getElementById('bf-kategori-select');
+  if (!sel) return;
+  
+  let html = '<option value="all">Berlaku Semua (All)</option>';
+  
+  if (pkg === 'fullservice') {
+    html += `
+      <option value="fs-handy">Handy Book A4+</option>
+      <option value="fs-minimal">Minimal Book SQ</option>
+      <option value="fs-large">Large Book B4</option>
+    `;
+  } else if (pkg === 'alacarte') {
+    html += `
+      <option value="ac-ebook">E-Book Package</option>
+      <option value="ac-editcetak">Edit+Desain+Cetak</option>
+      <option value="ac-fotohalf">Foto Only (½ Hari)</option>
+      <option value="ac-fotofull">Foto Only (Full Day)</option>
+      <option value="ac-videod">Drone Video</option>
+      <option value="ac-videodoc">Docudrama Video</option>
+      <option value="ac-desain">Desain Only</option>
+      <option value="ac-cetakonly">Cetak Only</option>
+    `;
+  } else if (pkg === 'graduation') {
+    if (typeof GRAD !== 'undefined' && GRAD.packages) {
+      GRAD.packages.forEach(p => {
+        html += `<option value="${p.id}">${p.name}</option>`;
+      });
+    }
+  }
+  
+  sel.innerHTML = html;
+  sel.value = 'all';
+  bfCurrentKategori = 'all';
+}
+
+function bfFilterKategori() {
+  const sel = document.getElementById('bf-kategori-select');
+  if (sel) {
+    bfCurrentKategori = sel.value;
+    bfRenderList(bfCurrentPkg);
+  }
+}
+
+// ── Load from API ─────────────────────────────────────────
+async function bfLoadItems(pkg) {
+  pkg = pkg || bfCurrentPkg;
+  bfCurrentPkg = pkg;
+
+  const listEl = document.getElementById('bf-list');
+  if (listEl) listEl.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">⏳ Memuat...</div>';
+
+  // Set tab desc immediately
+  const descEl = document.getElementById('bf-tab-desc');
+  if (descEl) descEl.textContent = BF_PKG_META[pkg]?.desc || '';
+
+  try {
+    const res  = await fetch(`${BF_API}?type=${pkg}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Gagal memuat');
+
+    bfData[pkg] = json.data || [];
+    bfRenderList(pkg);
+  } catch (e) {
+    if (listEl) listEl.innerHTML = `<div style="color:var(--danger);font-size:13px;padding:12px">✕ Error: ${e.message}</div>`;
+  }
+}
+
+// ── Render list ───────────────────────────────────────────
+function bfRenderList(pkg) {
+  const listEl = document.getElementById('bf-list');
+  if (!listEl) return;
+
+  const allItems = bfData[pkg] || [];
+  const items = allItems.filter(i => i.kategori === bfCurrentKategori || (bfCurrentKategori !== 'all' && i.kategori === 'all'));
+
+  if (!items.length) {
+    listEl.innerHTML = `
+      <div style="text-align:center;padding:24px 0;color:var(--text3)">
+        <div style="font-size:28px;margin-bottom:8px">🎁</div>
+        <div style="font-size:13px">Belum ada bonus untuk kategori ini.<br>Tambahkan menggunakan form di bawah.</div>
+      </div>`;
+    return;
+  }
+
+  const color = BF_PKG_META[pkg]?.color || 'var(--accent)';
+
+  listEl.innerHTML = items.map((item, idx) => `
+    <div id="bf-item-${item.id}" style="
+      display:grid;grid-template-columns:28px 1fr auto auto;gap:10px;align-items:center;
+      padding:10px 12px;margin-bottom:8px;border-radius:8px;
+      background:var(--surface);border:1px solid var(--border);
+      transition:box-shadow .15s">
+
+      <!-- Rank badge -->
+      <div style="width:24px;height:24px;border-radius:50%;background:${color};color:white;
+        font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        ${idx + 1}
+      </div>
+
+      <!-- Content (view mode) -->
+      <div id="bf-content-${item.id}">
+        <div style="font-size:13px;font-weight:600;color:var(--text)">
+          ${escHtml(item.label)} 
+          ${item.kategori === 'all' && bfCurrentKategori !== 'all' ? '<span style="font-size:10px;background:var(--surface2);color:var(--text3);padding:2px 6px;border-radius:4px;margin-left:4px">All</span>' : ''}
+        </div>
+        <div style="font-size:12px;color:var(--text2);margin-top:2px">${escHtml(item.detail)}</div>
+      </div>
+
+      <!-- Edit button -->
+      <button class="btn bs bsm" onclick="bfStartEdit(${item.id})"
+        style="padding:5px 10px;font-size:12px" title="Edit">✏️</button>
+
+      <!-- Delete button -->
+      <button class="btn bs bsm" onclick="bfDeleteItem(${item.id}, '${escHtml(item.label)}')"
+        style="padding:5px 10px;font-size:12px;color:var(--danger);border-color:var(--danger)" title="Hapus">✕</button>
+    </div>
+  `).join('');
+}
+
+// ── Start inline edit ─────────────────────────────────────
+function bfStartEdit(id) {
+  // Close previous edit if any
+  if (bfEditingId && bfEditingId !== id) bfCancelEdit(bfEditingId);
+  bfEditingId = id;
+
+  const items = bfData[bfCurrentPkg] || [];
+  const item  = items.find(i => i.id === id);
+  if (!item) return;
+
+  const contentEl = document.getElementById(`bf-content-${id}`);
+  if (!contentEl) return;
+
+  contentEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 2fr auto;gap:6px;align-items:center">
+      <input id="bf-edit-label-${id}" type="text" value="${escHtml(item.label)}"
+        placeholder="Judul bonus"
+        style="font-size:13px;padding:5px 8px;border:1px solid var(--accent);border-radius:5px">
+      <input id="bf-edit-detail-${id}" type="text" value="${escHtml(item.detail)}"
+        placeholder="Deskripsi detail"
+        style="font-size:13px;padding:5px 8px;border:1px solid var(--accent);border-radius:5px"
+        onkeydown="if(event.key==='Enter'){bfSaveEdit(${id});event.preventDefault()}">
+      <div style="display:flex;gap:5px">
+        <button class="btn bp bsm" onclick="bfSaveEdit(${id})" style="padding:5px 10px;font-size:12px">✓</button>
+        <button class="btn bs bsm" onclick="bfCancelEdit(${id})" style="padding:5px 10px;font-size:12px">✕</button>
+      </div>
+    </div>`;
+
+  document.getElementById(`bf-edit-label-${id}`)?.focus();
+}
+
+// ── Cancel edit ───────────────────────────────────────────
+function bfCancelEdit(id) {
+  bfEditingId = null;
+  const items = bfData[bfCurrentPkg] || [];
+  const item  = items.find(i => i.id === id);
+  const contentEl = document.getElementById(`bf-content-${id}`);
+  if (!item || !contentEl) return;
+
+  contentEl.innerHTML = `
+    <div style="font-size:13px;font-weight:600;color:var(--text)">${escHtml(item.label)}</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:2px">${escHtml(item.detail)}</div>`;
+}
+
+// ── Save edit ─────────────────────────────────────────────
+async function bfSaveEdit(id) {
+  const label  = document.getElementById(`bf-edit-label-${id}`)?.value.trim();
+  const detail = document.getElementById(`bf-edit-detail-${id}`)?.value.trim();
+  if (!label || !detail) { showToast('Judul dan deskripsi wajib diisi.', 'warning'); return; }
+
+  try {
+    const res  = await fetch(BF_API, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'update', id, label, detail })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Gagal menyimpan');
+
+    // Update cache
+    const items = bfData[bfCurrentPkg] || [];
+    const item  = items.find(i => i.id === id);
+    if (item) { item.label = label; item.detail = detail; }
+
+    bfEditingId = null;
+    bfRenderList(bfCurrentPkg);
+    showToast('✓ Bonus berhasil diperbarui.', 'success');
+  } catch (e) {
+    showToast(`✕ ${e.message}`, 'error');
+  }
+}
+
+// ── Delete ────────────────────────────────────────────────
+async function bfDeleteItem(id, label) {
+  if (!confirm(`Hapus bonus "${label}"?\nBonus ini akan hilang dari kalkulator dan PDF.`)) return;
+
+  try {
+    const res  = await fetch(BF_API, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'delete', id })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Gagal menghapus');
+
+    // Remove from cache
+    bfData[bfCurrentPkg] = (bfData[bfCurrentPkg] || []).filter(i => i.id !== id);
+    bfRenderList(bfCurrentPkg);
+    showToast(`✓ Bonus "${label}" dihapus.`, 'success');
+  } catch (e) {
+    showToast(`✕ ${e.message}`, 'error');
+  }
+}
+
+// ── Add new item ──────────────────────────────────────────
+async function bfAddItem() {
+  const label    = document.getElementById('bf-new-label')?.value.trim();
+  const detail   = document.getElementById('bf-new-detail')?.value.trim();
+  const statusEl = document.getElementById('bf-add-status');
+
+  if (!label || !detail) {
+    showToast('Judul dan deskripsi wajib diisi.', 'warning');
+    return;
+  }
+
+  if (statusEl) { statusEl.textContent = '⏳ Menyimpan...'; statusEl.style.display = ''; statusEl.style.color = 'var(--text3)'; }
+
+  try {
+    const currentItems = bfData[bfCurrentPkg] || [];
+    const newOrder = currentItems.length + 1;
+
+    const res  = await fetch(BF_API, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify({ action:'create', package_type: bfCurrentPkg, kategori: bfCurrentKategori, label, detail, display_order: newOrder })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Gagal menambah');
+
+    // Clear inputs
+    document.getElementById('bf-new-label').value  = '';
+    document.getElementById('bf-new-detail').value = '';
+
+    if (statusEl) { statusEl.textContent = '✓ Ditambahkan!'; statusEl.style.color = 'var(--success)'; }
+    setTimeout(() => { if (statusEl) statusEl.style.display = 'none'; }, 2500);
+
+    // Reload list to get fresh data (including new id)
+    await bfLoadItems(bfCurrentPkg);
+    showToast(`✓ Bonus "${label}" ditambahkan ke paket ${BF_PKG_META[bfCurrentPkg]?.label}.`, 'success');
+  } catch (e) {
+    if (statusEl) { statusEl.textContent = `✕ ${e.message}`; statusEl.style.color = 'var(--danger)'; statusEl.style.display = ''; }
+    showToast(`✕ ${e.message}`, 'error');
+  }
+}
+
+// ── Helper ────────────────────────────────────────────────
+function escHtml(str) {
+  return String(str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+// ── Init on DOM ready ─────────────────────────────────────
+document.addEventListener('DOMContentLoaded', function() {
+  bfLoadItems('fullservice');
+});
+</script>
+
 <script>
 // Override renderPengaturan() — versi app-pages.js crash karena akses 'ov-oh'
 // yang tidak ada di pengaturan.php. Override ini aman dan hanya render yang perlu.

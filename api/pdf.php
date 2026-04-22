@@ -64,28 +64,158 @@ if (file_exists($logoPath)) {
 // Parse catatan untuk bonus/add-on
 $addons = [];
 $bonusExtra = [];
+$diskonInfo = '';
 if ($catatan) {
     foreach (explode('|', $catatan) as $part) {
         $part = trim($part);
         if (strpos($part, 'bonus:') === 0) {
             $bonusExtra[] = trim(substr($part, 6));
+        } elseif (strpos($part, 'diskon ') === 0 || strpos($part, 'cashback ') === 0) {
+            $diskonInfo = $part;
         } elseif ($part) {
             $addons[] = $part;
         }
     }
 }
 
-// Spesifikasi default berdasarkan paket
-$paketLower = strtolower($paket);
-$ukuranBuku = 'A4+ (22 × 30 cm)';
-$hasTipe = 'Handy Book A4+';
-if (strpos($paketLower, 'minimal') !== false) { $ukuranBuku = 'SQ (25 × 25 cm)'; $hasTipe = 'Minimal Book SQ'; }
-if (strpos($paketLower, 'large')   !== false) { $ukuranBuku = 'B4 (25 × 35 cm)'; $hasTipe = 'Large Book B4'; }
+// ── Deteksi tipe paket ────────────────────────────────────────
+$paketLower    = strtolower($paket);
+$isFullService = (strpos($paketLower, 'full service') !== false);
+$isAlacarte    = (strpos($paketLower, 'à la carte') !== false
+               || strpos($paketLower, 'a la carte') !== false
+               || strpos($paketLower, 'la carte') !== false);
+$isGraduation  = (strpos($paketLower, 'graduation') !== false);
+
+// ── Tipe buku (Handy / Minimal / Large) ──────────────────────
+$pkgType = 'handy';
+if (strpos($paketLower, 'minimal') !== false) $pkgType = 'minimal';
+elseif (strpos($paketLower, 'large') !== false) $pkgType = 'large';
+
+// ── Spesifikasi Buku sesuai tipe ─────────────────────────────
+$ukuranBuku     = 'A4+ (22 × 30 cm)';
+$hasTipe        = 'Handy Book A4+';
+$jenisCover     = 'Hard Cover, AC 190gsm, Laminasi Doff';
+$jenisFinishing = 'Binding Jahit';
+$jenisKertas    = 'Art Paper 150gsm';
+$jenisPackaging = 'Slongsong';
+
+if ($pkgType === 'minimal') {
+    $ukuranBuku     = 'SQ (25 × 25 cm)';
+    $hasTipe        = 'Minimal Book SQ';
+    $jenisCover     = 'Soft Cover, AC 150gsm, Laminasi Doff';
+    $jenisFinishing = 'Binding Jahit / Staples';
+    $jenisKertas    = 'Art Paper 120gsm';
+    $jenisPackaging = 'Plastik Wrap';
+} elseif ($pkgType === 'large') {
+    $ukuranBuku     = 'B4 (25 × 35 cm)';
+    $hasTipe        = 'Large Book B4';
+    $jenisCover     = 'Hard Cover, AC 210gsm, Laminasi Doff';
+    $jenisFinishing = 'Binding Jahit';
+    $jenisKertas    = 'Art Paper 170gsm';
+    $jenisPackaging = 'Slongsong';
+}
+
+// ── Ambil jumlah halaman dari database (tbl_fs_prices) ───────
+$jumlahHalaman = null;
+if ($isFullService && $siswa > 0) {
+    $stmtPages = $pdo->prepare("
+        SELECT pages FROM tbl_fs_prices
+        WHERE pkg = ? AND min_siswa <= ? AND max_siswa >= ?
+        LIMIT 1
+    ");
+    $stmtPages->execute([$pkgType, $siswa, $siswa]);
+    $rowPages = $stmtPages->fetch(PDO::FETCH_ASSOC);
+    if ($rowPages) {
+        $jumlahHalaman = (int)$rowPages['pages'];
+    }
+}
+
+// ── Jasa Termasuk sesuai tipe paket ──────────────────────────
+if ($isFullService) {
+    $jasaTermasuk = 'Foto Produksi (Personal, Konsep, Konten) &nbsp;·&nbsp; Desain Cover &amp; Layout &nbsp;·&nbsp; Editing Foto Terpilih';
+} elseif ($isAlacarte) {
+    if (strpos($paketLower, 'e-book') !== false || strpos($paketLower, 'ebook') !== false) {
+        $jasaTermasuk = 'Foto Produksi &nbsp;·&nbsp; Editing &nbsp;·&nbsp; Desain &amp; Layout (Output: File Digital)';
+    } elseif (strpos($paketLower, 'edit') !== false && strpos($paketLower, 'cetak') !== false) {
+        $jasaTermasuk = 'Editing Foto Terpilih &nbsp;·&nbsp; Desain &amp; Layout &nbsp;·&nbsp; Cetak &amp; Kirim';
+    } elseif (strpos($paketLower, 'foto only') !== false) {
+        $jasaTermasuk = 'Sesi Foto Produksi &nbsp;·&nbsp; Fashion Stylist';
+    } elseif (strpos($paketLower, 'drone') !== false) {
+        $jasaTermasuk = 'Video Drone 1–2 menit';
+    } elseif (strpos($paketLower, 'docudrama') !== false || strpos($paketLower, 'video') !== false) {
+        $jasaTermasuk = 'Video Cerita Angkatan 5–10 menit';
+    } elseif (strpos($paketLower, 'desain') !== false) {
+        $jasaTermasuk = 'Layout &amp; Desain Buku (Klien sediakan konten)';
+    } elseif (strpos($paketLower, 'cetak only') !== false) {
+        $jasaTermasuk = 'Cetak &amp; Pengiriman (File siap cetak dari klien)';
+    } else {
+        $jasaTermasuk = 'Sesuai paket yang dipilih';
+    }
+} elseif ($isGraduation) {
+    $jasaTermasuk = 'Dokumentasi Wisuda (Foto &amp; Video sesuai paket)';
+} else {
+    $jasaTermasuk = 'Sesuai paket yang dipilih';
+}
+
+// ── Bonus & Fasilitas — dari tabel bonus_fasilitas (DB) ──────
+$dbPkgType = 'fullservice'; // default
+$dbKategori = 'all';
+
+if ($isGraduation) {
+    $dbPkgType = 'graduation';
+    $stmtGrad = $pdo->query("SELECT setting_value FROM tbl_settings WHERE setting_key = 'grad_packages'");
+    $gradPkgJson = $stmtGrad->fetchColumn();
+    if ($gradPkgJson) {
+        $gradPkgs = json_decode($gradPkgJson, true);
+        if (is_array($gradPkgs)) {
+            foreach ($gradPkgs as $gpkg) {
+                if (stripos($paket, $gpkg['name']) !== false) {
+                    $dbKategori = $gpkg['id'];
+                    break;
+                }
+            }
+        }
+    }
+} elseif ($isAlacarte) {
+    $dbPkgType = 'alacarte';
+    if (strpos($paketLower, 'e-book') !== false) $dbKategori = 'ac-ebook';
+    elseif (strpos($paketLower, 'edit') !== false && strpos($paketLower, 'cetak') !== false) $dbKategori = 'ac-editcetak';
+    elseif (strpos($paketLower, 'foto only') !== false && strpos($paketLower, '½ hari') !== false) $dbKategori = 'ac-fotohalf';
+    elseif (strpos($paketLower, 'foto only') !== false) $dbKategori = 'ac-fotofull';
+    elseif (strpos($paketLower, 'drone') !== false) $dbKategori = 'ac-videod';
+    elseif (strpos($paketLower, 'docudrama') !== false || strpos($paketLower, 'video') !== false) $dbKategori = 'ac-videodoc';
+    elseif (strpos($paketLower, 'desain') !== false) $dbKategori = 'ac-desain';
+    elseif (strpos($paketLower, 'cetak only') !== false) $dbKategori = 'ac-cetakonly';
+} else {
+    $dbPkgType = 'fullservice';
+    if ($pkgType === 'minimal') $dbKategori = 'fs-minimal';
+    elseif ($pkgType === 'large') $dbKategori = 'fs-large';
+    else $dbKategori = 'fs-handy';
+}
+
+$bonusStandar = [];
+try {
+    $stmtBonus = $pdo->prepare(
+        "SELECT label, detail FROM bonus_fasilitas
+         WHERE package_type = ? AND active = 1 AND (kategori = 'all' OR kategori = ? OR kategori = '' OR kategori IS NULL)
+         ORDER BY display_order ASC, id ASC"
+    );
+    $stmtBonus->execute([$dbPkgType, $dbKategori]);
+    $bonusStandar = $stmtBonus->fetchAll(PDO::FETCH_ASSOC);
+} catch (Exception $e) {
+    // Jika tabel belum ada atau query gagal, biarkan kosong
+    $bonusStandar = [];
+}
+
+
+
+
 
 $subtitle = implode('  ·  ', array_filter([$paket, $siswa > 0 ? $siswa . ' siswa' : '']));
 
 $filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', $namaKlien) . '_' . $docId . '.pdf';
 ?>
+
 <!DOCTYPE html>
 <html lang="id">
 <head>
@@ -352,7 +482,7 @@ body {
         <?= e($namaKlien) ?>
     </div>
     <div class="toolbar-btns">
-        <button class="btn-print btn-secondary" onclick="history.back()">← Kembali</button>
+        <button class="btn-print btn-secondary" onclick="if(window.history.length > 1) { history.back(); } else { window.close(); }">← Kembali</button>
         <button class="btn-print btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
     </div>
 </div>
@@ -398,28 +528,34 @@ body {
         <div class="sec-label">Spesifikasi Buku</div>
         <table class="spec-table">
             <tr><td class="spec-key">Jumlah Pesanan</td><td class="spec-val"><?= $siswa > 0 ? $siswa . ' Buku' : '—' ?></td></tr>
+            <?php if ($jumlahHalaman !== null): ?>
+            <tr><td class="spec-key">Jumlah Halaman</td><td class="spec-val"><?= $jumlahHalaman ?> Halaman</td></tr>
+            <?php endif; ?>
+            <?php if ($isFullService || $isAlacarte): ?>
             <tr><td class="spec-key">Ukuran Buku</td><td class="spec-val"><?= e($ukuranBuku) ?></td></tr>
-            <tr><td class="spec-key">Jenis Kertas</td><td class="spec-val">Matte Paper 150gsm</td></tr>
-            <tr><td class="spec-key">Cover</td><td class="spec-val">Hard Cover, AC 190gsm, Laminasi Doff</td></tr>
-            <tr><td class="spec-key">Packaging</td><td class="spec-val">Slongsong</td></tr>
-            <tr><td class="spec-key">Finishing</td><td class="spec-val">Binding Jahit</td></tr>
-            <tr><td class="spec-key">Jasa Termasuk</td><td class="spec-val">Foto Produksi (Personal, Konsep, Konten) &nbsp;·&nbsp; Desain Cover &amp; Layout &nbsp;·&nbsp; Editing Foto Terpilih</td></tr>
+            <tr><td class="spec-key">Jenis Kertas</td><td class="spec-val"><?= e($jenisKertas) ?></td></tr>
+            <tr><td class="spec-key">Cover</td><td class="spec-val"><?= e($jenisCover) ?></td></tr>
+            <tr><td class="spec-key">Packaging</td><td class="spec-val"><?= e($jenisPackaging) ?></td></tr>
+            <tr><td class="spec-key">Finishing</td><td class="spec-val"><?= e($jenisFinishing) ?></td></tr>
+            <?php endif; ?>
+            <tr><td class="spec-key">Jasa Termasuk</td><td class="spec-val"><?= $jasaTermasuk ?></td></tr>
         </table>
 
         <!-- Bonus & Fasilitas -->
+        <?php if (!empty($bonusStandar) || !empty($bonusExtra)): ?>
         <div class="sec-label">Bonus &amp; Fasilitas</div>
         <div class="bonus-block">
             <div class="bonus-bar"></div>
             <div class="bonus-content">
-                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b>Studio Foto:</b> Free portable studio delivery, Fashion Stylist, Properti sesuai tema</span></div>
-                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b>Buku Gratis:</b> 4 pcs Buku Tahunan</span></div>
-                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b>Fotografi:</b> Free Photoshoot Graduation (2 Fotografer)</span></div>
-                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b>Pengiriman:</b> Gratis biaya pengiriman area Jabodetabek</span></div>
+                <?php foreach ($bonusStandar as $bs): ?>
+                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b><?= e($bs['label']) ?>:</b> <?= $bs['detail'] ?></span></div>
+                <?php endforeach; ?>
                 <?php foreach ($bonusExtra as $b): ?>
                 <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><?= e($b) ?></span></div>
                 <?php endforeach; ?>
             </div>
         </div>
+        <?php endif; ?>
 
         <!-- Rincian Harga -->
         <div class="sec-label">Rincian Harga</div>
@@ -427,9 +563,15 @@ body {
             <!-- Baris base price -->
             <tr>
                 <td class="pt-label">
-                    Harga Buku Tahunan
-                    <?php if ($siswa > 0): ?>
-                        &nbsp;(<?= $siswa ?> buku × <?= rp($perBuku) ?>)
+                    <?php if ($isGraduation): ?>
+                        Harga Paket Graduation
+                    <?php elseif ($isAlacarte): ?>
+                        Harga Layanan
+                    <?php else: ?>
+                        Harga Buku Tahunan
+                        <?php if ($siswa > 0): ?>
+                            &nbsp;(<?= $siswa ?> buku × <?= rp($perBuku) ?>)
+                        <?php endif; ?>
                     <?php endif; ?>
                 </td>
                 <td class="pt-val"><?= rp($harga) ?></td>
@@ -465,8 +607,17 @@ body {
             <div class="notes-bar"></div>
             <div class="notes-content">
                 <ul>
-                    <li>Harga berlaku untuk minimal <?= $siswa > 0 ? $siswa : '—' ?> pemesan Buku Tahunan.</li>
+                    <?php if ($isFullService && $siswa > 0): ?>
+                    <li>Harga berlaku untuk minimal <?= $siswa ?> pemesan Buku Tahunan.</li>
+                    <?php elseif ($isGraduation): ?>
+                    <li>Harga berlaku untuk event yang telah disepakati.</li>
+                    <?php else: ?>
+                    <li>Harga berlaku sesuai spesifikasi yang tercantum.</li>
+                    <?php endif; ?>
                     <li>Harga bersifat penawaran dan dapat berubah sesuai kesepakatan.</li>
+                    <?php if ($diskonInfo): ?>
+                    <li>Telah diperhitungkan: <?= e($diskonInfo) ?>.</li>
+                    <?php endif; ?>
                 </ul>
             </div>
         </div>

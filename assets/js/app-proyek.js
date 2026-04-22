@@ -430,6 +430,9 @@ function updateNominalFmt(){
 // ============================================================
 window.addEventListener('DOMContentLoaded', async ()=>{
   await loadSettingsFromAPI();
+  if (typeof refreshMasterData === 'function') {
+    await refreshMasterData();
+  }
   await loadPenawaranFromAPI();
   
   const pg = document.querySelector('.page');

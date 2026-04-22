@@ -118,6 +118,13 @@ const ALC_CFG = DB_SETTINGS['alc_cfg'] ? JSON.parse(DB_SETTINGS['alc_cfg']) : {
 
 let curFSPkg='handy', curAnPkg='handy';
 
+// Bonus & Fasilitas — diisi dari DB via refreshMasterData()
+let BONUS_FASILITAS = {
+  fullservice: [],
+  graduation:  [],
+  alacarte:    [],
+};
+
 // ============================================================
 // HELPERS
 // ============================================================
@@ -683,13 +690,15 @@ async function refreshMasterData() {
             const data = result.data;
             
             // Update semua global variables
-            if (data.overhead) OH = {...OH, ...flattenObject(data.overhead)};
-            if (data.cetak_f) CETAK_F = {...data.cetak_f};
+            if (data.overhead)    OH = {...OH, ...flattenObject(data.overhead)};
+            if (data.cetak_f)    CETAK_F = {...data.cetak_f};
             if (data.cetak_base) CETAK_BASE = data.cetak_base;
-            if (data.alc_f) ALC_F = {...data.alc_f};
-            if (data.fs) FS = {...data.fs};
+            if (data.alc_f)      ALC_F = {...data.alc_f};
+            if (data.fs)         FS = {...data.fs};
             if (data.addon_data) ADDON_DATA = {...data.addon_data};
-            if (data.grad) GRAD = {...data.grad};
+            if (data.grad)       GRAD = {...data.grad};
+            if (data.bonus_fasilitas) BONUS_FASILITAS = {...data.bonus_fasilitas};
+            if (data.payment_terms)   PT = data.payment_terms;
             
             console.log('✓ Master data refreshed from API');
             return true;
