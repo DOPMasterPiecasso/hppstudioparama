@@ -141,23 +141,9 @@ $jsUser = json_encode([
 ]);
 ?>
 <script>const PHP_USER = <?= $jsUser ?>;</script>
-<script src="/assets/js/app.js?v=1.2"></script>
-<script src="/assets/js/app-pages.js?v=1.2"></script>
-<script src="/assets/js/app-proyek.js?v=1.2"></script>
-<script>
-// Handle init specifically if there's an edit_id param
-window.addEventListener('DOMContentLoaded', () => {
-    const params = new URLSearchParams(window.location.search);
-    const editId = params.get('edit_id');
-    if (editId) {
-        // Need a slight delay to allow settings and penawaran to load
-        setTimeout(() => {
-            if (typeof editPenawaran === 'function') {
-                editPenawaran(parseInt(editId));
-            }
-        }, 300);
-    }
-});
-</script>
+<script src="/assets/js/app.js?v=1.5"></script>
+<script src="/assets/js/app-pages.js?v=1.5"></script>
+<script src="/assets/js/app-proyek.js?v=1.5"></script>
+<!-- Edit init ditangani di app-proyek.js DOMContentLoaded (async flow, no race condition) -->
 </body>
 </html>

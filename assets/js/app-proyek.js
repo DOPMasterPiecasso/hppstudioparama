@@ -214,6 +214,7 @@ function renderProyek(){
 // EDIT PENAWARAN & SAVE dari KALKULATOR
 // ============================================================
 let editingPenawaranId = null;
+let isRestoringEditData = false; // Flag untuk prevent race condition
 
 function editPenawaran(id){
   const p = penawaranList.find(x=>String(x.id)===String(id));
@@ -223,28 +224,160 @@ function editPenawaran(id){
     return;
   }
   editingPenawaranId = id;
-  setTimeout(()=>{
+  isRestoringEditData = true; // Set flag untuk prevent intermediate kalcUpdate()
+  
+  // Langsung eksekusi — dipanggil dari async DOMContentLoaded, tidak perlu setTimeout
+  {
     const isGrad = p.paket.toLowerCase().includes('graduation');
     const catEl = document.getElementById('k-cat');
     if(catEl){ catEl.value = isGrad ? 'graduation' : 'bukutahunan'; kCatChange(); }
-    if(!isGrad){
+
+    if(isGrad){
+      // Restore graduation package — cari berdasarkan nama paket
+      const gradEl = document.getElementById('k-grad-pkg');
+      if(gradEl && typeof GRAD !== 'undefined' && GRAD.packages){
+        const paketNama = p.paket.replace(/^Graduation\s*[\u2014-]?\s*/i,'').trim();
+        const found = GRAD.packages.find(pk =>
+          pk.name.toLowerCase() === paketNama.toLowerCase() ||
+          p.paket.toLowerCase().includes(pk.name.toLowerCase())
+        );
+        if(found){ gradEl.value = found.id; }
+      }
+    } else {
+      // Peta label paket ke value option
+      const PAKET_MAP = {
+        'Full Service \u2014 Handy Book A4+':    'fs-handy',
+        'Full Service \u2014 Minimal Book SQ':   'fs-minimal',
+        'Full Service \u2014 Large Book B4':     'fs-large',
+        '\u00c0 La Carte \u2014 E-Book Package':      'ac-ebook',
+        '\u00c0 La Carte \u2014 Edit+Desain+Cetak':   'ac-editcetak',
+        '\u00c0 La Carte \u2014 Foto Only (\u00bd hari)':  'ac-fotohalf',
+        '\u00c0 La Carte \u2014 Foto Only (Full day)':'ac-fotofull',
+        '\u00c0 La Carte \u2014 Drone Video':         'ac-videod',
+        '\u00c0 La Carte \u2014 Docudrama Video':     'ac-videodoc',
+        '\u00c0 La Carte \u2014 Desain Only':         'ac-desain',
+        '\u00c0 La Carte \u2014 Cetak Only':          'ac-cetakonly',
+        'Full Service - Handy': 'fs-handy',
+        'Full Service - Minimal': 'fs-minimal',
+        'Full Service - Large': 'fs-large',
+      };
       const typeEl = document.getElementById('k-type');
       if(typeEl){
-        const paketLower = p.paket.toLowerCase();
-        for(let i=0;i<typeEl.options.length;i++){
-          if(typeEl.options[i].text.toLowerCase().includes(paketLower.split('—')[0].trim().toLowerCase().slice(0,10))){
-            typeEl.selectedIndex=i; break;
+        // 1. Coba exact match dari peta
+        let matched = PAKET_MAP[p.paket];
+        // 2. Coba match dari teks option yang sama persis
+        if(!matched){
+          for(let i=0;i<typeEl.options.length;i++){
+            if(typeEl.options[i].text === p.paket){
+              matched = typeEl.options[i].value; break;
+            }
           }
         }
+        // 3. Fallback: substring match (tanpa emdash)
+        if(!matched){
+          const pl = p.paket.toLowerCase();
+          for(let i=0;i<typeEl.options.length;i++){
+            const ol = typeEl.options[i].text.toLowerCase();
+            const plBase = pl.split(/[\u2014\-]/)[0].trim();
+            const olBase = ol.split(/[\u2014\-]/)[0].trim();
+            if(plBase && olBase && (plBase.includes(olBase) || olBase.includes(plBase))){
+              matched = typeEl.options[i].value; break;
+            }
+          }
+        }
+        if(matched) typeEl.value = matched;
       }
       const siswaEl = document.getElementById('k-siswa');
-      if(siswaEl&&p.siswa) siswaEl.value = p.siswa;
+      if(siswaEl && p.siswa) siswaEl.value = p.siswa;
     }
-    kalcUpdate();
-    const namaEl=document.getElementById('k-save-nama'); if(namaEl) namaEl.value=p.nama;
+
+    // Restore nama klien SEBELUM kalcUpdate() — jangan lewati
+    const namaEl = document.getElementById('k-save-nama');
+    if(namaEl) namaEl.value = p.nama;
+
+    // Tampilkan tombol hapus
     const hbtn = document.getElementById('btn-hapus-pw');
     if(hbtn) hbtn.style.display = 'block';
-  }, 150);
+
+    // Restore bonus tags & diskon dari field catatan
+    // Format tersimpan: "diskon 5% | bonus: abc | bonus: xyz (\u2248Rp500rb)"
+    if(p.catatan){
+      const parts = p.catatan.split('|').map(s=>s.trim()).filter(Boolean);
+      const bnsContainer = document.getElementById('bns-tags');
+      if(bnsContainer) bnsContainer.innerHTML = '';
+
+      parts.forEach(part => {
+        // Restore diskon persen
+        const dkPersen = part.match(/^diskon\s+(\d+(?:\.\d+)?)%$/i);
+        if(dkPersen){
+          const btn = document.querySelector('.dkbtn[data-type="persen"]');
+          if(btn) setDkType('persen', btn);
+          const dkv = document.getElementById('dk-value');
+          if(dkv){ dkv.value = dkPersen[1]; }
+          return;
+        }
+        // Restore diskon nominal
+        const dkNom = part.match(/^diskon Rp([\d.,]+)$/i);
+        if(dkNom){
+          const btn = document.querySelector('.dkbtn[data-type="nominal"]');
+          if(btn) setDkType('nominal', btn);
+          const dkv = document.getElementById('dk-value');
+          if(dkv){ dkv.value = dkNom[1].replace(/[.,]/g,''); }
+          return;
+        }
+        // Restore cashback
+        const cbPersen = part.match(/^cashback\s+(\d+(?:\.\d+)?)%$/i);
+        if(cbPersen){
+          const btn = document.querySelector('.dkbtn[data-type="cashback"]');
+          if(btn) setDkType('cashback', btn);
+          const dkv = document.getElementById('dk-value');
+          if(dkv){ dkv.value = cbPersen[1]; }
+          return;
+        }
+        // Restore bonus tag
+        const bonusPart = part.match(/^bonus:\s*(.+)$/i);
+        if(bonusPart && bnsContainer){
+          const label = bonusPart[1];
+          const tagId = 'bns-'+Date.now()+'-'+Math.random().toString(36).slice(2,6);
+          const tag = document.createElement('span');
+          tag.className = 'bns-tag';
+          tag.dataset.label = label;
+          tag.dataset.nominal = 0;
+          tag.id = tagId;
+          tag.innerHTML = label+'<button onclick=\"removeBonusTag(\'' + tagId + '\')\" title=\"Hapus\">\u00d7</button>';
+          bnsContainer.appendChild(tag);
+        }
+        // Addons entry diabaikan di sini (ditangani terpisah di bawah)
+      });
+
+      // Restore addon checkboxes — setelah buildAddonList() dipanggil lewat kCatChange()
+      const addonPart = parts.find(pt => /^addons:/i.test(pt));
+      if(addonPart){
+        const addonEntries = addonPart.replace(/^addons:\s*/i,'').split(',').map(s=>s.trim()).filter(Boolean);
+        addonEntries.forEach(entry => {
+          const colonIdx = entry.lastIndexOf(':');
+          const addonId  = colonIdx > 0 ? entry.slice(0, colonIdx) : entry;
+          const extraVal = colonIdx > 0 ? entry.slice(colonIdx+1) : null;
+          // Coba checkbox (buku tahunan / graduation addons)
+          const chk = document.getElementById('chk-'+addonId);
+          if(chk){ chk.checked = true; }
+          // Coba xhal input (halaman tambahan)
+          if(extraVal){
+            const xhal = document.getElementById('xhal-'+addonId);
+            if(xhal){ xhal.style.display=''; xhal.value=extraVal; }
+            // Coba qty-cetak input (graduation cetak)
+            const qtyCetak = document.getElementById('qty-cetak-'+addonId);
+            if(qtyCetak){ qtyCetak.value = extraVal; }
+          }
+        });
+      }
+    }
+
+    // SEKARANG baru panggil kalcUpdate() setelah SEMUA data ter-restore
+    isRestoringEditData = false; // Clear flag SEBELUM kalcUpdate
+    kalcUpdate();
+    applyDiskon();
+  }
 }
 
 function deleteCurrentPenawaran(){
@@ -288,6 +421,31 @@ async function saveKalcToPenawaran(){
   else if(dType==='nominal'&&dVal>0) nego.push(`diskon Rp${dVal.toLocaleString('id-ID')}`);
   else if(dType==='cashback'&&dVal>0) nego.push(`cashback ${dVal}%`);
   if(tags.length) nego.push(...tags.map(t=>`bonus: ${t}`));
+  // Simpan checkbox add-on yang dipilih
+  const _cat = document.getElementById('k-cat')?.value||'bukutahunan';
+  let checkedAddons = [];
+  if(_cat === 'bukutahunan'){
+    const _allAddons = [...(ADDON_DATA.finishing||[]),...(ADDON_DATA.kertas||[]),...(ADDON_DATA.halaman||[]),...(ADDON_DATA.video||[]),...(ADDON_DATA.pkg1||[]),...(ADDON_DATA.pkg2||[])];
+    _allAddons.forEach(a=>{
+      const chk=document.getElementById('chk-'+a.id);
+      if(chk&&chk.checked){
+        if(a.type==='extra_hal'){
+          const xv=document.getElementById('xhal-'+a.id)?.value||'10';
+          checkedAddons.push(a.id+':'+xv);
+        } else { checkedAddons.push(a.id); }
+      }
+    });
+  } else if(_cat === 'graduation'){
+    if(GRAD&&GRAD.addons) GRAD.addons.forEach(a=>{
+      const chk=document.getElementById('chk-'+a.id);
+      if(chk&&chk.checked) checkedAddons.push(a.id);
+    });
+    if(GRAD&&GRAD.cetak) GRAD.cetak.forEach(c=>{
+      const qty=parseInt(document.getElementById('qty-cetak-'+c.id)?.value)||0;
+      if(qty>0) checkedAddons.push(c.id+':'+qty);
+    });
+  }
+  if(checkedAddons.length>0) nego.push('addons: '+checkedAddons.join(','));
   const catatan=nego.join(' | ');
   let hargaFinal=total;
   if(dType==='persen'&&dVal>0) hargaFinal=Math.round(total*(1-dVal/100));
@@ -444,8 +602,26 @@ window.addEventListener('DOMContentLoaded', async ()=>{
   if(activePageId === 'page-addon' && typeof renderAddon === 'function') renderAddon();
   if(activePageId === 'page-graduation' && typeof renderGraduation === 'function') renderGraduation();
   if(activePageId === 'page-kalkulator' && typeof kalcUpdateCore === 'function') {
-    buildAddonList(); 
-    kalcUpdateCore();
+    buildAddonList();
+    // Cek apakah mode edit (ada edit_id di URL)
+    const _editParams = new URLSearchParams(window.location.search);
+    const _editId = _editParams.get('edit_id');
+    if(_editId){
+      // Mode edit: cari data dari penawaranList, lalu panggil editPenawaran
+      // — semua dalam satu async flow, tidak ada race condition
+      const _targetId = parseInt(_editId);
+      const _found = penawaranList.find(x => String(x.id) === String(_targetId));
+      if(_found && typeof editPenawaran === 'function'){
+        editPenawaran(_targetId);
+      } else {
+        // Fallback: tidak ketemu di list, tetap render default
+        kalcUpdateCore();
+        console.warn('edit_id ' + _targetId + ' tidak ditemukan di penawaranList');
+      }
+    } else {
+      // Mode baru: render normal
+      kalcUpdateCore();
+    }
   }
   if(activePageId === 'page-proyek' && typeof renderProyek === 'function') renderProyek();
   if(activePageId === 'page-analisis' && typeof renderAnalisis === 'function') renderAnalisis();

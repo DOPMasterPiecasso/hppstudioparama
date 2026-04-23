@@ -252,7 +252,12 @@ function kalcUpdateCore(){
   renderBonusPreview();
 }
 
-function kalcUpdate(){ kalcUpdateCore(); applyDiskon(); }
+function kalcUpdate(){ 
+  // Skip intermediate updates during edit data restore to prevent race condition
+  if(typeof isRestoringEditData !== 'undefined' && isRestoringEditData) return;
+  kalcUpdateCore(); 
+  applyDiskon(); 
+}
 
 // ============================================================
 // BONUS & FASILITAS PREVIEW (sesuai tipe paket → sama dengan PDF)
