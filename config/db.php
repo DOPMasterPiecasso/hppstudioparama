@@ -836,7 +836,7 @@ class MySQLDb {
      */
     public function getUserByUsername($username) {
         $stmt = $this->pdo->prepare(
-            "SELECT u.id, u.username, u.password, u.name, u.role_id, u.is_active,
+            "SELECT u.id, u.username, u.password, u.name, u.position, u.role_id, u.is_active,
                     r.name as role, r.label as role_label, r.permissions
              FROM users u
              JOIN roles r ON r.id = u.role_id
@@ -858,7 +858,7 @@ class MySQLDb {
      */
     public function getUserById($id) {
         $stmt = $this->pdo->prepare(
-            "SELECT u.id, u.username, u.password, u.name, u.role_id, u.is_active,
+            "SELECT u.id, u.username, u.password, u.name, u.position, u.role_id, u.is_active,
                     r.name as role, r.label as role_label, r.permissions
              FROM users u
              JOIN roles r ON r.id = u.role_id
@@ -879,7 +879,7 @@ class MySQLDb {
      */
     public function getAllUsers() {
         $stmt = $this->pdo->query(
-            "SELECT u.id, u.username, u.name, u.role_id, u.is_active, u.created_at,
+            "SELECT u.id, u.username, u.name, u.position, u.role_id, u.is_active, u.created_at,
                     r.name as role, r.label as role_label
              FROM users u
              JOIN roles r ON r.id = u.role_id
@@ -896,11 +896,11 @@ class MySQLDb {
     /**
      * Add user — return new id
      */
-    public function addUser($username, $password, $name, $email, $role_id) {
+    public function addUser($username, $password, $name, $email, $role_id, $position = null) {
         $stmt = $this->pdo->prepare(
-            "INSERT INTO users (username, password, name, role_id, is_active) VALUES (?, ?, ?, ?, 1)"
+            "INSERT INTO users (username, password, name, role_id, position, is_active) VALUES (?, ?, ?, ?, ?, 1)"
         );
-        $stmt->execute([$username, $password, $name, (int)$role_id]);
+        $stmt->execute([$username, $password, $name, (int)$role_id, $position]);
         return (int)$this->pdo->lastInsertId();
     }
 
@@ -908,7 +908,7 @@ class MySQLDb {
      * Update user fields
      */
     public function updateUser($id, $fields) {
-        $allowed = ['username','name','role_id','is_active','password'];
+        $allowed = ['username','name','position','role_id','is_active','password'];
         $sets = [];
         $vals = [];
         foreach ($allowed as $col) {

@@ -163,18 +163,23 @@ $dbKategori = 'all';
 
 if ($isGraduation) {
     $dbPkgType = 'graduation';
-    $stmtGrad = $pdo->query("SELECT setting_value FROM tbl_settings WHERE setting_key = 'grad_packages'");
-    $gradPkgJson = $stmtGrad->fetchColumn();
-    if ($gradPkgJson) {
-        $gradPkgs = json_decode($gradPkgJson, true);
-        if (is_array($gradPkgs)) {
-            foreach ($gradPkgs as $gpkg) {
-                if (stripos($paket, $gpkg['name']) !== false) {
-                    $dbKategori = $gpkg['id'];
-                    break;
+    try {
+        $stmtGrad = $pdo->query("SELECT setting_value FROM tbl_settings WHERE setting_key = 'grad_packages'");
+        $gradPkgJson = $stmtGrad->fetchColumn();
+        if ($gradPkgJson) {
+            $gradPkgs = json_decode($gradPkgJson, true);
+            if (is_array($gradPkgs)) {
+                foreach ($gradPkgs as $gpkg) {
+                    if (stripos($paket, $gpkg['name']) !== false) {
+                        $dbKategori = $gpkg['id'];
+                        break;
+                    }
                 }
             }
         }
+    } catch (Exception $e) {
+        // Jika tabel tbl_settings tidak ada, gunakan default
+        $dbKategori = 'all';
     }
 } elseif ($isAlacarte) {
     $dbPkgType = 'alacarte';
@@ -351,6 +356,32 @@ body {
 .bonus-text { color: #1a4a2e; }
 .bonus-text b { color: #2d7a4a; }
 
+/* Add-on block */
+.addon-block {
+    display: flex;
+    margin-bottom: 18px;
+}
+.addon-bar { width: 5px; background: #1e5a8e; flex-shrink: 0; border-radius: 1px; }
+.addon-content { background: #e3f2fd; flex: 1; padding: 10px 14px; }
+.addon-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; font-size: 8pt; line-height: 1.5; }
+.addon-item:last-child { margin-bottom: 0; }
+.addon-check { color: #1e5a8e; font-weight: 700; font-size: 9pt; flex-shrink: 0; margin-top: 1px; }
+.addon-text { color: #0d3d6b; }
+.addon-text b { color: #1e5a8e; }
+
+/* Spesifikasi block */
+.spec-block {
+    display: flex;
+    margin-bottom: 18px;
+}
+.spec-bar { width: 5px; background: #c85b2a; flex-shrink: 0; border-radius: 1px; }
+.spec-content { background: #fef4ee; flex: 1; padding: 10px 14px; }
+.spec-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; font-size: 8pt; line-height: 1.5; }
+.spec-item:last-child { margin-bottom: 0; }
+.spec-check { color: #c85b2a; font-weight: 700; font-size: 9pt; flex-shrink: 0; margin-top: 1px; }
+.spec-text { color: #5c3a1f; }
+.spec-text b { color: #c85b2a; }
+
 /* Rincian harga */
 .price-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 8.5pt; }
 .price-table td { padding: 6px 10px; border: 0.5pt solid #dddddd; }
@@ -375,7 +406,8 @@ body {
 .sign-section { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 8px; }
 .sign-col { padding: 8px 10px; }
 .sign-label { font-size: 8pt; color: #5c5750; margin-bottom: 70px; }
-.sign-line { border-top: 0.5pt solid #5c5750; padding-top: 4px; }
+.sign-line { border-top: 0.5pt solid #5c5750; padding-top: 4px; width: 50%; }
+.sign-col-right .sign-line { margin-left: auto; border-top: none; }
 .sign-name { font-size: 9pt; font-weight: 700; color: #1a1714; }
 .sign-role { font-size: 7.5pt; color: #9c9890; }
 .sign-col-right { text-align: right; }
@@ -446,6 +478,16 @@ body {
         background: #e8f5ed !important;
     }
 
+    /* Pastikan add-on biru tercetak */
+    .addon-content {
+        background: #e3f2fd !important;
+    }
+
+    /* Pastikan spesifikasi oranye tercetak */
+    .spec-content {
+        background: #fef4ee !important;
+    }
+
     /* Pastikan notes tercetak */
     .notes-content {
         background: #f0ede6 !important;
@@ -462,6 +504,8 @@ body {
     }
     .to-bar { background: #c85b2a !important; }
     .bonus-bar { background: #2d7a4a !important; }
+    .addon-bar { background: #1e5a8e !important; }
+    .spec-bar { background: #c85b2a !important; }
     .notes-bar { background: #9c9890 !important; }
 
     @page {
@@ -531,15 +575,31 @@ body {
             <?php if ($jumlahHalaman !== null): ?>
             <tr><td class="spec-key">Jumlah Halaman</td><td class="spec-val"><?= $jumlahHalaman ?> Halaman</td></tr>
             <?php endif; ?>
-            <?php if ($isFullService || $isAlacarte): ?>
-            <tr><td class="spec-key">Ukuran Buku</td><td class="spec-val"><?= e($ukuranBuku) ?></td></tr>
-            <tr><td class="spec-key">Jenis Kertas</td><td class="spec-val"><?= e($jenisKertas) ?></td></tr>
-            <tr><td class="spec-key">Cover</td><td class="spec-val"><?= e($jenisCover) ?></td></tr>
-            <tr><td class="spec-key">Packaging</td><td class="spec-val"><?= e($jenisPackaging) ?></td></tr>
-            <tr><td class="spec-key">Finishing</td><td class="spec-val"><?= e($jenisFinishing) ?></td></tr>
-            <?php endif; ?>
-            <tr><td class="spec-key">Jasa Termasuk</td><td class="spec-val"><?= $jasaTermasuk ?></td></tr>
         </table>
+
+        <!-- Spesifikasi Detail -->
+        <?php if ($isFullService || $isAlacarte): ?>
+        <div class="sec-label">Detail Spesifikasi</div>
+        <div class="spec-block">
+            <div class="spec-bar"></div>
+            <div class="spec-content">
+                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Ukuran Buku:</b> <?= e($ukuranBuku) ?></span></div>
+                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Jenis Kertas:</b> <?= e($jenisKertas) ?></span></div>
+                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Cover:</b> <?= e($jenisCover) ?></span></div>
+                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Packaging:</b> <?= e($jenisPackaging) ?></span></div>
+                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Finishing:</b> <?= e($jenisFinishing) ?></span></div>
+                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Jasa Termasuk:</b> <?= $jasaTermasuk ?></span></div>
+            </div>
+        </div>
+        <?php else: ?>
+        <div class="sec-label">Detail Spesifikasi</div>
+        <div class="spec-block">
+            <div class="spec-bar"></div>
+            <div class="spec-content">
+                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Jasa Termasuk:</b> <?= $jasaTermasuk ?></span></div>
+            </div>
+        </div>
+        <?php endif; ?>
 
         <!-- Bonus & Fasilitas -->
         <?php if (!empty($bonusStandar) || !empty($bonusExtra)): ?>
@@ -552,6 +612,19 @@ body {
                 <?php endforeach; ?>
                 <?php foreach ($bonusExtra as $b): ?>
                 <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><?= e($b) ?></span></div>
+                <?php endforeach; ?>
+            </div>
+        </div>
+        <?php endif; ?>
+
+        <!-- Add-on -->
+        <?php if (!empty($addons)): ?>
+        <div class="sec-label">Add-on</div>
+        <div class="addon-block">
+            <div class="addon-bar"></div>
+            <div class="addon-content">
+                <?php foreach ($addons as $addon): ?>
+                <div class="addon-item"><span class="addon-check">✓</span><span class="addon-text"><?= e(ucfirst($addon)) ?></span></div>
                 <?php endforeach; ?>
             </div>
         </div>
@@ -576,14 +649,6 @@ body {
                 </td>
                 <td class="pt-val"><?= rp($harga) ?></td>
             </tr>
-
-            <!-- Add-on dari catatan -->
-            <?php foreach ($addons as $addon): ?>
-            <tr>
-                <td class="pt-label"><?= e(ucfirst($addon)) ?></td>
-                <td class="pt-val">—</td>
-            </tr>
-            <?php endforeach; ?>
 
             <!-- Diskon jika ada -->
             <?php if ($hargaDP > 0 && $hargaDP !== $harga): ?>
@@ -627,15 +692,15 @@ body {
             <div class="sign-col">
                 <div class="sign-label">Hormat kami,</div>
                 <div class="sign-line">
-                    <div class="sign-name">Dhamar Singgih Wicaksono</div>
-                    <div class="sign-role">Marketing — Parama Studio</div>
+                    <div class="sign-name"><?= e($user['name'] ?? '') ?></div>
+                    <div class="sign-role"><?= e($user['position'] ?? '') ?></div>
                 </div>
             </div>
             <div class="sign-col sign-col-right">
                 <div class="sign-label">Disetujui oleh,</div>
                 <div class="sign-line">
                     <div class="sign-slot">(________________________)</div>
-                    <div class="sign-slot-role">Nama &amp; Jabatan</div>
+                    <div class="sign-slot-role">Nama & Jabatan</div>
                 </div>
             </div>
         </div>

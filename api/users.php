@@ -20,6 +20,7 @@ if ($method === 'POST') {
     $body     = json_decode(file_get_contents('php://input'), true) ?? $_POST;
     $username = trim($body['username'] ?? '');
     $name     = trim($body['name']     ?? '');
+    $position = trim($body['position'] ?? '');
     $email    = trim($body['email']    ?? '');
     $role_id  = (int)($body['role_id'] ?? 3);
     $password = $body['password'] ?? 'parama123';
@@ -38,7 +39,7 @@ if ($method === 'POST') {
     }
 
     $hash   = password_hash($password, PASSWORD_DEFAULT);
-    $userId = $db->addUser($username, $hash, $name, $email, $role_id);
+    $userId = $db->addUser($username, $hash, $name, $email, $role_id, $position);
     echo json_encode(['id' => $userId, 'ok' => true]);
     exit;
 }
@@ -75,11 +76,29 @@ if ($method === 'PUT') {
         $fields['username'] = $newUsername;
     }
     if (isset($body['name']))      $fields['name']      = trim($body['name']);
+    if (isset($body['position']))  $fields['position']  = trim($body['position']);
     if (isset($body['role_id']))   $fields['role_id']   = (int)$body['role_id'];
     if (isset($body['is_active'])) $fields['is_active'] = $body['is_active'] ? 1 : 0;
     if (!empty($body['password'])) $fields['password']  = password_hash($body['password'], PASSWORD_DEFAULT);
 
     $db->updateUser($id, $fields);
+
+    // Sync session if the current user updated their own profile
+    if (isset($_SESSION['user']) && $_SESSION['user']['id'] === $id) {
+        $updatedUser = $db->getUserById($id);
+        if ($updatedUser) {
+            $_SESSION['user'] = [
+                'id'         => $updatedUser['id'],
+                'username'   => $updatedUser['username'],
+                'name'       => $updatedUser['name'],
+                'position'   => $updatedUser['position'],
+                'role'       => $updatedUser['role'],
+                'role_label' => $updatedUser['role_label'],
+                'permissions'=> $updatedUser['permissions'],
+            ];
+        }
+    }
+
     echo json_encode(['ok' => true]);
     exit;
 }

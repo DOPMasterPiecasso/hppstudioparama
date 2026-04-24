@@ -23,6 +23,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'id'         => $user['id'],
                     'username'   => $user['username'],
                     'name'       => $user['name'],
+                    'position'   => $user['position'],
                     'role'       => $user['role'],
                     'role_label' => $user['role_label'],
                     'permissions'=> $user['permissions'],

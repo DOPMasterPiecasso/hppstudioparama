@@ -40,7 +40,7 @@ $roles = $db->getRoles();
     <div class="tw">
       <table>
         <thead><tr>
-          <th>ID</th><th>Username</th><th>Nama</th><th>Role</th><th>Status</th><th>Aksi</th>
+          <th>ID</th><th>Username</th><th>Nama</th><th>Jabatan</th><th>Role</th><th>Status</th><th>Aksi</th>
         </tr></thead>
         <tbody>
         <?php foreach($allUsers as $u): ?>
@@ -48,10 +48,11 @@ $roles = $db->getRoles();
             <td><?= $u['id'] ?></td>
             <td><b><?= htmlspecialchars($u['username']) ?></b></td>
             <td><?= htmlspecialchars($u['name']) ?></td>
+            <td><?= htmlspecialchars($u['position'] ?? '') ?></td>
             <td><span class="badge <?= $u['role']==='admin'?'bdan':($u['role']==='manager'?'binf':'bgra') ?>"><?= ucfirst($u['role']) ?></span></td>
             <td><?= $u['is_active'] ? '<span class="badge bsuc">Aktif</span>' : '<span class="badge bgra">Nonaktif</span>' ?></td>
             <td>
-              <button class="btn bs bsm" onclick="editUser(<?= $u['id'] ?>,'<?= htmlspecialchars($u['username']) ?>','<?= htmlspecialchars($u['name']) ?>',<?= $u['role_id'] ?>,<?= $u['is_active'] ?>)">✏ Edit</button>
+              <button class="btn bs bsm" onclick="editUser(<?= $u['id'] ?>,'<?= htmlspecialchars($u['username']) ?>','<?= htmlspecialchars($u['name']) ?>',<?= $u['role_id'] ?>,<?= $u['is_active'] ?>,'<?= htmlspecialchars($u['position']??'') ?>')">✏ Edit</button>
               <?php if($u['id'] != $user['id']): ?>
               <button class="btn bs bsm" style="color:var(--danger)" onclick="if(confirm('Hapus user <?= htmlspecialchars($u['username']) ?>?'))deleteUser(<?= $u['id'] ?>)">×</button>
               <?php endif; ?>
@@ -73,6 +74,7 @@ $roles = $db->getRoles();
     <form id="form-add" onsubmit="return submitAdd(event)">
       <div class="form-row"><label>Username</label><input type="text" name="username" required placeholder="Tidak boleh ada spasi"></div>
       <div class="form-row"><label>Nama Lengkap</label><input type="text" name="name" required></div>
+      <div class="form-row"><label>Jabatan</label><input type="text" name="position" placeholder="Contoh: Manager, Marketing"></div>
       <div class="form-row"><label>Password</label><input type="password" name="password" required minlength="6"></div>
       <div class="form-row"><label>Role</label>
         <select name="role_id"><?php foreach($roles as $r): ?><option value="<?= $r['id'] ?>"><?= ucfirst($r['name']) ?></option><?php endforeach; ?></select>
@@ -94,6 +96,7 @@ $roles = $db->getRoles();
       <input type="hidden" name="id" id="edit-id">
       <div class="form-row"><label>Username</label><input type="text" name="username" id="edit-username" required placeholder="Tidak boleh ada spasi"></div>
       <div class="form-row"><label>Nama Lengkap</label><input type="text" name="name" id="edit-name" required></div>
+      <div class="form-row"><label>Jabatan</label><input type="text" name="position" id="edit-position" placeholder="Contoh: Manager, Marketing"></div>
       <div class="form-row"><label>Password Baru <span style="font-weight:400;color:var(--text3)">(kosongkan jika tidak diubah)</span></label><input type="password" name="password" id="edit-password" minlength="6"></div>
       <div class="form-row"><label>Role</label>
         <select name="role_id" id="edit-role"><?php foreach($roles as $r): ?><option value="<?= $r['id'] ?>"><?= ucfirst($r['name']) ?></option><?php endforeach; ?></select>
@@ -125,10 +128,11 @@ $jsUser = json_encode([
 <script>
 const API = '/api/users.php';
 
-function editUser(id,username,name,role,active){
+function editUser(id,username,name,role,active,position){
   document.getElementById('edit-id').value=id;
   document.getElementById('edit-username').value=username;
   document.getElementById('edit-name').value=name;
+  document.getElementById('edit-position').value=position||'';
   document.getElementById('edit-role').value=role;
   document.getElementById('edit-active').value=active;
   document.getElementById('edit-password').value='';
