@@ -945,6 +945,7 @@ CREATE TABLE `users` (
   `username` varchar(50) NOT NULL,
   `password` varchar(255) NOT NULL,
   `name` varchar(100) NOT NULL,
+  `position` varchar(100) DEFAULT NULL,
   `role_id` int(11) NOT NULL,
   `is_active` tinyint(1) DEFAULT 1,
   `created_at` timestamp NOT NULL DEFAULT current_timestamp(),
@@ -961,7 +962,7 @@ CREATE TABLE `users` (
 
 LOCK TABLES `users` WRITE;
 /*!40000 ALTER TABLE `users` DISABLE KEYS */;
-INSERT INTO `users` VALUES (1,'admin','$2y$10$JVcYQCJ9bOxiKKzjD5AaIuFm0JsI.wTCpCsh4WjjMlTELw7aRE0J2','Administrator',1,1,'2026-04-05 17:00:00'),(2,'manager','$2y$10$vkWDCDwnijr09oKHW50ny.tK6u7mGd08CPzTo0SdVsGCbiLWKMIF6','Manajer',2,1,'2026-04-05 17:00:00'),(3,'staff','$2y$10$xwONKMp6sripzA5QZRFBTuoYPhXqIdTvi/Tt0VU5LneOeJjMu6cse','Staff Member',3,1,'2026-04-05 17:00:00'),(4,'qwdq','$2y$10$6Pel76DjzAtKDroKyLeEruGPoz6pCw8QihIswmrlkfLJCQ7AOQveq','qweqwe',1,1,'2026-04-06 03:08:38');
+INSERT INTO `users` VALUES (1,'admin','$2y$10$JVcYQCJ9bOxiKKzjD5AaIuFm0JsI.wTCpCsh4WjjMlTELw7aRE0J2','Administrator',NULL,1,1,'2026-04-05 17:00:00'),(2,'manager','$2y$10$vkWDCDwnijr09oKHW50ny.tK6u7mGd08CPzTo0SdVsGCbiLWKMIF6','Manajer',NULL,2,1,'2026-04-05 17:00:00'),(3,'staff','$2y$10$xwONKMp6sripzA5QZRFBTuoYPhXqIdTvi/Tt0VU5LneOeJjMu6cse','Staff Member',NULL,3,1,'2026-04-05 17:00:00'),(4,'qwdq','$2y$10$6Pel76DjzAtKDroKyLeEruGPoz6pCw8QihIswmrlkfLJCQ7AOQveq','qweqwe',NULL,1,1,'2026-04-06 03:08:38');
 /*!40000 ALTER TABLE `users` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;

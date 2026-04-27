@@ -227,207 +227,531 @@ $filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', $namaKlien) . '_' .
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title><?= e($docId) ?> — Penawaran Parama Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
 <style>
+:root {
+  --orange: #C0602A;
+  --orange-light: #F4EBE4;
+  --orange-mid: #E08050;
+  --navy: #1A2236;
+  --navy-mid: #2C3A55;
+  --gray: #6B7280;
+  --gray-light: #F5F5F3;
+  --border: #E5E0D8;
+  --white: #FDFCFA;
+}
+
 /* ══════════════ RESET & BASE ══════════════ */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
 /* Screen styling */
 body {
-    font-family: Arial, sans-serif;
-    background: #e9e9e9;
+    font-family: 'DM Sans', sans-serif;
+    background: #ECEAE5;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
-    align-items: center;
-    padding: 24px 16px 60px;
-    min-height: 100vh;
-    color: #1a1714;
 }
 
-/* Toolbar */
-.toolbar {
-    width: 100%;
-    max-width: 595pt;
+/* ── TOP BAR ── */
+.topbar {
+    background: var(--navy);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+}
+
+.topbar-brand span {
+    color: var(--orange-mid);
+}
+
+.topbar-logo {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--orange-mid);
+    display: grid;
+    place-items: center;
+    font-size: 13px;
+}
+
+.topbar-actions {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+}
+
+.btn-ghost {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+}
+
+.btn-ghost:hover {
+    background: rgba(255,255,255,0.15);
+}
+
+.btn-primary {
+    background: var(--orange);
+    border: none;
+    color: white;
+    padding: 7px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    transition: background 0.15s;
+}
+
+.btn-primary:hover {
+    background: #A85424;
+}
+
+/* ── LAYOUT ── */
+.layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: calc(100vh - 56px);
+}
+
+/* ── LEFT PANEL ── */
+.left-panel {
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray);
+    margin-bottom: 4px;
+    margin-top: 8px;
+}
+
+.divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+}
+
+.info-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+}
+
+.info-label {
+    font-size: 11px;
+    font-weight: 600;
+    color: var(--gray);
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.info-value {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--navy);
+}
+
+.summary-box {
+    background: var(--navy);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 8px;
+    color: white;
+}
+
+.summary-row {
     display: flex;
     justify-content: space-between;
-    align-items: center;
-    margin-bottom: 16px;
-    padding: 12px 16px;
-    background: #1c2e3d;
-    border-radius: 8px;
-    gap: 12px;
-    flex-wrap: wrap;
-}
-.toolbar-left { font-size: 13px; color: rgba(255,255,255,0.7); }
-.toolbar-left b { color: #fff; font-size: 14px; }
-.toolbar-btns { display: flex; gap: 8px; }
-.btn-print {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 8px 18px; border-radius: 6px;
-    font-size: 13px; font-weight: 600;
-    cursor: pointer; border: none;
-    font-family: Arial, sans-serif;
-    transition: all 0.15s;
-}
-.btn-primary { background: #c85b2a; color: #fff; }
-.btn-primary:hover { background: #a84820; }
-.btn-secondary { background: rgba(255,255,255,0.12); color: #fff; border: 1px solid rgba(255,255,255,0.25); }
-.btn-secondary:hover { background: rgba(255,255,255,0.2); }
-
-/* ══════════════ DOCUMENT (A4 proportion) ══════════════ */
-.doc {
-    width: 595pt;
-    min-height: 842pt;
-    background: #ffffff;
-    box-shadow: 0 4px 40px rgba(0,0,0,0.2);
-    border-radius: 2px;
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    overflow: hidden;
-}
-/* Body konten mengisi sisa ruang agar footer selalu di bawah */
-.doc-body { flex: 1; }
-
-/* ── HEADER ── */
-.doc-header {
-    background: #1c2e3d;
-    padding: 16px 36px 14px;
-    display: grid;
-    grid-template-columns: auto 1fr auto;
-    gap: 0 20px;
-    align-items: center;
-}
-.hd-logo img { width: 52px; height: 52px; object-fit: contain; display: block; }
-.hd-logo-placeholder {
-    width: 52px; height: 52px;
-    background: #c85b2a;
-    border-radius: 4px;
-    display: flex; align-items: center; justify-content: center;
-    color: #fff; font-weight: 700; font-size: 16px;
-}
-.hd-company { padding-left: 4px; }
-.hd-company .co-name { font-size: 18pt; font-weight: 700; color: #ffffff; line-height: 1.2; }
-.hd-company .co-tag { font-size: 8pt; color: #9db8c8; margin-top: 1px; }
-.hd-company .co-contact { font-size: 7pt; color: #6a8a9d; margin-top: 2px; }
-.hd-docinfo { text-align: right; }
-.hd-docinfo .di-label { font-size: 7pt; font-weight: 700; color: #9db8c8; letter-spacing: 0.06em; }
-.hd-docinfo .di-id { font-size: 12pt; font-weight: 700; color: #c85b2a; line-height: 1.3; }
-.hd-docinfo .di-date { font-size: 7.5pt; color: #9db8c8; }
-
-/* ── BODY ── */
-.doc-body { padding: 22px 36px 0; flex: 1; }
-
-/* Ditujukan kepada */
-.to-block {
-    display: flex;
-    margin-bottom: 18px;
-}
-.to-bar { width: 5px; background: #c85b2a; flex-shrink: 0; border-radius: 1px; }
-.to-content { background: #f7f5f0; flex: 1; padding: 10px 14px; }
-.to-label { font-size: 7pt; font-weight: 700; color: #9c9890; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 3px; }
-.to-name { font-size: 15pt; font-weight: 700; color: #1c2e3d; line-height: 1.2; margin-bottom: 3px; }
-.to-sub { font-size: 8pt; color: #5c5750; }
-
-/* Section label */
-.sec-label {
-    font-size: 7pt; font-weight: 700; color: #9c9890;
-    letter-spacing: 0.08em; text-transform: uppercase;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
     margin-bottom: 6px;
 }
 
-/* Tabel spesifikasi */
-.spec-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 8pt; }
-.spec-table td { padding: 5px 8px; border: 0.5pt solid #dddddd; vertical-align: middle; }
-.spec-table tr:nth-child(odd) td { background: #f7f5f0; }
-.spec-table tr:nth-child(even) td { background: #ffffff; }
-.spec-table .spec-key { width: 33%; color: #5c5750; font-weight: 400; }
-.spec-table .spec-val { color: #1a1714; font-weight: 700; }
-
-/* Bonus block */
-.bonus-block {
-    display: flex;
-    margin-bottom: 18px;
+.summary-row span:last-child {
+    color: white;
 }
-.bonus-bar { width: 5px; background: #2d7a4a; flex-shrink: 0; border-radius: 1px; }
-.bonus-content { background: #e8f5ed; flex: 1; padding: 10px 14px; }
-.bonus-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; font-size: 8pt; line-height: 1.5; }
-.bonus-item:last-child { margin-bottom: 0; }
-.bonus-check { color: #2d7a4a; font-weight: 700; font-size: 9pt; flex-shrink: 0; margin-top: 1px; }
-.bonus-text { color: #1a4a2e; }
-.bonus-text b { color: #2d7a4a; }
 
-/* Add-on block */
-.addon-block {
+.summary-total {
     display: flex;
-    margin-bottom: 18px;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 10px;
+    margin-top: 4px;
 }
-.addon-bar { width: 5px; background: #1e5a8e; flex-shrink: 0; border-radius: 1px; }
-.addon-content { background: #e3f2fd; flex: 1; padding: 10px 14px; }
-.addon-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; font-size: 8pt; line-height: 1.5; }
-.addon-item:last-child { margin-bottom: 0; }
-.addon-check { color: #1e5a8e; font-weight: 700; font-size: 9pt; flex-shrink: 0; margin-top: 1px; }
-.addon-text { color: #0d3d6b; }
-.addon-text b { color: #1e5a8e; }
 
-/* Spesifikasi block */
-.spec-block {
+.summary-total-label {
+    font-size: 12px;
+    color: rgba(255,255,255,0.7);
+}
+
+.summary-total-value {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--orange-mid);
+}
+
+/* ── RIGHT PANEL ── */
+.right-panel {
     display: flex;
-    margin-bottom: 18px;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px;
+    overflow-y: auto;
+    background: #DEDAD4;
+    gap: 16px;
 }
-.spec-bar { width: 5px; background: #c85b2a; flex-shrink: 0; border-radius: 1px; }
-.spec-content { background: #fef4ee; flex: 1; padding: 10px 14px; }
-.spec-item { display: flex; align-items: flex-start; gap: 6px; margin-bottom: 4px; font-size: 8pt; line-height: 1.5; }
-.spec-item:last-child { margin-bottom: 0; }
-.spec-check { color: #c85b2a; font-weight: 700; font-size: 9pt; flex-shrink: 0; margin-top: 1px; }
-.spec-text { color: #5c3a1f; }
-.spec-text b { color: #c85b2a; }
 
-/* Rincian harga */
-.price-table { width: 100%; border-collapse: collapse; margin-bottom: 18px; font-size: 8.5pt; }
-.price-table td { padding: 6px 10px; border: 0.5pt solid #dddddd; }
-.price-table .pt-label { background: #ffffff; color: #5c5750; }
-.price-table .pt-val { background: #ffffff; color: #1a1714; font-weight: 700; text-align: right; width: 30%; }
-.price-total td { background: #1c2e3d !important; }
-.price-total .pt-label { color: #9db8c8 !important; font-weight: 700; font-size: 7.5pt; letter-spacing: 0.04em; }
-.price-total .pt-val { color: #ffffff !important; font-size: 12pt; font-weight: 700; }
-.price-sub { width: 30%; font-size: 7.5pt; text-align: right; }
-.price-sub td { background: #f0ede6; color: #5c5750; border-color: #dddddd; font-size: 7.5pt; }
+.preview-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #9C9589;
+    align-self: flex-start;
+    margin-bottom: -8px;
+}
 
-/* Notes */
-.notes-block {
+/* ══════════════ PDF SHEET ══════════════ */
+.pdf-sheet {
+    width: 680px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
     display: flex;
-    margin-bottom: 20px;
+    flex-direction: column;
 }
-.notes-bar { width: 5px; background: #9c9890; flex-shrink: 0; border-radius: 1px; }
-.notes-content { background: #f0ede6; flex: 1; padding: 8px 14px; font-size: 7.5pt; color: #5c5750; line-height: 1.7; }
-.notes-content li { list-style: disc; margin-left: 14px; }
 
-/* TTD / Signature */
-.sign-section { display: grid; grid-template-columns: 1fr 1fr; gap: 0; margin-bottom: 8px; }
-.sign-col { padding: 8px 10px; }
-.sign-label { font-size: 8pt; color: #5c5750; margin-bottom: 70px; }
-.sign-line { border-top: 0.5pt solid #5c5750; padding-top: 4px; width: 50%; }
-.sign-col-right .sign-line { margin-left: auto; border-top: none; }
-.sign-name { font-size: 9pt; font-weight: 700; color: #1a1714; }
-.sign-role { font-size: 7.5pt; color: #9c9890; }
-.sign-col-right { text-align: right; }
-.sign-col-right .sign-label { text-align: right; }
-.sign-slot { font-size: 9pt; color: #5c5750; font-family: Arial, sans-serif; }
-.sign-slot-role { font-size: 7.5pt; color: #9c9890; text-align: right; }
+/* ── PDF HEADER ── */
+.pdf-header {
+    background: var(--navy);
+    padding: 28px 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+}
+.pdf-brand { color: white; }
+.pdf-brand-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+    font-weight: 700;
+}
+.pdf-brand-tagline {
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+}
+.pdf-brand-contact {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 8px;
+    line-height: 1.7;
+}
+.pdf-doc-info { text-align: right; }
+.pdf-doc-number {
+    color: var(--orange-mid);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+}
+.pdf-doc-date { 
+    font-size: 11px; 
+    color: rgba(255,255,255,0.45); 
+    margin-top: 4px; 
+}
 
-/* ── FOOTER ── */
-.doc-footer {
-    background: #1c2e3d;
+/* ── PDF BODY ── */
+.pdf-body { 
+    padding: 28px 36px; 
+    flex: 1;
+}
+
+/* ── PDF CLIENT SECTION ── */
+.pdf-to-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gray);
+    margin-bottom: 4px;
+}
+.pdf-client-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--navy);
+    line-height: 1.1;
+    font-weight: 700;
+}
+.pdf-paket-tag {
+    display: inline-block;
+    background: var(--orange-light);
+    color: var(--orange);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 6px;
+}
+
+/* ── PDF SECTIONS ── */
+.pdf-section {
+    margin-top: 24px;
+}
+.pdf-section-title {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gray);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+}
+
+/* ── SPEC TABLE ── */
+.pdf-spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+.pdf-spec-table td {
+    padding: 6px 8px;
+    vertical-align: top;
+}
+.pdf-spec-table td:first-child {
+    color: var(--gray);
+    width: 38%;
+    font-size: 11px;
+}
+.pdf-spec-table td:last-child {
+    color: var(--navy);
+    font-weight: 500;
+}
+.pdf-spec-table tr:nth-child(odd) td {
+    background: var(--gray-light);
+}
+
+/* ── SERVICE GRID ── */
+.pdf-service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+}
+.pdf-service-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--navy-mid);
+    padding: 6px 10px;
+    background: var(--gray-light);
+    border-radius: 6px;
+}
+.pdf-service-row .check {
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 1px;
+}
+.pdf-service-name { 
+    font-weight: 500; 
+    font-size: 11px; 
+}
+.pdf-service-detail { 
+    font-size: 10px; 
+    color: var(--gray); 
+    margin-top: 1px; 
+}
+
+/* ── BONUS LIST ── */
+.pdf-bonus-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+.pdf-bonus-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--navy-mid);
+}
+.pdf-bonus-item::before {
+    content: '✓';
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 12px;
+    flex-shrink: 0;
+}
+
+/* ── PRICE TABLE ── */
+.pdf-price-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 4px;
+}
+.pdf-price-table thead tr {
+    background: var(--navy-mid);
+    color: white;
+}
+.pdf-price-table thead td {
+    padding: 8px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+}
+.pdf-price-table tbody tr td {
+    padding: 9px 12px;
+    color: var(--navy-mid);
+    border-bottom: 1px solid var(--border);
+}
+.pdf-price-table tbody tr:nth-child(odd) td { 
+    background: var(--gray-light); 
+}
+.pdf-price-table .price-col { 
+    text-align: right; 
+    font-weight: 500; 
+}
+.pdf-price-table tfoot tr td {
+    background: var(--navy);
+    color: white;
+    padding: 12px 12px;
+    font-weight: 700;
+    font-size: 13px;
+}
+.pdf-price-table tfoot .price-col { 
+    color: var(--orange-mid); 
+    font-size: 16px; 
+}
+
+/* ── TERMS ── */
+.pdf-terms {
+    margin-top: 20px;
+    padding: 14px;
+    background: var(--gray-light);
+    border-radius: 8px;
+    border-left: 3px solid var(--orange);
+}
+.pdf-terms-title {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--orange);
+    margin-bottom: 8px;
+}
+.pdf-terms ol, .pdf-terms ul {
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+.pdf-terms li { 
+    font-size: 10.5px; 
+    color: var(--gray); 
+    line-height: 1.5; 
+}
+.pdf-terms p {
+    font-size: 10.5px;
+    color: var(--gray);
+    line-height: 1.7;
+    margin-top: 8px;
+}
+
+/* ── TTD ── */
+.pdf-ttd {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+}
+.pdf-ttd-block { 
+    font-size: 11px; 
+    color: var(--gray); 
+}
+.pdf-ttd-name { 
+    font-weight: 700; 
+    color: var(--navy); 
+    font-size: 12px; 
+    margin-top: 32px; 
+}
+.pdf-ttd-jabatan { 
+    font-size: 10px; 
+    color: var(--gray); 
+}
+.pdf-ttd-line { 
+    border-top: 1px solid var(--navy); 
+    margin-top: 2px; 
+}
+.pdf-ttd-placeholder { 
+    margin-top: 48px;
+    border-top: 1px solid var(--navy); 
+    padding-top: 4px;
+    font-size: 10px; 
+    color: var(--gray); 
+}
+
+/* ── PDF FOOTER ── */
+.pdf-footer {
+    background: var(--navy);
     padding: 10px 36px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    flex-wrap: wrap;
-    gap: 4px;
-    margin-top: auto;
 }
-.ft-address { font-size: 6.5pt; color: #6a8a9d; }
-.ft-validity { font-size: 6.5pt; color: #6a8a9d; text-align: right; }
+.pdf-footer-left { 
+    font-size: 9px; 
+    color: rgba(255,255,255,0.35); 
+}
+.pdf-footer-right { 
+    font-size: 9px; 
+    color: rgba(255,255,255,0.35); 
+    text-align: right; 
+}
 
 /* ══════════════ PRINT STYLES ══════════════ */
 @media print {
@@ -445,68 +769,84 @@ body {
         display: block;
     }
 
-    .toolbar { display: none !important; }
+    .topbar, .left-panel, .preview-label { display: none !important; }
 
-    .doc {
+    .layout {
+        display: block;
+    }
+
+    .right-panel {
+        padding: 0;
+        background: transparent;
+        display: block;
+        overflow: visible !important;
+    }
+
+    .pdf-sheet {
         width: 210mm;
-        height: 297mm;
-        min-height: 297mm;
-        max-height: 297mm;
+        height: 297mm; /* Restore exact A4 height */
         box-shadow: none;
         border-radius: 0;
         margin: 0;
-        overflow: hidden;
+        overflow: hidden; /* Prevent 2nd page spill */
+        display: flex !important;
+        flex-direction: column !important;
     }
 
-    .doc-body { flex: 1; }
+    .pdf-body { 
+        display: flex !important;
+        flex-direction: column !important;
+        flex: 1 !important;
+        padding: 16px 36px !important; /* Reduce vertical padding */
+    }
 
-    /* Pastikan header & footer navy tercetak */
-    .doc-header {
-        background: #1c2e3d !important;
+    /* Penyesuaian padding/margin agar muat 1 halaman tanpa terpotong */
+    .pdf-header {
+        background: var(--navy) !important;
+        padding: 20px 36px !important; /* Reduce padding */
     }
-    .doc-footer {
-        background: #1c2e3d !important;
+    .pdf-footer {
+        background: var(--navy) !important;
+        padding: 8px 36px !important;
+        margin-top: auto; /* Push to bottom */
     }
+    .pdf-section {
+        margin-top: 14px !important; /* Reduce margin */
+    }
+    .pdf-section-title {
+        margin-bottom: 8px !important;
+    }
+    .pdf-terms {
+        margin-top: 12px !important;
+        padding: 10px 14px !important;
+    }
+    .pdf-ttd {
+        margin-top: 14px !important;
+        padding-top: 12px !important;
+    }
+    .pdf-ttd-name { margin-top: 24px !important; }
+    .pdf-ttd-placeholder { margin-top: 38px !important; }
 
     /* Pastikan tabel total navy tercetak */
-    .price-total td {
-        background: #1c2e3d !important;
+    .pdf-price-table tfoot tr td {
+        background: var(--navy) !important;
+    }
+    .pdf-price-table tbody tr td {
+        padding: 6px 12px !important; /* Reduce padding */
     }
 
-    /* Pastikan bonus hijau tercetak */
-    .bonus-content {
-        background: #e8f5ed !important;
+    /* Pastikan background tabel tercetak */
+    .pdf-spec-table tr:nth-child(odd) td {
+        background: var(--gray-light) !important;
+    }
+    .pdf-spec-table td {
+        padding: 4px 8px !important; /* Reduce padding */
     }
 
-    /* Pastikan add-on biru tercetak */
-    .addon-content {
-        background: #e3f2fd !important;
+    .pdf-service-row {
+        background: var(--gray-light) !important;
+        padding: 4px 8px !important; /* Reduce padding */
     }
-
-    /* Pastikan spesifikasi oranye tercetak */
-    .spec-content {
-        background: #fef4ee !important;
-    }
-
-    /* Pastikan notes tercetak */
-    .notes-content {
-        background: #f0ede6 !important;
-    }
-
-    /* Pastikan spek tabel tercetak */
-    .spec-table tr:nth-child(odd) td {
-        background: #f7f5f0 !important;
-    }
-
-    /* to-content & bar */
-    .to-content {
-        background: #f7f5f0 !important;
-    }
-    .to-bar { background: #c85b2a !important; }
-    .bonus-bar { background: #2d7a4a !important; }
-    .addon-bar { background: #1e5a8e !important; }
-    .spec-bar { background: #c85b2a !important; }
-    .notes-bar { background: #9c9890 !important; }
 
     @page {
         size: A4;
@@ -519,205 +859,271 @@ body {
 </head>
 <body>
 
-<!-- ── TOOLBAR (screen only) ── -->
-<div class="toolbar">
-    <div class="toolbar-left">
-        <b><?= e($docId) ?></b><br>
-        <?= e($namaKlien) ?>
+<!-- ── NAVBAR ── -->
+<div class="topbar">
+    <div class="topbar-brand">
+        <div class="topbar-logo">P</div>
+        Parama Studio <span>/ PDF Review</span>
     </div>
-    <div class="toolbar-btns">
-        <button class="btn-print btn-secondary" onclick="if(window.history.length > 1) { history.back(); } else { window.close(); }">← Kembali</button>
-        <button class="btn-print btn-primary" onclick="window.print()">🖨 Print / Save PDF</button>
+    <div class="topbar-actions">
+        <button class="btn-ghost" onclick="if(window.history.length > 1) { history.back(); } else { window.close(); }">← Kembali</button>
+        <button class="btn-primary" onclick="window.print()">⬇ Download PDF</button>
     </div>
 </div>
 
-<!-- ══════════════ DOCUMENT ══════════════ -->
-<div class="doc">
+<div class="layout">
 
-    <!-- ── HEADER ── -->
-    <div class="doc-header">
-        <div class="hd-logo">
-            <?php if ($logoBase64): ?>
-                <img src="<?= $logoBase64 ?>" alt="Parama Studio Logo">
-            <?php else: ?>
-                <div class="hd-logo-placeholder">PS</div>
+    <!-- ── LEFT PANEL ── -->
+    <div class="left-panel">
+        <div class="panel-title">Informasi Penawaran</div>
+
+        <div class="info-row">
+            <div class="info-label">Nomor Dokumen</div>
+            <div class="info-value"><?= e($docId) ?></div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Klien</div>
+            <div class="info-value"><?= e($namaKlien) ?></div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Paket</div>
+            <div class="info-value"><?= e($paket) ?></div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Jumlah Siswa</div>
+            <div class="info-value"><?= $siswa ?> Siswa</div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">PIC / Sales</div>
+            <div class="info-value"><?= e($addedBy) ?></div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Tanggal Dokumen</div>
+            <div class="info-value"><?= e($tglDoc) ?></div>
+        </div>
+
+        <div class="info-row">
+            <div class="info-label">Berlaku Hingga</div>
+            <div class="info-value"><?= e($tglExp) ?></div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="panel-title">Summary Harga</div>
+
+        <div class="summary-box">
+            <div class="summary-row">
+                <span>Harga Per Unit</span>
+                <span><?= rp($perBuku) ?></span>
+            </div>
+            <div class="summary-row">
+                <span><?= $siswa ?> unit × <?= rp($perBuku) ?></span>
+                <span><?= rp($siswa > 0 ? $siswa * $perBuku : $harga) ?></span>
+            </div>
+            <?php if ($diskon > 0): ?>
+            <div class="summary-row">
+                <span>Diskon</span>
+                <span>− <?= rp($diskon) ?></span>
+            </div>
             <?php endif; ?>
-        </div>
-        <div class="hd-company">
-            <div class="co-name">Parama Studio</div>
-            <div class="co-tag">Yearbook &amp; Graduation Agency</div>
-            <div class="co-contact">studioparama.com &nbsp;·&nbsp; +62 822 9400 8994 &nbsp;·&nbsp; Tangerang Selatan</div>
-        </div>
-        <div class="hd-docinfo">
-            <div class="di-label">PENAWARAN HARGA</div>
-            <div class="di-id"><?= e($docId) ?></div>
-            <div class="di-date"><?= e($tglDoc) ?></div>
+            <div class="summary-total">
+                <span class="summary-total-label">TOTAL PENAWARAN</span>
+                <span class="summary-total-value"><?= rp($harga) ?></span>
+            </div>
         </div>
     </div>
 
-    <!-- ── BODY ── -->
-    <div class="doc-body">
+    <!-- ── RIGHT PANEL ── -->
+    <div class="right-panel">
+        <div class="preview-label">📋 Preview PDF — Siap Unduh atau Cetak</div>
 
-        <!-- Ditujukan Kepada -->
-        <div class="to-block">
-            <div class="to-bar"></div>
-            <div class="to-content">
-                <div class="to-label">Ditujukan Kepada</div>
-                <div class="to-name"><?= e($namaKlien) ?></div>
-                <div class="to-sub"><?= e($subtitle) ?></div>
+        <!-- ══════════════ PDF SHEET ══════════════ -->
+        <div class="pdf-sheet">
+
+    <!-- ── PDF HEADER ── -->
+    <div class="pdf-header">
+        <div class="pdf-brand">
+            <div class="pdf-brand-name">Parama Studio</div>
+            <div class="pdf-brand-tagline">Yearbook &amp; Graduation Agency</div>
+            <div class="pdf-brand-contact">
+                studioparama.com · +62 822 9400 8994<br>
+                Tangerang Selatan
             </div>
         </div>
-
-        <!-- Spesifikasi Buku -->
-        <div class="sec-label">Spesifikasi Buku</div>
-        <table class="spec-table">
-            <tr><td class="spec-key">Jumlah Pesanan</td><td class="spec-val"><?= $siswa > 0 ? $siswa . ' Buku' : '—' ?></td></tr>
-            <?php if ($jumlahHalaman !== null): ?>
-            <tr><td class="spec-key">Jumlah Halaman</td><td class="spec-val"><?= $jumlahHalaman ?> Halaman</td></tr>
-            <?php endif; ?>
-        </table>
-
-        <!-- Spesifikasi Detail -->
-        <?php if ($isFullService || $isAlacarte): ?>
-        <div class="sec-label">Detail Spesifikasi</div>
-        <div class="spec-block">
-            <div class="spec-bar"></div>
-            <div class="spec-content">
-                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Ukuran Buku:</b> <?= e($ukuranBuku) ?></span></div>
-                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Jenis Kertas:</b> <?= e($jenisKertas) ?></span></div>
-                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Cover:</b> <?= e($jenisCover) ?></span></div>
-                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Packaging:</b> <?= e($jenisPackaging) ?></span></div>
-                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Finishing:</b> <?= e($jenisFinishing) ?></span></div>
-                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Jasa Termasuk:</b> <?= $jasaTermasuk ?></span></div>
+        <div class="pdf-doc-info">
+            <div class="pdf-doc-number"><?= e($docId) ?></div>
+            <div class="pdf-doc-date"><?= e($tglDoc) ?></div>
+            <div class="pdf-doc-date" style="margin-top:8px; color: rgba(255,255,255,0.3); text-transform: uppercase; font-size: 9px;">
+                PENAWARAN HARGA
             </div>
         </div>
-        <?php else: ?>
-        <div class="sec-label">Detail Spesifikasi</div>
-        <div class="spec-block">
-            <div class="spec-bar"></div>
-            <div class="spec-content">
-                <div class="spec-item"><span class="spec-check">✓</span><span class="spec-text"><b>Jasa Termasuk:</b> <?= $jasaTermasuk ?></span></div>
+    </div>
+
+    <!-- ── PDF BODY ── -->
+    <div class="pdf-body">
+
+        <!-- CLIENT INFO -->
+        <div>
+            <div class="pdf-to-label">Ditujukan Kepada</div>
+            <div class="pdf-client-name"><?= e($namaKlien) ?></div>
+            <div class="pdf-paket-tag"><?= e($paket) ?><?php if ($siswa > 0): ?> — <?= $siswa ?> Siswa<?php endif; ?></div>
+        </div>
+
+        <!-- SPESIFIKASI BUKU -->
+        <div class="pdf-section">
+            <div class="pdf-section-title">Spesifikasi Buku</div>
+            <table class="pdf-spec-table">
+                <tr><td>Jumlah Pesanan</td><td><strong><?= $siswa > 0 ? $siswa . ' Buku' : '—' ?></strong></td></tr>
+                <?php if ($jumlahHalaman !== null): ?>
+                <tr><td>Jumlah Halaman</td><td><strong><?= $jumlahHalaman ?> Halaman</strong></td></tr>
+                <?php endif; ?>
+                <tr><td>Ukuran Buku</td><td><?= e($ukuranBuku) ?></td></tr>
+                <tr><td>Jenis Kertas</td><td><?= e($jenisKertas) ?></td></tr>
+                <tr><td>Cover</td><td><?= e($jenisCover) ?></td></tr>
+                <tr><td>Finishing</td><td><?= e($jenisFinishing) ?></td></tr>
+                <tr><td>Packaging</td><td><?= e($jenisPackaging) ?></td></tr>
+            </table>
+        </div>
+
+        <!-- JASA TERMASUK (jika applicable) -->
+        <?php if ($isFullService || $isAlacarte || $isGraduation): ?>
+        <div class="pdf-section">
+            <div class="pdf-section-title">Jasa Termasuk</div>
+            <div class="pdf-service-grid">
+                <div class="pdf-service-row">
+                    <div class="check">✓</div>
+                    <div>
+                        <div class="pdf-service-name"><?= $jasaTermasuk ?></div>
+                    </div>
+                </div>
             </div>
         </div>
         <?php endif; ?>
 
-        <!-- Bonus & Fasilitas -->
+        <!-- BONUS & FASILITAS -->
         <?php if (!empty($bonusStandar) || !empty($bonusExtra)): ?>
-        <div class="sec-label">Bonus &amp; Fasilitas</div>
-        <div class="bonus-block">
-            <div class="bonus-bar"></div>
-            <div class="bonus-content">
+        <div class="pdf-section">
+            <div class="pdf-section-title">Bonus &amp; Fasilitas</div>
+            <div class="pdf-bonus-list">
                 <?php foreach ($bonusStandar as $bs): ?>
-                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><b><?= e($bs['label']) ?>:</b> <?= $bs['detail'] ?></span></div>
+                <div class="pdf-bonus-item"><?= e($bs['label']) ?><?php if ($bs['detail']): ?>: <?= e($bs['detail']) ?><?php endif; ?></div>
                 <?php endforeach; ?>
                 <?php foreach ($bonusExtra as $b): ?>
-                <div class="bonus-item"><span class="bonus-check">✓</span><span class="bonus-text"><?= e($b) ?></span></div>
+                <div class="pdf-bonus-item"><?= e($b) ?></div>
                 <?php endforeach; ?>
             </div>
         </div>
         <?php endif; ?>
 
-        <!-- Add-on -->
+        <!-- ADD-ON -->
         <?php if (!empty($addons)): ?>
-        <div class="sec-label">Add-on</div>
-        <div class="addon-block">
-            <div class="addon-bar"></div>
-            <div class="addon-content">
+        <div class="pdf-section">
+            <div class="pdf-section-title">Add-on</div>
+            <div class="pdf-bonus-list">
                 <?php foreach ($addons as $addon): ?>
-                <div class="addon-item"><span class="addon-check">✓</span><span class="addon-text"><?= e(ucfirst($addon)) ?></span></div>
+                <div class="pdf-bonus-item"><?= e(ucfirst($addon)) ?></div>
                 <?php endforeach; ?>
             </div>
         </div>
         <?php endif; ?>
 
-        <!-- Rincian Harga -->
-        <div class="sec-label">Rincian Harga</div>
-        <table class="price-table">
-            <!-- Baris base price -->
-            <tr>
-                <td class="pt-label">
-                    <?php if ($isGraduation): ?>
-                        Harga Paket Graduation
-                    <?php elseif ($isAlacarte): ?>
-                        Harga Layanan
-                    <?php else: ?>
-                        Harga Buku Tahunan
-                        <?php if ($siswa > 0): ?>
-                            &nbsp;(<?= $siswa ?> buku × <?= rp($perBuku) ?>)
-                        <?php endif; ?>
+        <!-- RINCIAN HARGA -->
+        <div class="pdf-section">
+            <div class="pdf-section-title">Rincian Harga</div>
+            <table class="pdf-price-table">
+                <thead>
+                    <tr>
+                        <td>Deskripsi</td>
+                        <td class="price-col">Harga</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <?php if ($isGraduation): ?>
+                                Harga Paket Graduation
+                            <?php elseif ($isAlacarte): ?>
+                                Harga Layanan
+                            <?php else: ?>
+                                Harga Buku Tahunan
+                                <?php if ($siswa > 0): ?>
+                                    (<?= $siswa ?> buku × <?= rp($perBuku) ?>)
+                                <?php endif; ?>
+                            <?php endif; ?>
+                        </td>
+                        <td class="price-col"><?= rp($harga) ?></td>
+                    </tr>
+                    <?php if ($hargaDP > 0 && $hargaDP !== $harga): ?>
+                    <tr>
+                        <td>Diskon</td>
+                        <td class="price-col">− <?= rp($hargaDP - $harga) ?></td>
+                    </tr>
                     <?php endif; ?>
-                </td>
-                <td class="pt-val"><?= rp($harga) ?></td>
-            </tr>
-
-            <!-- Diskon jika ada -->
-            <?php if ($hargaDP > 0 && $hargaDP !== $harga): ?>
-            <tr>
-                <td class="pt-label" style="color:#a02020">Diskon</td>
-                <td class="pt-val" style="color:#a02020">− <?= rp($hargaDP - $harga) ?></td>
-            </tr>
-            <?php endif; ?>
-
-            <!-- Total baris navy -->
-            <tr class="price-total">
-                <td class="pt-label">TOTAL HARGA PENAWARAN</td>
-                <td class="pt-val"><?= rp($harga) ?></td>
-            </tr>
-        </table>
-
-
-
-        <!-- Ketentuan -->
-        <div class="notes-block" style="margin-top:12px">
-            <div class="notes-bar"></div>
-            <div class="notes-content">
-                <ul>
-                    <?php if ($isFullService && $siswa > 0): ?>
-                    <li>Harga berlaku untuk minimal <?= $siswa ?> pemesan Buku Tahunan.</li>
-                    <?php elseif ($isGraduation): ?>
-                    <li>Harga berlaku untuk event yang telah disepakati.</li>
-                    <?php else: ?>
-                    <li>Harga berlaku sesuai spesifikasi yang tercantum.</li>
-                    <?php endif; ?>
-                    <li>Harga bersifat penawaran dan dapat berubah sesuai kesepakatan.</li>
-                    <?php if ($diskonInfo): ?>
-                    <li>Telah diperhitungkan: <?= e($diskonInfo) ?>.</li>
-                    <?php endif; ?>
-                </ul>
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <td>TOTAL HARGA PENAWARAN</td>
+                        <td class="price-col"><?= rp($harga) ?></td>
+                    </tr>
+                </tfoot>
+            </table>
+            <div style="margin-top: 10px; font-size: 10.5px; color: var(--gray); line-height: 1.6;">
+                • Harga berlaku sesuai spesifikasi yang tercantum.<br>
+                • Harga bersifat penawaran dan dapat berubah sesuai kesepakatan.<br>
+                • Penawaran berlaku hingga: <strong><?= e($tglExp) ?></strong>
             </div>
         </div>
 
-        <!-- Tanda Tangan -->
-        <div class="sign-section">
-            <div class="sign-col">
-                <div class="sign-label">Hormat kami,</div>
-                <div class="sign-line">
-                    <div class="sign-name"><?= e($user['name'] ?? '') ?></div>
-                    <div class="sign-role"><?= e($user['position'] ?? '') ?></div>
-                </div>
+        <!-- KETERANGAN -->
+        <div class="pdf-terms">
+            <div class="pdf-terms-title">Keterangan</div>
+            <ul style="padding-left: 16px; display: flex; flex-direction: column; gap: 5px; list-style: disc;">
+                <li style="font-size: 10.5px; color: var(--gray); line-height: 1.6;">
+                    Harga di atas adalah dengan asumsi minimal pemesanan sebanyak <strong><?php if ($siswa > 0): ?><?= $siswa ?> buku<?php else: ?>sesuai spesifikasi<?php endif; ?></strong>.
+                </li>
+                <li style="font-size: 10.5px; color: var(--gray); line-height: 1.6;">
+                    Harga di atas masih bersifat <em>tentative</em> (dapat berubah) sesuai kesepakatan nantinya.
+                </li>
+            </ul>
+            <p style="font-size: 10.5px; color: var(--gray); line-height: 1.7; margin-top: 12px;">
+                Demikian penawaran yang kami sampaikan. Besar harapan kami untuk dapat berpartisipasi dalam project Anda. Hal–hal yang belum termasuk dan diatur di sini akan dibicarakan di kemudian hari apabila penawaran ini disetujui. Atas perhatian dan kerjasamanya kami sampaikan terima kasih.
+            </p>
+        </div>
+
+        <!-- TANDA TANGAN -->
+        <div class="pdf-ttd">
+            <div class="pdf-ttd-block">
+                Hormat kami,
+                <div class="pdf-ttd-name"><?= e($addedBy) ?></div>
+                <div class="pdf-ttd-line"></div>
+                <div class="pdf-ttd-jabatan">Parama Studio</div>
             </div>
-            <div class="sign-col sign-col-right">
-                <div class="sign-label">Disetujui oleh,</div>
-                <div class="sign-line">
-                    <div class="sign-slot">(________________________)</div>
-                    <div class="sign-slot-role">Nama & Jabatan</div>
-                </div>
+            <div class="pdf-ttd-block">
+                Disetujui oleh,
+                <div class="pdf-ttd-placeholder">(________________________)</div>
             </div>
         </div>
 
-    </div><!-- /doc-body -->
+    </div><!-- /pdf-body -->
 
-    <!-- ── FOOTER ── -->
-    <div class="doc-footer">
-        <div class="ft-address">
-            PT. Parama Kreatif Sukses &nbsp;·&nbsp; Rawa Buntu Utara Blok G1 No.12, Serpong, Tangerang Selatan 15810
+    <!-- ── PDF FOOTER ── -->
+    <div class="pdf-footer">
+        <div class="pdf-footer-left">
+            PT. Parama Kreatif Sukses · Rawa Buntu Utara Blok G1 No.12, Serpong, Tangerang Selatan 15810
         </div>
-        <div class="ft-validity">
-            <?= e($docId) ?> &nbsp;·&nbsp; Berlaku s/d <?= e($tglExp) ?>
+        <div class="pdf-footer-right">
+            <?= e($docId) ?> · Berlaku s/d <?= e($tglExp) ?>
         </div>
     </div>
 
-</div><!-- /doc -->
+        </div><!-- /pdf-sheet -->
+    </div>
+</div>
 
 </body>
 </html>

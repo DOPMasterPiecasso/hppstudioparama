@@ -1,0 +1,917 @@
+﻿KLASIFIKASI PAKET YEARBOOK — PARAMA STUDIO
+Dokumen ini: Referensi lengkap per paket untuk developer PDF Generator
+Versi: April 2026
+
+
+________________
+
+
+CATATAN UNIVERSAL (Ada di SEMUA Paket)
+Apapun paketnya, klien selalu mendapat hal-hal berikut yang wajib tampil di semua PDF:
+
+
+Item
+	Keterangan
+	Sales Support
+	Tim Sales membantu proses penawaran, pembuatan paket, dan negosiasi
+	Project Manager
+	PM dedicated handle komunikasi, jadwal produksi, dan koordinasi tim
+	Project Report
+	Laporan progres proyek dikirim berkala ke klien
+	Guarantee
+	Garansi kepuasan & ketentuan revisi sesuai paket
+	Pembayaran
+	Sesuai dengan kesepakatan yang tertera di kontrak atau quotation
+	Rekening
+	Transfer ke BCA 497-862-4888 a/n Parama Kreatif Sukses PT
+	
+
+________________
+
+
+
+
+
+TERMS & CONDITIONS — 2 TEMPLATE (Pilih berdasarkan paket)
+[DEV] Render kondisional — jangan tampilkan kedua-duanya sekaligus.
+
+
+________________
+
+
+📄 TEMPLATE A — Paket Buku / Produk Fisik & Digital
+Digunakan untuk: Full Service · E-Book · Edit+Desain+Cetak · Desain Only · Cetak Only
+
+
+Keterangan:
+
+
+• Harga di atas adalah dengan asumsi minimal pemesanan sebanyak {jumlah_siswa} buku.
+
+
+• Harga di atas masih bersifat tentative (dapat berubah) sesuai kesepakatan nantinya.
+
+
+Demikian penawaran yang kami sampaikan. Besar harapan kami untuk dapat berpartisipasi
+
+
+dalam project katalog / buku tahunan sekolah Anda. Hal–hal yang belum termasuk dan
+
+
+diatur di sini akan dibicarakan di kemudian hari apabila penawaran ini disetujui.
+
+
+Atas perhatian dan kerjasamanya kami sampaikan terima kasih.
+
+
+________________
+
+
+📄 TEMPLATE B — Paket Jasa Only (Foto / Video)
+Digunakan untuk: Foto Only A · Foto Only B · Full Day · Video Drone · Short Movie
+
+
+Syarat & Ketentuan:
+
+
+1. Pilihan paket yang telah diambil tidak dapat diubah setelah dimulainya pekerjaan,
+
+
+   kecuali ada kesepakatan tertulis.
+
+
+2. Waktu satu hari maksimal 8 jam kerja untuk produksi photo/video.
+
+
+3. Harga di atas masih bersifat tentative (dapat berubah) sesuai kesepakatan nantinya.
+
+
+Demikian penawaran yang kami sampaikan. Besar harapan kami untuk dapat berpartisipasi
+
+
+dalam project tahunan sekolah Anda. Hal–hal yang belum termasuk dan diatur di sini
+
+
+akan dibicarakan di kemudian hari apabila penawaran ini disetujui.
+
+
+Atas perhatian dan kerjasamanya kami sampaikan terima kasih.
+
+
+________________
+
+
+PAKET 1 — FULL SERVICE (Buku Tahunan Lengkap)
+Paket paling komprehensif. Semua dikerjakan dari foto sampai buku jadi dan dikirim.
+Varian Ukuran:
+* Handy Book A4+ (22 × 30 cm)
+* Square (24 × 24 cm)
+* B4 (25 × 35 cm)
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Creative Brief
+	Konsultasi konsep & tema buku tahunan
+	2
+	Photography
+	Foto produksi personal (biodata siswa), konsep kelas, dan konten (guru, fasilitas, eskul, dll)
+	3
+	Studio Photo Delivery
+	Studio foto portable diantar ke lokasi atau sekolah
+	4
+	Property
+	Properti foto sesuai tema kelas
+	5
+	Fashion Stylist
+	Pengarah gaya dan konsultasi kostum/tema
+	6
+	Editing
+	Editing foto terpilih
+	7
+	Design
+	Desain cover, packaging, dan layout seluruh halaman buku
+	8
+	E-Book
+	Versi digital buku tahunan (PDF/Flipbook)
+	9
+	Project Report
+	Laporan progres proyek berkala ke klien
+	10
+	Shipping
+	Gratis pengiriman buku ke 1 (satu) alamat
+	11
+	Guarantee
+	Garansi revisi desain 3x sebelum cetak dan buku baru kalau reject karena proses cetak
+	📦 SPESIFIKASI BUKU:
+✓ Ukuran Buku            : [sesuai varian dipilih]
+
+
+✓ Jenis Kertas           : Matte Paper 150gsm
+
+
+✓ Cover                          : Hard Cover MDF, AC 190gsm, Laminasi Doff
+
+
+✓ Finishing              : Perfect Binding + Jahit
+
+
+✓ Packaging              : [sesuai pilihan — hilangkan baris ini jika tidak ada packaging]
+🎁 BONUS & FASILITAS:
+✓ [X] pcs Buku Tahunan Gratis
+
+
+   *) 75–100 buku → 2 buku gratis
+
+
+   *) 100–200 buku → 4 buku gratis
+
+
+   *) >200 buku → 10 buku gratis
+
+
+   [DEV] Tampilkan jumlah buku gratis saja di PDF, bukan tabel ketentuannya
+
+
+✓ Gratis biaya pengiriman buku (*)
+
+
+✓ Studio foto portable delivery ke lokasi (*)
+
+
+✓ Fashion Stylist & Properti sesuai tema (*)
+📝 KALIMAT WAJIB DI PDF:
+Paket Full Service mencakup seluruh proses produksi buku tahunan dari awal hingga
+
+
+buku siap di tangan siswa — mulai dari sesi foto, editing, desain, cetak, hingga pengiriman.
+
+
+→ Lanjut dengan TEMPLATE A (Keterangan + penutup)
+
+
+________________
+
+
+PAKET 2 — E-BOOK ONLY
+Semua proses kreatif dikerjakan, tapi tanpa cetak fisik. Output adalah file digital.
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Creative Brief
+	Konsultasi konsep & tema buku tahunan
+	2
+	Photography
+	Foto produksi personal, konsep kelas, dan konten lainnya
+	3
+	Studio Photo Delivery
+	Studio foto portable diantar ke lokasi (opsional)
+	4
+	Property
+	Properti foto sesuai tema (opsional)
+	5
+	Fashion Stylist
+	Pengarah gaya dan konsultasi kostum/tema (opsional)
+	6
+	Editing
+	Editing foto terpilih
+	7
+	Design
+	Desain cover dan layout seluruh halaman
+	8
+	E-Book
+	File digital siap distribusi (PDF/Flipbook)
+	9
+	Project Report
+	Laporan progres proyek berkala
+	10
+	Guarantee
+	Garansi revisi desain 3 (tiga) kali
+	❌ TIDAK TERMASUK:
+✗ Cetak fisik buku
+
+
+✗ Pengiriman buku
+
+
+✗ Packaging / box
+📝 KALIMAT WAJIB DI PDF:
+Paket E-Book mencakup seluruh proses kreatif mulai dari foto, editing, hingga desain
+
+
+buku tahunan dalam format digital. Tidak termasuk cetak dan pengiriman buku fisik.
+
+
+Output: File digital PDF/Flipbook siap distribusi ke seluruh siswa.
+
+
+→ Lanjut dengan TEMPLATE A (Keterangan + penutup)
+
+
+________________
+
+
+PAKET 3 — EDIT, DESAIN & CETAK
+Klien sudah punya foto sendiri. Kami handle editing, desain, dan cetak.
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Creative Brief
+	Konsultasi konsep & tema desain
+	2
+	Editing
+	Editing dan seleksi foto yang dikirim klien
+	3
+	Design
+	Desain cover, packaging (jika ada), dan layout isi halaman
+	4
+	E-Book
+	Versi digital buku tahunan (PDF)
+	5
+	Project Report
+	Laporan progres edit, desain dan cetak
+	6
+	Shipping
+	Pengiriman buku ke lokasi klien maksimal 1 (satu) lokasi
+	7
+	Guarantee
+	Garansi revisi desain 3x sebelum cetak dan buku baru kalau reject karena proses cetak
+	❌ TIDAK TERMASUK:
+✗ Sesi foto produksi
+
+
+✗ Studio delivery & properti
+
+
+✗ Fashion Stylist
+📝 KALIMAT WAJIB DI PDF:
+Paket Edit, Desain & Cetak mencakup proses editing foto, desain layout buku tahunan,
+
+
+hingga cetak dan pengiriman. Foto/material visual disiapkan oleh klien.
+
+
+File foto harus diserahkan paling lambat 14 Hari sebelum deadline desain.
+
+
+→ Lanjut dengan TEMPLATE A (Keterangan + penutup)
+
+
+________________
+
+
+PAKET 4 — FOTO ONLY: Yearbook Foto (A) — Tanpa Studio
+Hanya sesi foto. Tanpa studio delivery, tanpa props. Lokasi foto disiapkan klien.
+Durasi: Maksimal 4 Jam Kerja (½ Hari)
+Kapasitas: Maksimal 1 Kelas
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Photography
+	1 Photographer + Unlimited Shoot
+	2
+	Fashion Stylist
+	1 Fashion Stylist (pengarah gaya & konsultasi tema/konsep)
+	3
+	Editing
+	45 Photo Edit Terpilih
+	4
+	Project Report
+	Laporan dan pengiriman file via G-Drive
+	5
+	Crew
+	1 Crew pendukung produksi
+	6
+	Guarantee
+	Revisi foto 1 (satu) kali · File dikirim maksimal 14 hari kerja setelah produksi
+	❌ TIDAK TERMASUK:
+✗ Studio foto delivery
+
+
+✗ Properti foto
+
+
+✗ Desain layout buku
+
+
+✗ Cetak buku
+📝 KALIMAT WAJIB DI PDF:
+Paket Foto Only (A) mencakup sesi foto produksi di lokasi yang disiapkan oleh klien.
+
+
+Tim kami hadir dengan fotografer, stylist, dan crew untuk hasil foto yang optimal.
+
+
+Output: 45 foto edit terpilih · Dikirim via G-Drive · Maksimal 14 hari kerja setelah produksi.
+
+
+Lokasi foto disiapkan oleh pihak sekolah/klien.
+
+
+→ Lanjut dengan TEMPLATE B (Syarat & Ketentuan + penutup)
+💰 HARGA: Rp 3.600.000,-
+________________
+
+
+PAKET 5 — FOTO ONLY: Yearbook Foto (B) — Dengan Studio Delivery + Properti
+Sesi foto lengkap dengan studio portable + properti diantar ke lokasi.
+Durasi: Maksimal 4 Jam Kerja (½ Hari)
+Kapasitas: Maksimal 1 Kelas (1 tema)
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Photography
+	1 Photographer + Unlimited Shoot
+	2
+	Studio Photo Delivery
+	Studio foto portable diantar ke lokasi klien
+	3
+	Property
+	Properti sesuai tema kelas (1 tema)
+	4
+	Fashion Stylist
+	1 Fashion Stylist (pengarah gaya & konsultasi tema/konsep)
+	5
+	Editing
+	45 Photo Edit Terpilih
+	6
+	Project Report
+	Laporan dan pengiriman file via G-Drive
+	7
+	Crew
+	1 Crew pendukung produksi
+	8
+	Guarantee
+	File dikirim maksimal 14 hari kerja setelah produksi
+	❌ TIDAK TERMASUK:
+✗ Desain layout buku
+
+
+✗ Cetak buku
+
+
+✗ Properti lebih dari 1 tema
+📝 KALIMAT WAJIB DI PDF:
+Paket Foto Only (B) mencakup sesi foto produksi lengkap dengan studio portable
+
+
+dan properti yang kami antar langsung ke lokasi sekolah.
+
+
+Output: 45 foto edit terpilih · Dikirim via G-Drive · Maksimal 14 hari kerja setelah produksi.
+
+
+Studio dan properti untuk 1 tema kelas. Tema tambahan dikenakan biaya tambahan.
+
+
+→ Lanjut dengan TEMPLATE B (Syarat & Ketentuan + penutup)
+💰 HARGA: Rp 4.950.000,-
+________________
+
+
+PAKET 6 — FOTO ONLY: Full Day (8 Jam / 2 Kelas)
+Sesi foto seharian penuh untuk 2 kelas. Bisa dengan atau tanpa studio delivery.
+Durasi: Maksimal 8 Jam Kerja (Full Day)
+Kapasitas: Maksimal 2 Kelas
+Varian:
+* Full Day Tanpa Studio — Lokasi disiapkan klien
+* Full Day + Studio Delivery — Studio portable diantar ke lokasi
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Photography
+	1 Photographer + Unlimited Shoot
+	2
+	Studio Photo Delivery
+	✓ (jika varian + Studio) / ✗ (jika tanpa studio)
+	3
+	Property
+	✓ (jika varian + Studio, 1 tema per kelas) / ✗
+	4
+	Fashion Stylist
+	1 Fashion Stylist
+	5
+	Editing
+	45 Photo Edit Terpilih per kelas
+	6
+	Project Report
+	Laporan dan pengiriman file via G-Drive
+	7
+	Crew
+	1 Crew pendukung produksi
+	8
+	Guarantee
+	File dikirim maksimal 14 hari kerja setelah produksi
+	📝 KALIMAT WAJIB DI PDF:
+Paket Foto Full Day mencakup sesi foto produksi selama 8 jam kerja untuk maksimal 2 kelas.
+
+
+Output: 45 foto edit terpilih per kelas · Dikirim via G-Drive · Maksimal 14 hari kerja setelah produksi.
+
+
+[Jika + studio: Studio portable dan properti kami antar ke lokasi sekolah.]
+
+
+→ Lanjut dengan TEMPLATE B (Syarat & Ketentuan + penutup)
+
+
+________________
+
+
+PAKET 7 — VIDEO ONLY: Video Angkatan (Drone)
+Video formasi angkatan menggunakan drone. Cocok untuk video wisuda/perpisahan.
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Videography (Drone)
+	1 Pilot Drone + 1 Videographer + 1 Crew
+	2
+	Creative Brief
+	Briefing konsep formasi dan script drone
+	3
+	Project Report
+	File dikirim via G-Drive
+	4
+	Guarantee
+	File dikirim maksimal 14 hari kerja setelah produksi
+	Output:
+✓ Video durasi 1–3 menit
+
+
+✓ Format: MP4 HD/4K (sesuai kesepakatan)
+
+
+✓ Pengiriman file via Google Drive
+❌ TIDAK TERMASUK:
+✗ Foto produksi
+
+
+✗ Desain / cetak buku
+
+
+✗ Short Movie / Docudrama
+📝 KALIMAT WAJIB DI PDF:
+Paket Video Angkatan (Drone) mencakup pengambilan video formasi angkatan menggunakan
+
+
+drone, diperkuat dengan footage videographer di lapangan untuk behind the scene.
+
+
+Output: Video 1–3 menit · Format MP4 · Dikirim via G-Drive · Maksimal 14 hari kerja.
+
+
+Script dan konsep formasi disepakati bersama sebelum hari produksi.
+
+
+→ Lanjut dengan TEMPLATE B (Syarat & Ketentuan + penutup)
+💰 HARGA: Rp 3.000.000,-
+________________
+
+
+PAKET 8 — VIDEO ONLY: Short Movie / Docudrama
+Video drama/dokumenter akhir sekolah sesuai script yang disepakati.
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Videography
+	1–2 Videographer + 1 Crew
+	2
+	Creative Brief
+	Penulisan & briefing script bersama klien
+	3
+	Editing Video
+	Full editing + color grading + scoring musik
+	4
+	Project Report
+	File dikirim via G-Drive
+	5
+	Guarantee
+	File dikirim maksimal 14 hari kerja setelah produksi
+	Output:
+✓ Video durasi 5–10 menit
+
+
+✓ Format: MP4 HD/4K (sesuai kesepakatan)
+
+
+✓ Pengiriman file via Google Drive
+❌ TIDAK TERMASUK:
+✗ Foto produksi
+
+
+✗ Desain / cetak buku
+
+
+✗ Video Drone
+📝 KALIMAT WAJIB DI PDF:
+Paket Short Movie / Docudrama mencakup produksi video drama atau catatan akhir sekolah
+
+
+sesuai script yang disepakati bersama. Dikerjakan secara profesional dengan full editing.
+
+
+Output: Video 5–10 menit · Format MP4 · Dikirim via G-Drive · Maksimal 14 hari kerja.
+
+
+Script dan konsep wajib difinalisasi sebelum hari produksi.
+
+
+→ Lanjut dengan TEMPLATE B (Syarat & Ketentuan + penutup)
+💰 HARGA: Rp 6.000.000,-
+________________
+
+
+
+PAKET 9 — DESAIN ONLY
+Klien punya foto yang sudah di-edit dan siap. Kami hanya mengerjakan desain.
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Creative Brief
+	Konsultasi konsep & arah visual desain
+	2
+	Design
+	Desain cover, packaging (jika ada), pop-up (jika ada), layout isi halaman
+	3
+	E-Book
+	File PDF digital siap distribusi
+	4
+	Project Report
+	Update progres desain berkala
+	5
+	Guarantee
+	Garansi revisi desain 3x
+	❌ TIDAK TERMASUK:
+✗ Sesi foto produksi
+
+
+✗ Editing foto
+
+
+✗ Cetak buku
+
+
+✗ Studio delivery & properti
+📝 KALIMAT WAJIB DI PDF:
+Paket Desain Only mencakup seluruh proses desain buku tahunan mulai dari cover
+
+
+hingga layout isi halaman. Semua file foto dan konten disiapkan oleh klien.
+
+
+File foto dan konten diserahkan paling lambat 14 Hari sebelum deadline pengerjaan.
+
+
+Revisi desain maksimal 3x per tahap (cover & layout).
+
+
+→ Lanjut dengan TEMPLATE A (Keterangan + penutup)
+
+
+________________
+
+
+PAKET 10 — CETAK ONLY
+File desain sudah 100% final dari klien. Kami hanya mencetak dan setting buku.
+✅ SERVICE YANG DIDAPAT (Tampil di PDF):
+No
+	Service
+	Detail
+	1
+	Printing
+	Cetak buku dengan spesifikasi sesuai permintaan
+	2
+	Setting & Prepress
+	Setting file sebelum naik cetak (cek bleed/margin, resolusi, dll)
+	3
+	Project Report
+	Update status cetak dan estimasi selesai
+	4
+	Shipping
+	Pengiriman buku ke lokasi klien
+	5
+	Guarantee
+	Quality control sebelum pengiriman dan garansi buku cacat/reject karena proses produksi
+	❌ TIDAK TERMASUK:
+✗ Desain (file PDF/AI harus sudah final dari klien)
+
+
+✗ Editing foto
+
+
+✗ Sesi foto produksi
+⚠️ SYARAT CETAK:
+✓ File desain sudah final dalam format PDF/AI (print-ready)
+
+
+✓ Resolusi minimal 600 dpi
+
+
+✓ Sudah termasuk bleed 3mm
+
+
+✓ Warna dalam mode CMYK
+📝 KALIMAT WAJIB DI PDF:
+Paket Cetak Only mencakup proses cetak, finishing, dan pengiriman buku tahunan.
+
+
+File desain final (PDF/AI, print-ready) wajib disiapkan oleh klien sebelum proses dimulai.
+
+
+Estimasi waktu cetak: 21 s/d 45 hari kerja setelah file diterima dan disetujui.
+
+
+Quality control dilakukan sebelum buku dikirimkan ke klien.
+
+
+→ Lanjut dengan TEMPLATE A (Keterangan + penutup)
+
+
+________________
+
+
+
+
+________________
+
+
+RINGKASAN MATRIX — SERVICE PER PAKET
+Service
+	Full Service
+	E-Book
+	Edit+Desain+Cetak
+	Foto A
+	Foto B
+	Full Day
+	Video Drone
+	Short Movie
+	Desain Only
+	Cetak Only
+	Creative Brief
+	✓
+	✓
+	✓
+	-
+	-
+	-
+	✓
+	✓
+	✓
+	-
+	Photography
+	✓
+	✓
+	-
+	✓
+	✓
+	✓
+	-
+	-
+	-
+	-
+	Studio Delivery
+	✓
+	opsional
+	-
+	-
+	✓
+	opsional
+	-
+	-
+	-
+	-
+	Property
+	✓
+	opsional
+	-
+	-
+	✓
+	opsional
+	-
+	-
+	-
+	-
+	Fashion Stylist
+	✓
+	opsional
+	-
+	✓
+	✓
+	✓
+	-
+	-
+	-
+	-
+	Editing Foto
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	-
+	-
+	-
+	-
+	Videography
+	-
+	-
+	-
+	-
+	-
+	-
+	✓
+	✓
+	-
+	-
+	Drone
+	-
+	-
+	-
+	-
+	-
+	-
+	✓
+	-
+	-
+	-
+	Design
+	✓
+	✓
+	✓
+	-
+	-
+	-
+	-
+	-
+	✓
+	-
+	E-Book
+	✓
+	✓
+	✓
+	-
+	-
+	-
+	-
+	-
+	✓
+	-
+	Cetak Fisik
+	✓
+	-
+	✓
+	-
+	-
+	-
+	-
+	-
+	-
+	✓
+	Project Report
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	Shipping
+	✓
+	-
+	✓
+	-
+	-
+	-
+	-
+	-
+	-
+	✓
+	Guarantee
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	Sales Support
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	PM Dedicated
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	✓
+	
+
+________________
+
+
+CATATAN UNTUK DEVELOPER
+Logika Render PDF:
+1. Ambil paket yang dipilih dari kalkulator
+2. Lookup ke matrix di atas → render hanya service yang ✓
+3. Jika service = "opsional" → cek apakah add-on tersebut dicentang
+4. PM Dedicated + Sales Support + Project Report + Guarantee → selalu tampil di semua paket
+Logika Terms & Conditions (WAJIB kondisional):
+if paket in [Full Service, E-Book, Edit+Desain+Cetak, Desain Only, Cetak Only]:
+
+
+    → render TEMPLATE A (Keterangan bullet + paragraf penutup buku)
+
+
+elif paket in [Foto Only A, Foto Only B, Full Day, Video Drone, Short Movie]:
+
+
+    → render TEMPLATE B (Syarat & Ketentuan bernomor + paragraf penutup jasa)
+Jika Ada Kombinasi Paket (misal Full Service + Video Drone):
+* Tampilkan sebagai 2 section terpisah di PDF
+* Harga dibreakdown per paket di tabel rincian harga
+* Total = jumlah semua paket yang dipilih
+* Untuk Terms: gunakan Template yang sesuai dengan paket utama (paket dengan nilai lebih besar)
+
+
+________________
+
+
+
+
+Dokumen ini dibuat berdasarkan: package include visual, price list photo/video, dan rincian paket yearbook Parama Studio. Update terakhir: April 2026 — Dhamar Singgih

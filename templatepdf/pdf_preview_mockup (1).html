@@ -1,0 +1,959 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PDF Generator — Parama Studio</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --orange: #C0602A;
+    --orange-light: #F4EBE4;
+    --orange-mid: #E08050;
+    --navy: #1A2236;
+    --navy-mid: #2C3A55;
+    --gray: #6B7280;
+    --gray-light: #F5F5F3;
+    --border: #E5E0D8;
+    --white: #FDFCFA;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: #ECEAE5;
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
+
+  /* ── TOP BAR ── */
+  .topbar {
+    background: var(--navy);
+    color: white;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0 32px;
+    height: 56px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .topbar-brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+  .topbar-brand span {
+    color: var(--orange-mid);
+  }
+  .topbar-logo {
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 2px solid var(--orange-mid);
+    display: grid; place-items: center;
+    font-size: 13px;
+  }
+  .topbar-actions { display: flex; gap: 10px; align-items: center; }
+  .btn-ghost {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.15);
+    color: white;
+    padding: 6px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: background 0.15s;
+  }
+  .btn-ghost:hover { background: rgba(255,255,255,0.15); }
+  .btn-primary {
+    background: var(--orange);
+    border: none;
+    color: white;
+    padding: 7px 18px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    display: flex; align-items: center; gap: 6px;
+    transition: background 0.15s;
+  }
+  .btn-primary:hover { background: #A85424; }
+
+  /* ── LAYOUT ── */
+  .layout {
+    display: grid;
+    grid-template-columns: 340px 1fr;
+    min-height: calc(100vh - 56px);
+  }
+
+  /* ── LEFT PANEL ── */
+  .left-panel {
+    background: var(--white);
+    border-right: 1px solid var(--border);
+    overflow-y: auto;
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .panel-title {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--gray);
+    margin-bottom: 4px;
+    margin-top: 8px;
+  }
+
+  .paket-selector {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    margin-bottom: 8px;
+  }
+
+  .paket-option {
+    border: 1.5px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 14px;
+    cursor: pointer;
+    transition: all 0.15s;
+    background: white;
+  }
+  .paket-option:hover { border-color: var(--orange-mid); }
+  .paket-option.active {
+    border-color: var(--orange);
+    background: var(--orange-light);
+  }
+  .paket-option-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .paket-name {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--navy);
+  }
+  .paket-option.active .paket-name { color: var(--orange); }
+  .paket-badge {
+    font-size: 10px;
+    font-weight: 600;
+    background: var(--orange);
+    color: white;
+    padding: 2px 8px;
+    border-radius: 20px;
+  }
+  .paket-desc {
+    font-size: 11px;
+    color: var(--gray);
+    margin-top: 3px;
+  }
+
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 8px 0;
+  }
+
+  .input-row {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    margin-bottom: 8px;
+  }
+  .input-label {
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--navy-mid);
+  }
+  .input-field {
+    border: 1.5px solid var(--border);
+    border-radius: 8px;
+    padding: 9px 12px;
+    font-size: 13px;
+    font-family: 'DM Sans', sans-serif;
+    color: var(--navy);
+    outline: none;
+    transition: border-color 0.15s;
+    background: white;
+  }
+  .input-field:focus { border-color: var(--orange); }
+
+  .service-checklist {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .service-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 7px 10px;
+    border-radius: 7px;
+    background: var(--gray-light);
+    font-size: 12px;
+    color: var(--navy-mid);
+  }
+  .service-item.locked {
+    opacity: 0.45;
+  }
+  .service-item .dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--orange);
+    flex-shrink: 0;
+  }
+  .service-item.locked .dot {
+    background: var(--gray);
+  }
+
+  .summary-box {
+    background: var(--navy);
+    border-radius: 12px;
+    padding: 16px;
+    margin-top: 8px;
+    color: white;
+  }
+  .summary-row {
+    display: flex;
+    justify-content: space-between;
+    font-size: 12px;
+    color: rgba(255,255,255,0.6);
+    margin-bottom: 6px;
+  }
+  .summary-row span:last-child { color: white; }
+  .summary-total {
+    display: flex;
+    justify-content: space-between;
+    border-top: 1px solid rgba(255,255,255,0.15);
+    padding-top: 10px;
+    margin-top: 4px;
+  }
+  .summary-total-label { font-size: 12px; color: rgba(255,255,255,0.7); }
+  .summary-total-value { font-size: 18px; font-weight: 700; color: var(--orange-mid); }
+
+  /* ── RIGHT PANEL — PDF PREVIEW ── */
+  .right-panel {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 32px;
+    overflow-y: auto;
+    background: #DEDAD4;
+    gap: 16px;
+  }
+
+  .preview-label {
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: #9C9589;
+    align-self: flex-start;
+    margin-bottom: -8px;
+  }
+
+  /* PDF SHEET */
+  .pdf-sheet {
+    width: 680px;
+    background: white;
+    border-radius: 4px;
+    box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+    overflow: hidden;
+    font-family: 'DM Sans', sans-serif;
+  }
+
+  /* PDF HEADER */
+  .pdf-header {
+    background: var(--navy);
+    padding: 28px 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+  }
+  .pdf-brand { color: white; }
+  .pdf-brand-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 22px;
+    letter-spacing: 0.01em;
+  }
+  .pdf-brand-tagline {
+    font-size: 10px;
+    color: rgba(255,255,255,0.5);
+    margin-top: 2px;
+    letter-spacing: 0.05em;
+  }
+  .pdf-brand-contact {
+    font-size: 10px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 8px;
+    line-height: 1.7;
+  }
+  .pdf-doc-info { text-align: right; }
+  .pdf-doc-number {
+    color: var(--orange-mid);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+  }
+  .pdf-doc-date { font-size: 11px; color: rgba(255,255,255,0.45); margin-top: 4px; }
+
+  /* PDF BODY */
+  .pdf-body { padding: 28px 36px; }
+
+  .pdf-to-label {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gray);
+    margin-bottom: 4px;
+  }
+  .pdf-client-name {
+    font-family: 'DM Serif Display', serif;
+    font-size: 26px;
+    color: var(--navy);
+    line-height: 1.1;
+  }
+  .pdf-paket-tag {
+    display: inline-block;
+    background: var(--orange-light);
+    color: var(--orange);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 3px 10px;
+    border-radius: 20px;
+    margin-top: 6px;
+  }
+
+  .pdf-section {
+    margin-top: 24px;
+  }
+  .pdf-section-title {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.12em;
+    color: var(--gray);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+
+  .pdf-spec-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+  }
+  .pdf-spec-table td {
+    padding: 6px 8px;
+    vertical-align: top;
+  }
+  .pdf-spec-table td:first-child {
+    color: var(--gray);
+    width: 38%;
+    font-size: 11px;
+  }
+  .pdf-spec-table td:last-child {
+    color: var(--navy);
+    font-weight: 500;
+  }
+  .pdf-spec-table tr:nth-child(odd) td {
+    background: var(--gray-light);
+  }
+
+  .pdf-service-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 6px;
+  }
+  .pdf-service-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    font-size: 12px;
+    color: var(--navy-mid);
+    padding: 6px 10px;
+    background: var(--gray-light);
+    border-radius: 6px;
+  }
+  .pdf-service-row .check {
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 12px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+  .pdf-service-name { font-weight: 500; font-size: 11px; }
+  .pdf-service-detail { font-size: 10px; color: var(--gray); margin-top: 1px; }
+
+  .pdf-bonus-list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+  }
+  .pdf-bonus-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 11.5px;
+    color: var(--navy-mid);
+  }
+  .pdf-bonus-item::before {
+    content: '✓';
+    color: var(--orange);
+    font-weight: 700;
+    font-size: 12px;
+    flex-shrink: 0;
+  }
+
+  /* PRICE TABLE */
+  .pdf-price-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    margin-top: 4px;
+  }
+  .pdf-price-table thead tr {
+    background: var(--navy-mid);
+    color: white;
+  }
+  .pdf-price-table thead td {
+    padding: 8px 12px;
+    font-size: 10px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+  }
+  .pdf-price-table tbody tr td {
+    padding: 9px 12px;
+    color: var(--navy-mid);
+    border-bottom: 1px solid var(--border);
+  }
+  .pdf-price-table tbody tr:nth-child(odd) td { background: var(--gray-light); }
+  .pdf-price-table .price-col { text-align: right; font-weight: 500; }
+  .pdf-price-table tfoot tr td {
+    background: var(--navy);
+    color: white;
+    padding: 12px 12px;
+    font-weight: 700;
+    font-size: 13px;
+  }
+  .pdf-price-table tfoot .price-col { color: var(--orange-mid); font-size: 16px; }
+
+  /* TERMS */
+  .pdf-terms {
+    margin-top: 20px;
+    padding: 14px;
+    background: var(--gray-light);
+    border-radius: 8px;
+    border-left: 3px solid var(--orange);
+  }
+  .pdf-terms-title {
+    font-size: 9px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--orange);
+    margin-bottom: 8px;
+  }
+  .pdf-terms ol {
+    padding-left: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .pdf-terms li { font-size: 10.5px; color: var(--gray); line-height: 1.5; }
+
+  /* TTD */
+  .pdf-ttd {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+    padding-top: 20px;
+    border-top: 1px solid var(--border);
+  }
+  .pdf-ttd-block { font-size: 11px; color: var(--gray); }
+  .pdf-ttd-name { font-weight: 700; color: var(--navy); font-size: 12px; margin-top: 32px; }
+  .pdf-ttd-jabatan { font-size: 10px; color: var(--gray); }
+  .pdf-ttd-line { border-top: 1px solid var(--navy); margin-top: 2px; }
+  .pdf-ttd-placeholder { 
+    margin-top: 48px;
+    border-top: 1px solid var(--navy); 
+    padding-top: 4px;
+    font-size: 10px; 
+    color: var(--gray); 
+  }
+
+  /* PDF FOOTER */
+  .pdf-footer {
+    background: var(--navy);
+    padding: 10px 36px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .pdf-footer-left { font-size: 9px; color: rgba(255,255,255,0.35); }
+  .pdf-footer-right { font-size: 9px; color: rgba(255,255,255,0.35); text-align: right; }
+
+  /* ANNOTATION CALLOUTS */
+  .annotation-row {
+    width: 680px;
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+  }
+  .callout {
+    background: var(--orange);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 5px 12px;
+    border-radius: 20px;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    letter-spacing: 0.02em;
+  }
+  .callout.gray {
+    background: rgba(0,0,0,0.3);
+    color: rgba(255,255,255,0.7);
+  }
+  .callout-arrow { font-size: 12px; }
+
+  .note-box {
+    width: 680px;
+    background: rgba(192, 96, 42, 0.12);
+    border: 1px solid rgba(192, 96, 42, 0.3);
+    border-radius: 8px;
+    padding: 12px 16px;
+    font-size: 11.5px;
+    color: #7A3810;
+    line-height: 1.6;
+  }
+  .note-box strong { font-weight: 700; }
+
+  /* HIDDEN SECTION (locked) */
+  .pdf-section.locked {
+    opacity: 0.3;
+    position: relative;
+  }
+  .locked-badge {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: var(--navy);
+    color: white;
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    white-space: nowrap;
+    z-index: 10;
+  }
+</style>
+</head>
+<body>
+
+<!-- TOP BAR -->
+<div class="topbar">
+  <div class="topbar-brand">
+    <div class="topbar-logo">P</div>
+    Parama Studio <span>/ PDF Generator</span>
+  </div>
+  <div class="topbar-actions">
+    <button class="btn-ghost">← Kembali ke Kalkulator</button>
+    <button class="btn-primary">⬇ Download PDF</button>
+  </div>
+</div>
+
+<div class="layout">
+
+  <!-- LEFT PANEL -->
+  <div class="left-panel">
+    <div class="panel-title">Pilih Paket</div>
+    <div class="paket-selector">
+      <div class="paket-option active">
+        <div class="paket-option-header">
+          <span class="paket-name">Full Service</span>
+          <span class="paket-badge">AKTIF</span>
+        </div>
+        <div class="paket-desc">Foto · Desain · Cetak · Kirim</div>
+      </div>
+      <div class="paket-option">
+        <div class="paket-name">E-Book Only</div>
+        <div class="paket-desc">Foto · Desain · Digital</div>
+      </div>
+      <div class="paket-option">
+        <div class="paket-name">Edit, Desain & Cetak</div>
+        <div class="paket-desc">Tanpa foto produksi</div>
+      </div>
+      <div class="paket-option">
+        <div class="paket-name">Foto Only (A / B / Full Day)</div>
+        <div class="paket-desc">Tanpa desain & cetak</div>
+      </div>
+      <div class="paket-option">
+        <div class="paket-name">Video Drone / Short Movie</div>
+        <div class="paket-desc">Video only</div>
+      </div>
+      <div class="paket-option">
+        <div class="paket-name">Desain Only / Cetak Only</div>
+        <div class="paket-desc">Service tunggal</div>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+    <div class="panel-title">Info Dokumen</div>
+
+    <div class="input-row">
+      <div class="input-label">Nama Sekolah / Klien</div>
+      <input class="input-field" value="SMPN 1 Tangerang" />
+    </div>
+    <div class="input-row">
+      <div class="input-label">Jumlah Siswa</div>
+      <input class="input-field" value="100" />
+    </div>
+    <div class="input-row">
+      <div class="input-label">Jumlah Halaman</div>
+      <input class="input-field" value="45" />
+    </div>
+    <div class="input-row">
+      <div class="input-label">Sales / PIC</div>
+      <input class="input-field" value="Dabo" />
+    </div>
+    <div class="input-row">
+      <div class="input-label">Berlaku Hingga</div>
+      <input class="input-field" value="20 Mei 2026" />
+    </div>
+
+    <div class="divider"></div>
+    <div class="panel-title">Service Aktif di PDF</div>
+
+    <div class="service-checklist">
+      <div class="service-item"><div class="dot"></div>Creative Brief</div>
+      <div class="service-item"><div class="dot"></div>Photography</div>
+      <div class="service-item"><div class="dot"></div>Studio Photo Delivery</div>
+      <div class="service-item"><div class="dot"></div>Property Sesuai Tema</div>
+      <div class="service-item"><div class="dot"></div>Fashion Stylist</div>
+      <div class="service-item"><div class="dot"></div>Editing Foto</div>
+      <div class="service-item"><div class="dot"></div>Design Layout</div>
+      <div class="service-item"><div class="dot"></div>E-Book Digital</div>
+      <div class="service-item"><div class="dot"></div>Project Report</div>
+      <div class="service-item"><div class="dot"></div>Shipping (Jabodetabek)</div>
+      <div class="service-item"><div class="dot"></div>Guarantee & Revisi</div>
+      <div class="service-item locked"><div class="dot"></div>Video Drone</div>
+      <div class="service-item locked"><div class="dot"></div>Short Movie</div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="summary-box">
+      <div class="summary-row"><span>Harga/buku</span><span>Rp 395.000</span></div>
+      <div class="summary-row"><span>100 buku × Rp 395.000</span><span>Rp 39.500.000</span></div>
+      <div class="summary-row"><span>Add-on: Slide Box</span><span>Rp 4.000.000</span></div>
+      <div class="summary-row"><span>Diskon 0%</span><span>–</span></div>
+      <div class="summary-total">
+        <span class="summary-total-label">TOTAL PENAWARAN</span>
+        <span class="summary-total-value">Rp 43.500.000</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT PANEL — PDF PREVIEW -->
+  <div class="right-panel">
+
+    <div class="preview-label">Preview PDF — Otomatis update sesuai pilihan paket</div>
+
+    <!-- ANNOTATION -->
+    <div class="annotation-row">
+      <div class="callout">📋 Paket: Full Service</div>
+      <div class="callout">👤 100 Siswa · 45 Hal</div>
+      <div class="callout gray">← Service berubah otomatis saat ganti paket</div>
+    </div>
+
+    <!-- PDF SHEET -->
+    <div class="pdf-sheet">
+
+      <!-- HEADER -->
+      <div class="pdf-header">
+        <div class="pdf-brand">
+          <div class="pdf-brand-name">Parama Studio</div>
+          <div class="pdf-brand-tagline">Yearbook & Graduation Agency</div>
+          <div class="pdf-brand-contact">
+            studioparama.com · +62 822 9400 8994<br>
+            Tangerang Selatan
+          </div>
+        </div>
+        <div class="pdf-doc-info">
+          <div class="pdf-doc-number">PS-20260424-002</div>
+          <div class="pdf-doc-date">24 April 2026</div>
+          <div class="pdf-doc-date" style="margin-top:8px; color: rgba(255,255,255,0.3);">
+            PENAWARAN HARGA
+          </div>
+        </div>
+      </div>
+
+      <!-- BODY -->
+      <div class="pdf-body">
+
+        <!-- CLIENT -->
+        <div>
+          <div class="pdf-to-label">Ditujukan Kepada</div>
+          <div class="pdf-client-name">SMPN 1 Tangerang</div>
+          <div class="pdf-paket-tag">Full Service — Handy Book A4+ · 100 Siswa</div>
+        </div>
+
+        <!-- SPESIFIKASI BUKU -->
+        <div class="pdf-section">
+          <div class="pdf-section-title">Spesifikasi Buku</div>
+          <table class="pdf-spec-table">
+            <tr><td>Jumlah Pesanan</td><td><strong>100 Buku</strong></td></tr>
+            <tr><td>Jumlah Halaman</td><td><strong>45 Halaman</strong></td></tr>
+            <tr><td>Ukuran Buku</td><td>A4+ (22 × 30 cm)</td></tr>
+            <tr><td>Jenis Kertas</td><td>Art Paper 150gsm</td></tr>
+            <tr><td>Cover</td><td>Hard Cover MDF, AC 190gsm, Laminasi Doff</td></tr>
+            <tr><td>Finishing</td><td>Perfect Binding + Jahit</td></tr>
+            <tr><td>Packaging</td><td>Slide Box</td></tr>
+          </table>
+        </div>
+
+        <!-- SERVICE YANG DIDAPAT -->
+        <div class="pdf-section">
+          <div class="pdf-section-title">Service yang Didapat</div>
+          <div class="pdf-service-grid">
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Creative Brief</div>
+                <div class="pdf-service-detail">Konsultasi konsep & tema</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Photography</div>
+                <div class="pdf-service-detail">Foto personal, kelas & konten</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Studio Photo Delivery</div>
+                <div class="pdf-service-detail">Studio portable ke lokasi</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Property Sesuai Tema</div>
+                <div class="pdf-service-detail">Per konsep kelas</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Fashion Stylist</div>
+                <div class="pdf-service-detail">Pengarah gaya & kostum</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Editing Foto Terpilih</div>
+                <div class="pdf-service-detail">Full retouching</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Design Cover & Layout</div>
+                <div class="pdf-service-detail">Seluruh halaman buku</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">E-Book Digital</div>
+                <div class="pdf-service-detail">PDF/Flipbook siap distribusi</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Project Manager</div>
+                <div class="pdf-service-detail">Koordinasi & jadwal produksi</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Project Report</div>
+                <div class="pdf-service-detail">Laporan progres berkala</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Shipping Gratis</div>
+                <div class="pdf-service-detail">Area Jabodetabek</div>
+              </div>
+            </div>
+            <div class="pdf-service-row">
+              <div class="check">✓</div>
+              <div>
+                <div class="pdf-service-name">Guarantee</div>
+                <div class="pdf-service-detail">Revisi desain 2× sebelum cetak</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- BONUS -->
+        <div class="pdf-section">
+          <div class="pdf-section-title">Bonus & Fasilitas</div>
+          <div class="pdf-bonus-list">
+            <div class="pdf-bonus-item">4 pcs Buku Tahunan Gratis</div>
+            <div class="pdf-bonus-item">Free Photoshoot Graduation (2 Fotografer)</div>
+            <div class="pdf-bonus-item">Studio foto portable delivery ke lokasi sekolah</div>
+            <div class="pdf-bonus-item">Fashion Stylist & Properti sesuai tema kelas</div>
+            <div class="pdf-bonus-item">Gratis biaya pengiriman area Jabodetabek</div>
+          </div>
+        </div>
+
+        <!-- RINCIAN HARGA -->
+        <div class="pdf-section">
+          <div class="pdf-section-title">Rincian Harga</div>
+          <table class="pdf-price-table">
+            <thead>
+              <tr>
+                <td>Deskripsi</td>
+                <td class="price-col">Harga</td>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Harga Buku Tahunan (100 buku × Rp 395.000)</td>
+                <td class="price-col">Rp 39.500.000</td>
+              </tr>
+              <tr>
+                <td>Add-on: Slide Box (100 buku × Rp 40.000)</td>
+                <td class="price-col">Rp 4.000.000</td>
+              </tr>
+            </tbody>
+            <tfoot>
+              <tr>
+                <td>TOTAL HARGA PENAWARAN</td>
+                <td class="price-col">Rp 43.500.000</td>
+              </tr>
+            </tfoot>
+          </table>
+          <div style="margin-top: 10px; font-size: 10.5px; color: var(--gray); line-height: 1.6;">
+            • Harga berlaku untuk minimal 100 pemesan Buku Tahunan.<br>
+            • Harga bersifat penawaran dan dapat berubah sesuai kesepakatan.<br>
+            • Penawaran berlaku hingga: <strong>8 Mei 2026</strong>
+          </div>
+        </div>
+
+        <!-- ============================================================
+             TERMS — TEMPLATE A
+             Paket: Full Service · E-Book · Edit+Desain+Cetak · Desain Only · Cetak Only
+             [DEV] Render block ini jika paket BUKAN Foto Only / Video Only
+             ============================================================ -->
+        <div class="pdf-terms">
+          <div class="pdf-terms-title">Keterangan</div>
+          <ul style="padding-left: 16px; display: flex; flex-direction: column; gap: 5px; list-style: disc;">
+            <li style="font-size: 10.5px; color: var(--gray); line-height: 1.6;">
+              Harga di atas adalah dengan asumsi minimal pemesanan sebanyak <strong>{jumlah_siswa} buku</strong>.
+            </li>
+            <li style="font-size: 10.5px; color: var(--gray); line-height: 1.6;">
+              Harga di atas masih bersifat <em>tentative</em> (dapat berubah) sesuai kesepakatan nantinya.
+            </li>
+          </ul>
+          <p style="font-size: 10.5px; color: var(--gray); line-height: 1.7; margin-top: 12px;">
+            Demikian penawaran yang kami sampaikan. Besar harapan kami untuk dapat berpartisipasi dalam project katalog / buku tahunan sekolah Anda. Hal–hal yang belum termasuk dan diatur di sini akan dibicarakan di kemudian hari apabila penawaran ini disetujui. Atas perhatian dan kerjasamanya kami sampaikan terima kasih.
+          </p>
+        </div>
+
+        <!-- ============================================================
+             TERMS — TEMPLATE B
+             Paket: Foto Only A · Foto Only B · Full Day · Video Drone · Short Movie
+             [DEV] Render block ini jika paket = Foto Only / Video Only
+             Uncomment block di bawah ini dan hapus block Template A di atas
+             ============================================================ -->
+        <!--
+        <div class="pdf-terms">
+          <div class="pdf-terms-title">Syarat &amp; Ketentuan</div>
+          <ol style="padding-left: 16px; display: flex; flex-direction: column; gap: 5px;">
+            <li style="font-size: 10.5px; color: var(--gray); line-height: 1.6;">
+              Pilihan paket yang telah diambil tidak dapat diubah setelah dimulainya pekerjaan, kecuali ada kesepakatan tertulis.
+            </li>
+            <li style="font-size: 10.5px; color: var(--gray); line-height: 1.6;">
+              Waktu satu hari maksimal 8 jam kerja untuk produksi photo/video.
+            </li>
+            <li style="font-size: 10.5px; color: var(--gray); line-height: 1.6;">
+              Harga di atas masih bersifat <em>tentative</em> (dapat berubah) sesuai kesepakatan nantinya.
+            </li>
+          </ol>
+          <p style="font-size: 10.5px; color: var(--gray); line-height: 1.7; margin-top: 12px;">
+            Demikian penawaran yang kami sampaikan. Besar harapan kami untuk dapat berpartisipasi dalam project tahunan sekolah Anda. Hal–hal yang belum termasuk dan diatur di sini akan dibicarakan di kemudian hari apabila penawaran ini disetujui. Atas perhatian dan kerjasamanya kami sampaikan terima kasih.
+          </p>
+        </div>
+        -->
+
+        <!-- TTD -->
+        <div class="pdf-ttd">
+          <div class="pdf-ttd-block">
+            Hormat kami,
+            <div class="pdf-ttd-name">Dabo</div>
+            <div class="pdf-ttd-line"></div>
+            <div class="pdf-ttd-jabatan">Digital Marketing · Parama Studio</div>
+          </div>
+          <div class="pdf-ttd-block">
+            Disetujui oleh,
+            <div class="pdf-ttd-placeholder">Nama & Jabatan / Stempel</div>
+          </div>
+        </div>
+
+      </div><!-- end pdf-body -->
+
+      <!-- PDF FOOTER -->
+      <div class="pdf-footer">
+        <div class="pdf-footer-left">
+          PT. Parama Kreatif Sukses · Rawa Buntu Utara Blok G1 No.12, Serpong, Tangerang Selatan 15810
+        </div>
+        <div class="pdf-footer-right">
+          PS-20260424-002 · Berlaku s/d 8 Mei 2026
+        </div>
+      </div>
+
+    </div><!-- end pdf-sheet -->
+
+    <!-- NOTE FOR DEVELOPER -->
+    <div class="note-box">
+      <strong>📌 Note untuk Developer:</strong><br><br>
+      <strong>1. Service &amp; Bonus</strong> — Section "Service yang Didapat" dan "Bonus &amp; Fasilitas" harus di-render berdasarkan paket yang dipilih (bukan hardcode). Gunakan mapping dari dokumen klasifikasi paket.<br><br>
+      <strong>2. Template Terms — 2 versi, render kondisional berdasarkan paket:</strong><br>
+      &nbsp;&nbsp;→ <strong>Template A</strong> (Keterangan + penutup formal): Full Service · E-Book · Edit+Desain+Cetak · Desain Only · Cetak Only<br>
+      &nbsp;&nbsp;→ <strong>Template B</strong> (Syarat &amp; Ketentuan bernomor + penutup): Foto Only A/B/Full Day · Video Drone · Short Movie<br><br>
+      Template B tersedia dalam HTML comment di atas — tinggal uncomment dan pasang kondisi if/else.<br><br>
+      <strong>3. Add-on</strong> — Hanya tampil jika dicentang di kalkulator. Label harus dari mapping display, bukan raw key (contoh: <em>slidebox</em> → <em>Slide Box</em>).
+    </div>
+
+  </div><!-- end right-panel -->
+</div>
+
+</body>
+</html>
