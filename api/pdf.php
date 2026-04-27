@@ -779,73 +779,38 @@ body {
         padding: 0;
         background: transparent;
         display: block;
-        overflow: visible !important;
     }
 
     .pdf-sheet {
         width: 210mm;
-        height: 297mm; /* Restore exact A4 height */
         box-shadow: none;
         border-radius: 0;
         margin: 0;
-        overflow: hidden; /* Prevent 2nd page spill */
-        display: flex !important;
-        flex-direction: column !important;
+        overflow: visible !important; /* Mencegah cut-off */
     }
 
-    .pdf-body { 
-        display: flex !important;
-        flex-direction: column !important;
-        flex: 1 !important;
-        padding: 16px 36px !important; /* Reduce vertical padding */
-    }
+    .pdf-body { flex: 1; }
 
-    /* Penyesuaian padding/margin agar muat 1 halaman tanpa terpotong */
+    /* Pastikan header & footer navy tercetak */
     .pdf-header {
         background: var(--navy) !important;
-        padding: 20px 36px !important; /* Reduce padding */
     }
     .pdf-footer {
         background: var(--navy) !important;
-        padding: 8px 36px !important;
-        margin-top: auto; /* Push to bottom */
     }
-    .pdf-section {
-        margin-top: 14px !important; /* Reduce margin */
-    }
-    .pdf-section-title {
-        margin-bottom: 8px !important;
-    }
-    .pdf-terms {
-        margin-top: 12px !important;
-        padding: 10px 14px !important;
-    }
-    .pdf-ttd {
-        margin-top: 14px !important;
-        padding-top: 12px !important;
-    }
-    .pdf-ttd-name { margin-top: 24px !important; }
-    .pdf-ttd-placeholder { margin-top: 38px !important; }
 
     /* Pastikan tabel total navy tercetak */
     .pdf-price-table tfoot tr td {
         background: var(--navy) !important;
-    }
-    .pdf-price-table tbody tr td {
-        padding: 6px 12px !important; /* Reduce padding */
     }
 
     /* Pastikan background tabel tercetak */
     .pdf-spec-table tr:nth-child(odd) td {
         background: var(--gray-light) !important;
     }
-    .pdf-spec-table td {
-        padding: 4px 8px !important; /* Reduce padding */
-    }
 
     .pdf-service-row {
         background: var(--gray-light) !important;
-        padding: 4px 8px !important; /* Reduce padding */
     }
 
     @page {
