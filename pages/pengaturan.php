@@ -47,9 +47,164 @@ try {
 
 include __DIR__ . '/../includes/header.php';
 ?>
+<!-- Quill Rich Text Editor -->
+<link href="https://cdn.quilljs.com/1.3.6/quill.snow.css" rel="stylesheet">
+<script src="https://cdn.quilljs.com/1.3.6/quill.min.js"></script>
+<style>
+  /* Quill Dark Mode Adjustments */
+  .ql-toolbar.ql-snow { border-color: var(--border); background: var(--surface2); border-radius: 8px 8px 0 0; }
+  .ql-container.ql-snow { border-color: var(--border); background: var(--surface); border-radius: 0 0 8px 8px; font-family: inherit; font-size: 13px; }
+  .ql-editor { color: var(--text); min-height: 100px; }
+  .ql-editor.ql-blank::before { color: var(--text3); font-style: normal; }
+  .si .ql-container.ql-snow { border-radius: 0; }
+
+  /* Quick Nav Styling */
+  .quick-nav {
+    position: fixed;
+    right: 20px;
+    top: 55%;
+    transform: translateY(-50%);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    z-index: 1000;
+  }
+  .quick-nav-item {
+    width: 38px;
+    height: 38px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.08);
+    transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    position: relative;
+    text-decoration: none;
+    color: var(--text2);
+    font-size: 16px;
+  }
+  .quick-nav-item:hover {
+    background: var(--accent);
+    color: white;
+    transform: scale(1.15) translateX(-5px);
+    border-color: var(--accent);
+    box-shadow: 0 6px 15px rgba(0,0,0,0.15);
+  }
+  .quick-nav-label {
+    position: absolute;
+    right: 48px;
+    background: var(--text);
+    color: var(--surface);
+    padding: 5px 12px;
+    border-radius: 6px;
+    font-size: 11px;
+    font-weight: 600;
+    white-space: nowrap;
+    opacity: 0;
+    pointer-events: none;
+    transition: all 0.2s ease;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  }
+  .quick-nav-item:hover .quick-nav-label {
+    opacity: 1;
+    transform: translateX(-5px);
+  }
+  #mobile-fab { display: none; }
+  #fab-menu { display: none; }
+
+  @media (max-width: 768px) {
+    .quick-nav { display: none; }
+    #mobile-fab {
+      display: flex;
+      position: fixed;
+      right: 20px;
+      bottom: 25px;
+      width: 52px;
+      height: 52px;
+      background: var(--accent);
+      color: white;
+      border-radius: 50%;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
+      z-index: 2001;
+      cursor: pointer;
+      border: 4px solid var(--surface);
+      transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #mobile-fab.active { transform: rotate(135deg); background: var(--danger); }
+    #fab-menu {
+      display: flex;
+      position: fixed;
+      right: 20px;
+      bottom: 85px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 10px;
+      flex-direction: column;
+      gap: 4px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.25);
+      z-index: 2001;
+      width: 220px;
+      opacity: 0;
+      transform: translateY(20px) scale(0.9);
+      pointer-events: none;
+      transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    #fab-menu.active { opacity: 1; transform: translateY(0) scale(1); pointer-events: auto; }
+    .fab-menu-item {
+      padding: 12px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text);
+      border-radius: 10px;
+      text-decoration: none;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: background 0.2s;
+    }
+    .fab-menu-item:active { background: var(--surface2); }
+    .fab-menu-item i { font-size: 16px; width: 20px; text-align: center; }
+  }
+</style>
+<?php
+?>
 <body>
 <!-- Toast Container -->
 <div id="toast-container" style="position:fixed;top:20px;right:20px;z-index:2000;max-width:400px"></div>
+
+<!-- Quick Navigation (Desktop) -->
+<nav class="quick-nav">
+  <a href="#overhead-card" class="quick-nav-item">💰 <span class="quick-nav-label">Overhead & Gaji</span></a>
+  <a href="#cetak-master-card" class="quick-nav-item">🖨️ <span class="quick-nav-label">Biaya Cetak</span></a>
+  <a href="#alacarte-factors-card" class="quick-nav-item">🛒 <span class="quick-nav-label">Faktor À La Carte</span></a>
+  <a href="#addon-section" class="quick-nav-item">➕ <span class="quick-nav-label">Add-ons</span></a>
+  <a href="#graduation-section" class="quick-nav-item">🎓 <span class="quick-nav-label">Graduation</span></a>
+  <a href="#bonus-fasilitas-card" class="quick-nav-item">🎁 <span class="quick-nav-label">Bonus & Fasilitas</span></a>
+  <a href="#jasa-termasuk-card" class="quick-nav-item">🛠️ <span class="quick-nav-label">Jasa Termasuk</span></a>
+  <a href="#spesifikasi-produk-card" class="quick-nav-item">⚙️ <span class="quick-nav-label">Spesifikasi</span></a>
+  <a href="#syarat-ketentuan-card" class="quick-nav-item">📝 <span class="quick-nav-label">Syarat & Ketentuan</span></a>
+</nav>
+
+<!-- Mobile FAB -->
+<button id="mobile-fab" onclick="toggleFabMenu()">+</button>
+<div id="fab-menu">
+  <a href="#overhead-card" class="fab-menu-item" onclick="toggleFabMenu()">💰 Overhead</a>
+  <a href="#cetak-master-card" class="fab-menu-item" onclick="toggleFabMenu()">🖨️ Biaya Cetak</a>
+  <a href="#alacarte-factors-card" class="fab-menu-item" onclick="toggleFabMenu()">🛒 À La Carte</a>
+  <a href="#addon-section" class="fab-menu-item" onclick="toggleFabMenu()">➕ Add-ons</a>
+  <a href="#graduation-section" class="fab-menu-item" onclick="toggleFabMenu()">🎓 Graduation</a>
+  <a href="#bonus-fasilitas-card" class="fab-menu-item" onclick="toggleFabMenu()">🎁 Bonus</a>
+  <a href="#jasa-termasuk-card" class="fab-menu-item" onclick="toggleFabMenu()">🛠️ Jasa</a>
+  <a href="#spesifikasi-produk-card" class="fab-menu-item" onclick="toggleFabMenu()">⚙️ Spesifikasi</a>
+  <a href="#syarat-ketentuan-card" class="fab-menu-item" onclick="toggleFabMenu()">📝 S&K</a>
+</div>
 
 <!-- Mobile Navbar Fixed -->
 <div class="mobile-navbar">
@@ -64,7 +219,7 @@ include __DIR__ . '/../includes/header.php';
 <!-- PENGATURAN -->
 <div class="page active" id="page-pengaturan">
   <div class="ph"><div class="pt">Edit Semua Harga</div><div class="ps">Ubah semua harga &amp; asumsi biaya — berpengaruh ke seluruh dashboard</div></div>
-  <div class="card mb16">
+  <div class="card mb16" id="overhead-card">
     <div class="ct">Overhead &amp; Gaji Tim (Rp/bulan)</div>
     <div class="note mb12">Kelola biaya overhead — edit, tambah item baru, atau hapus. Total overhead akan dihitung otomatis.</div>
     
@@ -203,7 +358,7 @@ include __DIR__ . '/../includes/header.php';
   </div>
 
 
-  <div class="card mb16">
+  <div class="card mb16" id="alacarte-factors-card">
     <div class="ct">Faktor Harga À La Carte (% dari Full Service)</div>
     <div class="note mb12">Harga à la carte = harga full service × faktor ini.</div>
     <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-bottom:12px">
@@ -216,7 +371,7 @@ include __DIR__ . '/../includes/header.php';
   </div>
 
   <!-- ===== ADD-ON SECTION ===== -->
-  <div style="margin-bottom:30px">
+  <div id="addon-section" style="margin-bottom:30px">
     <div class="ph"><div class="pt">Manajemen Add-on (Full Service)</div><div class="ps">Kelola harga finishing, kertas, halaman, video, dan packaging — pisah per kategori</div></div>
     
     <!-- FINISHING & BINDING -->
@@ -426,6 +581,7 @@ include __DIR__ . '/../includes/header.php';
   </div>
 
   <!-- ===== GRADUATION SECTION ===== -->
+  <div id="graduation-section">
   <!-- Card 1: Edit Harga Paket Utama -->
   <div class="card mb16">
     <div class="ph"><div class="pt" style="color:var(--grad)">Graduation Package — Paket Utama</div><div class="ps">Dokumentasi wisuda — foto, video, photobooth &amp; glamation 360°</div></div>
@@ -637,6 +793,191 @@ include __DIR__ . '/../includes/header.php';
   </div>
 
 
+
+  <!-- ===== JASA TERMASUK MASTER DATA ===== -->
+  <div class="card mb16" id="jasa-termasuk-card">
+    <div class="ph">
+      <div class="pt" style="color:var(--accent)">🛠 Jasa Termasuk</div>
+      <div class="ps">Master data layanan yang termasuk per tipe paket — tercetak di PDF penawaran</div>
+    </div>
+    <div class="note mb12">Daftar layanan yang akan muncul di section "Jasa Termasuk" pada PDF.</div>
+
+    <!-- Tab Switcher -->
+    <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+      <button class="jt-tab-btn active" data-pkg="fullservice"
+        onclick="jtSwitchTab('fullservice',this)"
+        style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+        📚 Full Service
+      </button>
+      <button class="jt-tab-btn" data-pkg="graduation"
+        onclick="jtSwitchTab('graduation',this)"
+        style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+        🎓 Graduation
+      </button>
+      <button class="jt-tab-btn" data-pkg="alacarte"
+        onclick="jtSwitchTab('alacarte',this)"
+        style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+        🛒 À La Carte
+      </button>
+    </div>
+
+    <!-- Deskripsi Paket per Tab -->
+    <div id="jt-tab-desc" style="font-size:11px;color:var(--text3);margin-bottom:12px;padding:6px 10px;background:var(--surface2);border-radius:6px"></div>
+
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2)">Kategori:</label>
+      <select id="jt-kategori-select" onchange="jtFilterKategori()" style="padding:6px; font-size:12px; border-radius:4px; border:1px solid var(--border); min-width:200px">
+        <option value="all">Berlaku Semua (All)</option>
+      </select>
+    </div>
+
+    <!-- Daftar Jasa Items -->
+    <div id="jt-list" style="margin-bottom:16px;min-height:60px">
+      <div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">⏳ Memuat data...</div>
+    </div>
+
+    <!-- Separator -->
+    <div style="border-top:1px dashed var(--border2);margin-bottom:14px"></div>
+
+    <!-- Form Tambah Jasa Baru -->
+    <div style="background:var(--surface2);border-radius:8px;padding:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">+ Tambah Jasa Termasuk</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">Nama Jasa <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="jt-new-label" placeholder="cth: Foto Produksi, Desain Cover, dll."
+            style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">Deskripsi (Opsional)</label>
+          <input type="text" id="jt-new-detail" placeholder="cth: Menggunakan kamera Sony A7R IV"
+            style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)"
+            onkeydown="if(event.key==='Enter'){jtAddItem();event.preventDefault()}">
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn bp bsm" onclick="jtAddItem()" style="padding:7px 18px;font-size:13px;font-weight:600">+ Tambah</button>
+        <span id="jt-add-status" style="font-size:12px;display:none"></span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION: SPESIFIKASI PRODUK (MASTER) -->
+  <div class="card mb-24" id="spesifikasi-produk-card">
+    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
+      <div>
+        <h3 class="card-title">⚙️ Master Spesifikasi Produk</h3>
+        <p class="card-subtitle">Atur detail teknis produk (seperti ukuran, kertas, cover) per kategori paket.</p>
+      </div>
+      <div style="background:var(--surface2);padding:4px;border-radius:8px;display:flex;gap:4px">
+        <button class="btn bsm sp-tab-btn" onclick="spSwitchTab('fullservice', this)" style="color:var(--success);background:var(--surface)">Full Service</button>
+        <button class="btn bsm sp-tab-btn" onclick="spSwitchTab('graduation', this)">Graduation</button>
+        <button class="btn bsm sp-tab-btn" onclick="spSwitchTab('alacarte', this)">À La Carte</button>
+      </div>
+    </div>
+    <div class="card-body">
+      <div id="sp-tab-desc" style="font-size:12px;color:var(--text3);margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+        Spesifikasi untuk paket Full Service.
+      </div>
+
+      <!-- Kategori Filter -->
+      <div style="margin-bottom:15px; display:flex; align-items:center; gap:10px">
+        <label style="font-size:12px; font-weight:600; color:var(--text2)">Kategori:</label>
+        <select id="sp-kategori-select" onchange="spFilterKategori()" 
+          style="padding:6px 12px; font-size:13px; border-radius:6px; border:1px solid var(--border); background:var(--surface); color:var(--text)">
+          <!-- Options will be dynamic -->
+        </select>
+      </div>
+
+      <div id="sp-list" style="margin-bottom:20px">
+        <!-- List items here -->
+      </div>
+
+      <!-- Form Tambah Spesifikasi -->
+      <div style="background:var(--surface2);border-radius:8px;padding:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">+ Tambah Spesifikasi Baru</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px">
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">Label (cth: Ukuran Buku)</label>
+            <input type="text" id="sp-new-label" placeholder="cth: Ukuran Buku"
+              style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+          </div>
+          <div>
+            <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">Nilai (cth: A4+ 22x30cm)</label>
+            <input type="text" id="sp-new-value" placeholder="cth: A4+ (22 x 30 cm)"
+              style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+          </div>
+        </div>
+        <button class="btn bp bsm" onclick="spAddItem()" style="padding:7px 18px">Simpan Spesifikasi ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== SYARAT & KETENTUAN MASTER DATA ===== -->
+  <div class="card mb16" id="syarat-ketentuan-card">
+    <div class="ph">
+      <div class="pt" style="color:var(--grad)">📝 Syarat &amp; Ketentuan</div>
+      <div class="ps">Master data keterangan / T&C yang muncul di bagian bawah PDF penawaran</div>
+    </div>
+    <div class="note mb12">Daftar poin keterangan di PDF. Gunakan tag: <b>{siswa}</b> untuk jumlah siswa, <b>{tglExp}</b> untuk tgl berlaku.</div>
+
+    <!-- Tab Switcher -->
+    <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+      <button class="sk-tab-btn active" data-pkg="fullservice"
+        onclick="skSwitchTab('fullservice',this)"
+        style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+        📚 Full Service
+      </button>
+      <button class="sk-tab-btn" data-pkg="graduation"
+        onclick="skSwitchTab('graduation',this)"
+        style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+        🎓 Graduation
+      </button>
+      <button class="sk-tab-btn" data-pkg="alacarte"
+        onclick="skSwitchTab('alacarte',this)"
+        style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+        🛒 À La Carte
+      </button>
+    </div>
+
+    <!-- Deskripsi Paket per Tab -->
+    <div id="sk-tab-desc" style="font-size:11px;color:var(--text3);margin-bottom:12px;padding:6px 10px;background:var(--surface2);border-radius:6px"></div>
+
+    <div style="display:flex; align-items:center; gap:8px; margin-bottom:12px;">
+      <label style="font-size:12px;font-weight:600;color:var(--text2)">Kategori:</label>
+      <select id="sk-kategori-select" onchange="skFilterKategori()" style="padding:6px; font-size:12px; border-radius:4px; border:1px solid var(--border); min-width:200px">
+        <option value="all">Berlaku Semua (All)</option>
+      </select>
+    </div>
+
+    <!-- Daftar Syarat Items -->
+    <div id="sk-list" style="margin-bottom:16px;min-height:60px">
+      <div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">⏳ Memuat data...</div>
+    </div>
+
+    <!-- Separator -->
+    <div style="border-top:1px dashed var(--border2);margin-bottom:14px"></div>
+
+    <!-- Form Tambah Syarat Baru -->
+    <div style="background:var(--surface2);border-radius:8px;padding:14px">
+      <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:10px">+ Tambah Poin Keterangan</div>
+      <div style="display:flex; flex-direction:column; gap:12px; margin-bottom:12px">
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">Isi Ketentuan (Singkat/Judul) <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="sk-new-label" placeholder="cth: Harga berlaku untuk minimal {siswa} pemesan..."
+            style="width:100%;font-size:13px;padding:7px 10px;border:1px solid var(--border);border-radius:6px;background:var(--surface)">
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);display:block;margin-bottom:3px">Deskripsi Tambahan / Detail (Rich Text)</label>
+          <div id="sk-new-detail-editor" style="height: 120px;"></div>
+        </div>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn bp bsm" onclick="skAddItem()" style="padding:7px 18px;font-size:13px;font-weight:600">+ Tambah</button>
+        <span id="sk-add-status" style="font-size:12px;display:none"></span>
+      </div>
+    </div>
+  </div>
 
   <!-- ===== PAYMENT TERMS SECTION ===== -->
   <div class="card mb16" style="display:none">
@@ -2996,6 +3337,666 @@ function renderGraduation() {
 </script>
 
 <!-- ============================================================ -->
+
+<script>
+// ============================================================
+// JASA TERMASUK CRUD — pengaturan.php
+// API: /api/jasa-termasuk.php
+// ============================================================
+
+const JT_API = '/api/jasa-termasuk.php';
+let jtCurrentPkg  = 'fullservice';
+let jtData        = {};    // cache { fullservice:[], graduation:[], alacarte:[] }
+let jtEditingId   = null;
+
+const JT_PKG_META = {
+  fullservice: {
+    label : '📚 Full Service',
+    desc  : 'Daftar jasa yang termasuk dalam paket Full Service.',
+    color : 'var(--success)',
+  },
+  graduation: {
+    label : '🎓 Graduation',
+    desc  : 'Daftar jasa yang termasuk dalam paket Graduation.',
+    color : 'var(--info, #2A6B8A)',
+  },
+  alacarte: {
+    label : '🛒 À La Carte',
+    desc  : 'Daftar jasa yang termasuk dalam paket À La Carte.',
+    color : '#8A5F1A',
+  },
+};
+
+function jtSwitchTab(pkg, btn) {
+  jtCurrentPkg = pkg;
+  document.querySelectorAll('.jt-tab-btn').forEach(b => {
+    const isActive = b === btn;
+    b.style.color       = isActive ? JT_PKG_META[pkg].color : 'var(--text2)';
+    b.style.borderBottom = isActive ? `2px solid ${JT_PKG_META[pkg].color}` : '2px solid transparent';
+    b.style.background  = isActive ? 'var(--surface2)' : 'none';
+  });
+  const descEl = document.getElementById('jt-tab-desc');
+  if (descEl) descEl.textContent = JT_PKG_META[pkg]?.desc || '';
+  jtUpdateKategoriOptions(pkg);
+  jtLoadItems(pkg);
+}
+
+let jtCurrentKategori = 'all';
+
+function jtUpdateKategoriOptions(pkg) {
+  const sel = document.getElementById('jt-kategori-select');
+  if (!sel) return;
+  let html = '<option value="all">Berlaku Semua (All)</option>';
+  if (pkg === 'fullservice') {
+    html += `
+      <option value="fs-handy">Handy Book A4+</option>
+      <option value="fs-minimal">Minimal Book SQ</option>
+      <option value="fs-large">Large Book B4</option>
+    `;
+  } else if (pkg === 'alacarte') {
+    html += `
+      <option value="ac-ebook">E-Book Package</option>
+      <option value="ac-editcetak">Edit+Desain+Cetak</option>
+      <option value="ac-fotohalf">Foto Only (½ Hari)</option>
+      <option value="ac-fotofull">Foto Only (Full Day)</option>
+      <option value="ac-videod">Drone Video</option>
+      <option value="ac-videodoc">Docudrama Video</option>
+      <option value="ac-desain">Desain Only</option>
+      <option value="ac-cetakonly">Cetak Only</option>
+    `;
+  } else if (pkg === 'graduation') {
+    if (typeof GRAD !== 'undefined' && GRAD.packages) {
+      GRAD.packages.forEach(p => {
+        html += `<option value="${p.id}">${p.name}</option>`;
+      });
+    }
+  }
+  sel.innerHTML = html;
+  sel.value = 'all';
+  jtCurrentKategori = 'all';
+}
+
+function jtFilterKategori() {
+  const sel = document.getElementById('jt-kategori-select');
+  if (sel) {
+    jtCurrentKategori = sel.value;
+    jtRenderList(jtCurrentPkg);
+  }
+}
+
+async function jtLoadItems(pkg) {
+  pkg = pkg || jtCurrentPkg;
+  const listEl = document.getElementById('jt-list');
+  if (listEl) listEl.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">⏳ Memuat...</div>';
+  try {
+    const res  = await fetch(`${JT_API}?type=${pkg}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Gagal memuat');
+    jtData[pkg] = json.data || [];
+    jtRenderList(pkg);
+  } catch (e) {
+    if (listEl) listEl.innerHTML = `<div style="color:var(--danger);font-size:13px;padding:12px">✕ Error: ${e.message}</div>`;
+  }
+}
+
+function jtRenderList(pkg) {
+  const listEl = document.getElementById('jt-list');
+  if (!listEl) return;
+  const items = (jtData[pkg] || []).filter(item => item.kategori === jtCurrentKategori || item.kategori === 'all');
+  if (!items.length) {
+    listEl.innerHTML = `<div style="color:var(--text3);font-size:13px;text-align:center;padding:30px 0;background:var(--surface2);border-radius:8px;border:1px dashed var(--border)">
+      <div style="font-size:24px;margin-bottom:8px">🛠</div>
+      Belum ada jasa termasuk untuk kategori ini.
+    </div>`;
+    return;
+  }
+  listEl.innerHTML = `<div style="display:grid;gap:8px">${items.map(item => `
+    <div class="si" style="padding:10px 12px;display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:center;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+      <div style="color:var(--accent);font-weight:700">✓</div>
+      <div id="jt-content-${item.id}">
+        <div style="font-size:13px;font-weight:600">${escHtml(item.label)}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">${escHtml(item.detail || '')}</div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="btn bs bsm" onclick="jtStartEdit(${item.id})" title="Edit">✏️</button>
+        <button class="btn bs bsm" onclick="jtDeleteItem(${item.id}, '${escHtml(item.label)}')" title="Hapus">✕</button>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+async function jtAddItem() {
+  const labelEl  = document.getElementById('jt-new-label');
+  const detailEl = document.getElementById('jt-new-detail');
+  const label    = labelEl?.value.trim();
+  const detail   = detailEl?.value.trim();
+  if (!label) return;
+  const btn = labelEl.parentElement.parentElement.parentElement.querySelector('button');
+  btn.disabled = true;
+  try {
+    const res = await fetch(JT_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', package_type: jtCurrentPkg, kategori: jtCurrentKategori, label, detail })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    labelEl.value = '';
+    detailEl.value = '';
+    showToast('✓ Jasa Termasuk ditambahkan', 'success');
+    jtLoadItems(jtCurrentPkg);
+  } catch (e) { showToast(e.message, 'error'); }
+  finally { btn.disabled = false; }
+}
+
+async function jtDeleteItem(id, label) {
+  if (!confirm(`Hapus jasa "${label}"?`)) return;
+  try {
+    const res = await fetch(JT_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    showToast('✓ Jasa dihapus', 'success');
+    jtLoadItems(jtCurrentPkg);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+function jtStartEdit(id) {
+  if (jtEditingId && jtEditingId !== id) jtCancelEdit(jtEditingId);
+  jtEditingId = id;
+  const items = jtData[jtCurrentPkg] || [];
+  const item  = items.find(i => i.id === id);
+  if (!item) return;
+  const contentEl = document.getElementById(`jt-content-${id}`);
+  if (!contentEl) return;
+  contentEl.innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr 1fr auto;gap:6px;align-items:center">
+      <input id="jt-edit-label-${id}" type="text" value="${escHtml(item.label)}"
+        style="font-size:12px;padding:4px 8px;border:1px solid var(--accent);border-radius:4px">
+      <input id="jt-edit-detail-${id}" type="text" value="${escHtml(item.detail || '')}"
+        style="font-size:12px;padding:4px 8px;border:1px solid var(--accent);border-radius:4px"
+        onkeydown="if(event.key==='Enter'){jtSaveEdit(${id});event.preventDefault()}">
+      <div style="display:flex;gap:4px">
+        <button class="btn bp bsm" onclick="jtSaveEdit(${id})">✓</button>
+        <button class="btn bs bsm" onclick="jtCancelEdit(${id})">✕</button>
+      </div>
+    </div>`;
+}
+
+function jtCancelEdit(id) {
+  jtEditingId = null;
+  jtRenderList(jtCurrentPkg);
+}
+
+async function jtSaveEdit(id) {
+  const label  = document.getElementById(`jt-edit-label-${id}`)?.value.trim();
+  const detail = document.getElementById(`jt-edit-detail-${id}`)?.value.trim();
+  if (!label) return;
+  try {
+    const res = await fetch(JT_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update', id, label, detail })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    jtEditingId = null;
+    showToast('✓ Berhasil diperbarui', 'success');
+    jtLoadItems(jtCurrentPkg);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ============================================================
+// SPESIFIKASI PRODUK — pengaturan.php
+// API: /api/spesifikasi.php
+// ============================================================
+const SP_API = '/api/spesifikasi.php';
+let spCurrentPkg = 'fullservice';
+let spData = {}; // cache { fullservice:[], graduation:[], alacarte:[] }
+let spEditingId = null;
+
+const SP_PKG_META = {
+  fullservice: { label: '📚 Full Service', desc: 'Spesifikasi teknis untuk paket Full Service.', color: 'var(--success)' },
+  graduation: { label: '🎓 Graduation', desc: 'Spesifikasi teknis untuk paket Graduation.', color: 'var(--info, #2A6B8A)' },
+  alacarte: { label: '🛒 À La Carte', desc: 'Spesifikasi teknis untuk paket À La Carte.', color: '#8A5F1A' },
+};
+
+function spSwitchTab(pkg, btn) {
+  spCurrentPkg = pkg;
+  document.querySelectorAll('.sp-tab-btn').forEach(b => {
+    const isActive = b === btn;
+    b.style.color = isActive ? SP_PKG_META[pkg].color : 'var(--text2)';
+    b.style.borderBottom = isActive ? `2px solid ${SP_PKG_META[pkg].color}` : '2px solid transparent';
+    b.style.background = isActive ? 'var(--surface2)' : 'none';
+  });
+  const descEl = document.getElementById('sp-tab-desc');
+  if (descEl) descEl.textContent = SP_PKG_META[pkg]?.desc || '';
+  spUpdateKategoriOptions(pkg);
+  spLoadItems(pkg);
+}
+
+function spUpdateKategoriOptions(pkg) {
+  const sel = document.getElementById('sp-kategori-select');
+  if (!sel) return;
+  let html = '<option value="all">Berlaku Semua (All)</option>';
+  if (pkg === 'fullservice') {
+    html += `
+      <option value="fs-handy">Handy Book A4+</option>
+      <option value="fs-minimal">Minimal Book SQ</option>
+      <option value="fs-large">Large Book B4</option>
+    `;
+  } else if (pkg === 'alacarte') {
+    html += `
+      <option value="ac-ebook">E-Book Package</option>
+      <option value="ac-editcetak">Edit+Desain+Cetak</option>
+      <option value="ac-fotohalf">Foto Only (½ Hari)</option>
+      <option value="ac-fotofull">Foto Only (Full Day)</option>
+      <option value="ac-videod">Drone Video</option>
+      <option value="ac-videodoc">Docudrama Video</option>
+      <option value="ac-desain">Desain Only</option>
+      <option value="ac-cetakonly">Cetak Only</option>
+    `;
+  } else if (pkg === 'graduation') {
+    // Check if master data 'grad' is available (usually loaded in init)
+    if (masterData && masterData.grad && masterData.grad.packages) {
+      masterData.grad.packages.forEach(p => {
+        html += `<option value="${p.id}">${p.name}</option>`;
+      });
+    }
+  }
+  sel.innerHTML = html;
+  sel.value = 'all';
+}
+
+function spFilterKategori() {
+  spRenderList(spCurrentPkg);
+}
+
+async function spLoadItems(pkg) {
+  pkg = pkg || spCurrentPkg;
+  const listEl = document.getElementById('sp-list');
+  if (listEl) listEl.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">⏳ Memuat...</div>';
+  try {
+    const res = await fetch(`${SP_API}?type=${pkg}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Gagal memuat');
+    spData[pkg] = json.data || [];
+    spRenderList(pkg);
+  } catch (e) {
+    if (listEl) listEl.innerHTML = `<div style="color:var(--danger);font-size:13px;padding:12px">✕ Error: ${e.message}</div>`;
+  }
+}
+
+function spRenderList(pkg) {
+  const listEl = document.getElementById('sp-list');
+  if (!listEl) return;
+  const kat = document.getElementById('sp-kategori-select').value;
+  const items = (spData[pkg] || []).filter(item => item.kategori === kat || item.kategori === 'all');
+  
+  if (!items.length) {
+    listEl.innerHTML = `<div style="color:var(--text3);font-size:13px;text-align:center;padding:30px 0;background:var(--surface2);border-radius:8px;border:1px dashed var(--border)">Belum ada spesifikasi untuk kategori ini.</div>`;
+    return;
+  }
+
+  listEl.innerHTML = `<div style="display:grid;gap:8px">${items.map(item => `
+    <div class="si" style="padding:10px 12px;display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+      <div style="color:var(--accent);font-weight:700;margin-top:2px">•</div>
+      <div id="sp-content-${item.id}">
+        <div style="display:flex;gap:10px;align-items:baseline">
+          <div style="font-size:11px;color:var(--text3);width:100px;flex-shrink:0">${escHtml(item.label)}:</div>
+          <div style="font-size:13px;font-weight:600;color:var(--text2)">${escHtml(item.value)}</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="btn bs bsm" onclick="spStartEdit(${item.id})" title="Edit">✏️</button>
+        <button class="btn bs bsm" onclick="spDeleteItem(${item.id})" title="Hapus">✕</button>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+async function spAddItem() {
+  const label = document.getElementById('sp-new-label').value.trim();
+  const value = document.getElementById('sp-new-value').value.trim();
+  const kat   = document.getElementById('sp-kategori-select').value;
+  
+  if (!label || !value) { showToast('Label dan Nilai wajib diisi', 'warning'); return; }
+  
+  try {
+    const res = await fetch(SP_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', package_type: spCurrentPkg, kategori: kat, label, value })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    
+    document.getElementById('sp-new-label').value = '';
+    document.getElementById('sp-new-value').value = '';
+    showToast('✓ Spesifikasi ditambahkan', 'success');
+    spLoadItems(spCurrentPkg);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+function spStartEdit(id) {
+  if (spEditingId && spEditingId !== id) spCancelEdit(spEditingId);
+  spEditingId = id;
+  const items = spData[spCurrentPkg] || [];
+  const item  = items.find(i => i.id === id);
+  if (!item) return;
+
+  const contentEl = document.getElementById(`sp-content-${id}`);
+  if (!contentEl) return;
+
+  contentEl.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:8px">
+      <div style="display:flex; gap:8px; align-items:center">
+        <input id="sp-edit-label-${id}" type="text" value="${escHtml(item.label)}" 
+          placeholder="Label" style="width:120px; padding:6px 10px; border:1px solid var(--accent); border-radius:6px; font-size:12px">
+        <input id="sp-edit-value-${id}" type="text" value="${escHtml(item.value)}" 
+          placeholder="Nilai" style="flex:1; padding:6px 10px; border:1px solid var(--accent); border-radius:6px; font-size:12px; font-weight:600">
+      </div>
+      <div style="display:flex; gap:6px">
+        <button class="btn bp bsm" onclick="spSaveEdit(${id})" style="padding:6px 16px">Simpan ✓</button>
+        <button class="btn bs bsm" onclick="spCancelEdit(${id})" style="padding:6px 16px">Batal ✕</button>
+      </div>
+    </div>`;
+}
+
+function spCancelEdit(id) {
+  spEditingId = null;
+  spRenderList(spCurrentPkg);
+}
+
+async function spSaveEdit(id) {
+  const label = document.getElementById(`sp-edit-label-${id}`).value.trim();
+  const value = document.getElementById(`sp-edit-value-${id}`).value.trim();
+  const kat   = document.getElementById('sp-kategori-select').value;
+  
+  if (!label || !value) return;
+
+  try {
+    const res = await fetch(SP_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update', id, label, value, kategori: kat })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    
+    spEditingId = null;
+    showToast('✓ Berhasil diperbarui', 'success');
+    spLoadItems(spCurrentPkg);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function spDeleteItem(id) {
+  if (!confirm('Hapus spesifikasi ini?')) return;
+  try {
+    const res = await fetch(SP_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    showToast('✓ Berhasil dihapus', 'success');
+    spLoadItems(spCurrentPkg);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+// ============================================================
+// SYARAT & KETENTUAN CRUD — pengaturan.php
+// API: /api/syarat-ketentuan.php
+// ============================================================
+
+const SK_API = '/api/syarat-ketentuan.php';
+let skCurrentPkg  = 'fullservice';
+let skData        = {};    // cache { fullservice:[], graduation:[], alacarte:[] }
+let skEditingId   = null;
+let skQuillInstances = {}; // Store Quill instances by ID
+
+const SK_PKG_META = {
+  fullservice: {
+    label : '📚 Full Service',
+    desc  : 'Syarat & Ketentuan untuk paket Full Service.',
+    color : 'var(--success)',
+  },
+  graduation: {
+    label : '🎓 Graduation',
+    desc  : 'Syarat & Ketentuan untuk paket Graduation.',
+    color : 'var(--info, #2A6B8A)',
+  },
+  alacarte: {
+    label : '🛒 À La Carte',
+    desc  : 'Syarat & Ketentuan untuk paket À La Carte.',
+    color : '#8A5F1A',
+  },
+};
+
+// Helper Init Quill
+function initSkQuill(id, height = 120) {
+  const el = document.getElementById(id);
+  if (!el) return null;
+  const quill = new Quill(`#${id}`, {
+    theme: 'snow',
+    modules: {
+      toolbar: [
+        ['bold', 'italic', 'underline'],
+        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+        ['clean']
+      ]
+    }
+  });
+  skQuillInstances[id] = quill;
+  return quill;
+}
+
+function skSwitchTab(pkg, btn) {
+  skCurrentPkg = pkg;
+  document.querySelectorAll('.sk-tab-btn').forEach(b => {
+    const isActive = b === btn;
+    b.style.color       = isActive ? SK_PKG_META[pkg].color : 'var(--text2)';
+    b.style.borderBottom = isActive ? `2px solid ${SK_PKG_META[pkg].color}` : '2px solid transparent';
+    b.style.background  = isActive ? 'var(--surface2)' : 'none';
+  });
+  const descEl = document.getElementById('sk-tab-desc');
+  if (descEl) descEl.textContent = SK_PKG_META[pkg]?.desc || '';
+  skUpdateKategoriOptions(pkg);
+  skLoadItems(pkg);
+}
+
+function skUpdateKategoriOptions(pkg) {
+  const sel = document.getElementById('sk-kategori-select');
+  if (!sel) return;
+  let html = '<option value="all">Berlaku Semua (All)</option>';
+  if (pkg === 'fullservice') {
+    html += `
+      <option value="fs-handy">Handy Book A4+</option>
+      <option value="fs-minimal">Minimal Book SQ</option>
+      <option value="fs-large">Large Book B4</option>
+    `;
+  } else if (pkg === 'alacarte') {
+    html += `
+      <option value="ac-ebook">E-Book Package</option>
+      <option value="ac-editcetak">Edit+Desain+Cetak</option>
+      <option value="ac-fotohalf">Foto Only (½ Hari)</option>
+      <option value="ac-fotofull">Foto Only (Full Day)</option>
+      <option value="ac-videod">Drone Video</option>
+      <option value="ac-videodoc">Docudrama Video</option>
+      <option value="ac-desain">Desain Only</option>
+      <option value="ac-cetakonly">Cetak Only</option>
+    `;
+  } else if (pkg === 'graduation') {
+    if (typeof GRAD !== 'undefined' && GRAD.packages) {
+      GRAD.packages.forEach(p => {
+        html += `<option value="${p.id}">${p.name}</option>`;
+      });
+    }
+  }
+  sel.innerHTML = html;
+  sel.value = 'all';
+}
+
+function skFilterKategori() {
+  skRenderList(skCurrentPkg);
+}
+
+async function skLoadItems(pkg) {
+  pkg = pkg || skCurrentPkg;
+  const listEl = document.getElementById('sk-list');
+  if (listEl) listEl.innerHTML = '<div style="color:var(--text3);font-size:13px;text-align:center;padding:20px 0">⏳ Memuat...</div>';
+  try {
+    const res  = await fetch(`${SK_API}?type=${pkg}`);
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error || 'Gagal memuat');
+    skData[pkg] = json.data || [];
+    skRenderList(pkg);
+  } catch (e) {
+    if (listEl) listEl.innerHTML = `<div style="color:var(--danger);font-size:13px;padding:12px">✕ Error: ${e.message}</div>`;
+  }
+}
+
+function skRenderList(pkg) {
+  const listEl = document.getElementById('sk-list');
+  if (!listEl) return;
+  const kat = document.getElementById('sk-kategori-select').value;
+  const items = (skData[pkg] || []).filter(item => item.kategori === kat || item.kategori === 'all');
+  if (!items.length) {
+    listEl.innerHTML = `<div style="color:var(--text3);font-size:13px;text-align:center;padding:30px 0;background:var(--surface2);border-radius:8px;border:1px dashed var(--border)">Belum ada syarat & ketentuan untuk kategori ini.</div>`;
+    return;
+  }
+  listEl.innerHTML = `<div style="display:grid;gap:8px">${items.map(item => `
+    <div class="si" style="padding:10px 12px;display:grid;grid-template-columns:24px 1fr auto;gap:12px;align-items:start;background:var(--surface);border:1px solid var(--border);border-radius:8px">
+      <div style="color:var(--accent);font-weight:700;margin-top:2px">•</div>
+      <div id="sk-content-${item.id}">
+        <div style="font-size:12px;color:var(--text2);line-height:1.5;font-weight:600">${escHtml(item.label)}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">${item.detail || ''}</div>
+      </div>
+      <div style="display:flex;gap:4px">
+        <button class="btn bs bsm" onclick="skStartEdit(${item.id})" title="Edit">✏️</button>
+        <button class="btn bs bsm" onclick="skDeleteItem(${item.id})" title="Hapus">✕</button>
+      </div>
+    </div>
+  `).join('')}</div>`;
+}
+
+async function skAddItem() {
+  const label = document.getElementById('sk-new-label').value.trim();
+  const detail = skQuillInstances['sk-new-detail-editor']?.root.innerHTML;
+  
+  // Quill adds <p><br></p> if empty
+  const isDetailEmpty = !skQuillInstances['sk-new-detail-editor']?.getText().trim();
+  const finalDetail = isDetailEmpty ? '' : detail;
+  
+  if (!label) { showToast('Isi ketentuan wajib diisi', 'warning'); return; }
+  
+  const kat = document.getElementById('sk-kategori-select').value;
+  try {
+    const res = await fetch(SK_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'create', package_type: skCurrentPkg, kategori: kat, label, detail: finalDetail })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    
+    document.getElementById('sk-new-label').value = '';
+    skQuillInstances['sk-new-detail-editor']?.setText('');
+    
+    showToast('✓ Syarat & Ketentuan ditambahkan', 'success');
+    skLoadItems(skCurrentPkg);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+async function skDeleteItem(id) {
+  if (!confirm('Hapus poin keterangan ini?')) return;
+  try {
+    const res = await fetch(SK_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'delete', id })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    showToast('✓ Berhasil dihapus', 'success');
+    skLoadItems(skCurrentPkg);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+function skStartEdit(id) {
+  if (skEditingId && skEditingId !== id) skCancelEdit(skEditingId);
+  skEditingId = id;
+  const items = skData[skCurrentPkg] || [];
+  const item  = items.find(i => i.id === id);
+  if (!item) return;
+  const contentEl = document.getElementById(`sk-content-${id}`);
+  if (!contentEl) return;
+  
+  const editorId = `sk-edit-detail-editor-${id}`;
+  contentEl.innerHTML = `
+    <div style="display:flex; flex-direction:column; gap:8px">
+      <input id="sk-edit-label-${id}" type="text" value="${escHtml(item.label)}"
+        style="width:100%;font-size:13px;padding:6px 10px;border:1px solid var(--accent);border-radius:6px">
+      <div id="${editorId}" style="height: 150px; background:var(--surface)">${item.detail || ''}</div>
+      <div style="display:flex;gap:6px">
+        <button class="btn bp bsm" onclick="skSaveEdit(${id})" style="padding:6px 16px">Simpan Perubahan ✓</button>
+        <button class="btn bs bsm" onclick="skCancelEdit(${id})" style="padding:6px 16px">Batal ✕</button>
+      </div>
+    </div>`;
+    
+  initSkQuill(editorId, 150);
+}
+
+function skCancelEdit(id) {
+  const editorId = `sk-edit-detail-editor-${id}`;
+  if (skQuillInstances[editorId]) delete skQuillInstances[editorId];
+  skEditingId = null;
+  skRenderList(skCurrentPkg);
+}
+
+async function skSaveEdit(id) {
+  const label  = document.getElementById(`sk-edit-label-${id}`)?.value.trim();
+  const editorId = `sk-edit-detail-editor-${id}`;
+  const detail = skQuillInstances[editorId]?.root.innerHTML;
+  const isDetailEmpty = !skQuillInstances[editorId]?.getText().trim();
+  const finalDetail = isDetailEmpty ? '' : detail;
+  
+  if (!label) return;
+  try {
+    const res = await fetch(SK_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'update', id, label, detail: finalDetail })
+    });
+    const json = await res.json();
+    if (!json.success) throw new Error(json.error);
+    
+    if (skQuillInstances[editorId]) delete skQuillInstances[editorId];
+    skEditingId = null;
+    
+    showToast('✓ Berhasil diperbarui', 'success');
+    skLoadItems(skCurrentPkg);
+  } catch (e) { showToast(e.message, 'error'); }
+}
+
+// Init Jasa Termasuk
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+    jtLoadItems('fullservice');
+    skLoadItems('fullservice');
+    spUpdateKategoriOptions('fullservice');
+    spLoadItems('fullservice');
+    
+    // Init Quill for Creation Form
+    initSkQuill('sk-new-detail-editor', 150);
+  }, 500);
+});
+</script>
+
 <!-- CETAK CRUD FUNCTIONS — Biaya Cetak Renjana Offset            -->
 <!-- ============================================================ -->
 <script>
@@ -3698,6 +4699,12 @@ async function resetAddons() {
         console.error('Error:', err);
         showToast('✕ Error: ' + err.message, 'error');
     }
+}
+function toggleFabMenu() {
+  const fab = document.getElementById('mobile-fab');
+  const menu = document.getElementById('fab-menu');
+  fab.classList.toggle('active');
+  menu.classList.toggle('active');
 }
 </script>
 </body>

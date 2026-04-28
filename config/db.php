@@ -817,6 +817,18 @@ class MySQLMasterData {
             throw $e;
         }
     }
+    // ========== SPESIFIKASI PRODUK ==========
+    public function getMasterSpesifikasi($packageType = 'fullservice', $kategori = 'all') {
+        try {
+            $stmt = $this->pdo->prepare("SELECT label, value FROM spesifikasi_produk 
+                                       WHERE package_type = ? AND (kategori = ? OR kategori = 'all') AND active = 1 
+                                       ORDER BY display_order ASC, id ASC");
+            $stmt->execute([$packageType, $kategori]);
+            return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            return [];
+        }
+    }
 }
 
 // ============================================================

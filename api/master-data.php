@@ -50,8 +50,15 @@ try {
                     'grad'            => getMasterGraduation($pdo),
                     'payment_terms'   => getMasterPaymentTerms($pdo),
                     'bonus_fasilitas' => getMasterBonusFasilitas($pdo),
+                    'jasa_termasuk'   => getMasterJasaTermasuk($pdo),
+                    'syarat_ketentuan' => getMasterSyaratKetentuan($pdo),
+                    'spesifikasi'     => getMasterSpesifikasi($pdo),
                     'timestamp'       => date('Y-m-d H:i:s'),
                 ];
+                break;
+                
+            case 'get_spesifikasi':
+                $response = getMasterSpesifikasi($pdo);
                 break;
                 
             case 'get_overhead':
@@ -88,6 +95,14 @@ try {
                 
             case 'get_bonus_fasilitas':
                 $response = getMasterBonusFasilitas($pdo);
+                break;
+                
+            case 'get_jasa_termasuk':
+                $response = getMasterJasaTermasuk($pdo);
+                break;
+                
+            case 'get_syarat_ketentuan':
+                $response = getMasterSyaratKetentuan($pdo);
                 break;
                 
             default:
@@ -198,6 +213,35 @@ function getMasterBonusFasilitas($pdo) {
     }
 }
 
+function getMasterSyaratKetentuan($pdo) {
+    try {
+        $stmt = $pdo->query("SELECT id, package_type, kategori, label, detail, display_order, active FROM syarat_ketentuan WHERE active = 1 ORDER BY display_order ASC, id ASC");
+        $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $result = ['fullservice' => [], 'graduation' => [], 'alacarte' => []];
+        foreach ($all as $row) {
+            $result[$row['package_type']][] = $row;
+        }
+        return $result;
+    } catch (Exception $e) {
+        return ['fullservice' => [], 'graduation' => [], 'alacarte' => []];
+    }
+}
+function getMasterJasaTermasuk($pdo) {
+    try {
+        $stmt = $pdo->query("SELECT id, package_type, kategori, label, detail, display_order, active FROM jasa_termasuk WHERE active = 1 ORDER BY display_order ASC, id ASC");
+        $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $result = ['fullservice' => [], 'graduation' => [], 'alacarte' => []];
+        foreach ($all as $row) {
+            $result[$row['package_type']][] = $row;
+        }
+        return $result;
+    } catch (Exception $e) {
+        return ['fullservice' => [], 'graduation' => [], 'alacarte' => []];
+    }
+}
+
 // ============================================================
 // UPDATE FUNCTION - Master Data
 // ============================================================
@@ -271,5 +315,19 @@ function updateGraduation($pdo, $data) {
 function updatePaymentTerms($pdo, $data) {
     $masterData = new MySQLMasterData($pdo);
     return $masterData->updatePaymentTerms($data);
+}
+function getMasterSpesifikasi($pdo) {
+    try {
+        $stmt = $pdo->query("SELECT id, package_type, kategori, label, value, display_order, active FROM spesifikasi_produk WHERE active = 1 ORDER BY display_order ASC, id ASC");
+        $all = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        $result = ['fullservice' => [], 'graduation' => [], 'alacarte' => []];
+        foreach ($all as $row) {
+            $result[$row['package_type']][] = $row;
+        }
+        return $result;
+    } catch (Exception $e) {
+        return ['fullservice' => [], 'graduation' => [], 'alacarte' => []];
+    }
 }
 ?>
