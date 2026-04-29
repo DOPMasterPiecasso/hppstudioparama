@@ -76,6 +76,7 @@ $isVideoDrone = (strpos($paketLower, 'drone') !== false);
 $isVideoMovie = (strpos($paketLower, 'docudrama') !== false || (strpos($paketLower, 'video') !== false && strpos($paketLower, 'drone') === false));
 $isDesain = (strpos($paketLower, 'desain') !== false && strpos($paketLower, 'cetak') === false);
 $isCetak = (strpos($paketLower, 'cetak only') !== false);
+$isGraduation = (strpos($paketLower, 'graduation') !== false);
 
 // Service mapping berdasarkan klasifikasi
 $services = [];
@@ -803,7 +804,7 @@ $diskon = $hargaDP > $harga ? ($hargaDP - $harga) : 0;
                 <div>
                     <div class="pdf-to-label">Ditujukan Kepada</div>
                     <div class="pdf-client-name"><?= e($namaKlien) ?></div>
-                    <div class="pdf-paket-tag"><?= e($paket) ?><?php if ($siswa > 0): ?> — <?= $siswa ?> Siswa<?php endif; ?></div>
+                    <div class="pdf-paket-tag"><?= e($paket) ?><?php if ($siswa > 0 && !$isGraduation): ?> — <?= $siswa ?> Siswa<?php endif; ?></div>
                 </div>
 
                 <!-- SPESIFIKASI BUKU -->
@@ -811,7 +812,9 @@ $diskon = $hargaDP > $harga ? ($hargaDP - $harga) : 0;
                     <div class="pdf-section-title">Informasi Penawaran</div>
                     <table class="pdf-spec-table">
                         <tr><td>Tipe Paket</td><td><strong><?= e($paket) ?></strong></td></tr>
+                        <?php if (!$isGraduation): ?>
                         <tr><td>Jumlah Siswa/Unit</td><td><strong><?= $siswa ?></strong></td></tr>
+                        <?php endif; ?>
                         <tr><td>Harga Per Unit</td><td><?= rp($perBuku) ?></td></tr>
                         <tr><td>Periode Berlaku</td><td><?= e($tglExp) ?></td></tr>
                     </table>

@@ -1175,7 +1175,7 @@ $filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', $namaKlien) . '_' .
                     <div>
                         <div class="pdf-to-label">Ditujukan Kepada</div>
                         <div class="pdf-client-name"><?= e($namaKlien) ?></div>
-                        <div class="pdf-paket-tag"><?= e($paket) ?><?php if ($siswa > 0): ?> — <?= $siswa ?>
+                        <div class="pdf-paket-tag"><?= e($paket) ?><?php if ($siswa > 0 && !$isGraduation): ?> — <?= $siswa ?>
                             Siswa<?php endif; ?></div>
                     </div>
 
@@ -1184,10 +1184,12 @@ $filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', $namaKlien) . '_' .
                     <div class="pdf-section">
                         <div class="pdf-section-title">Spesifikasi Produk</div>
                         <table class="pdf-spec-table">
+                            <?php if (!$isGraduation): ?>
                             <tr>
                                 <td>Jumlah Pesanan</td>
                                 <td><strong><?= $siswa > 0 ? $siswa . ($isFullService ? ' Buku' : '') : '—' ?></strong></td>
                             </tr>
+                            <?php endif; ?>
                             <?php if ($jumlahHalaman !== null): ?>
                             <tr>
                                 <td>Jumlah Halaman</td>
