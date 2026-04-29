@@ -116,7 +116,19 @@ include __DIR__ . '/../includes/header.php';
   #fab-menu { display: none; }
 
   @media (max-width: 768px) {
-    .quick-nav { display: none; }
+    .quick-nav { 
+      right: 10px; 
+      gap: 8px;
+      top: 50%;
+    }
+    .quick-nav-item {
+      width: 32px;
+      height: 32px;
+      font-size: 14px;
+    }
+    .quick-nav-label {
+      display: none; /* Jangan tampilkan label di mobile agar tidak menutupi konten */
+    }
     #mobile-fab {
       display: flex;
       position: fixed;
@@ -190,6 +202,7 @@ include __DIR__ . '/../includes/header.php';
   <a href="#jasa-termasuk-card" class="quick-nav-item">🛠️ <span class="quick-nav-label">Jasa Termasuk</span></a>
   <a href="#spesifikasi-produk-card" class="quick-nav-item">⚙️ <span class="quick-nav-label">Spesifikasi</span></a>
   <a href="#syarat-ketentuan-card" class="quick-nav-item">📝 <span class="quick-nav-label">Syarat & Ketentuan</span></a>
+  <a href="#penutup-pdf-card" class="quick-nav-item">✉️ <span class="quick-nav-label">Penutup PDF</span></a>
 </nav>
 
 <!-- Mobile FAB -->
@@ -204,6 +217,7 @@ include __DIR__ . '/../includes/header.php';
   <a href="#jasa-termasuk-card" class="fab-menu-item" onclick="toggleFabMenu()">🛠️ Jasa</a>
   <a href="#spesifikasi-produk-card" class="fab-menu-item" onclick="toggleFabMenu()">⚙️ Spesifikasi</a>
   <a href="#syarat-ketentuan-card" class="fab-menu-item" onclick="toggleFabMenu()">📝 S&K</a>
+  <a href="#penutup-pdf-card" class="fab-menu-item" onclick="toggleFabMenu()">✉️ Penutup PDF</a>
 </div>
 
 <!-- Mobile Navbar Fixed -->
