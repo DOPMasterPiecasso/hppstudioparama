@@ -797,7 +797,7 @@ include __DIR__ . '/../includes/header.php';
   <!-- ===== JASA TERMASUK MASTER DATA ===== -->
   <div class="card mb16" id="jasa-termasuk-card">
     <div class="ph">
-      <div class="pt" style="color:var(--accent)">🛠 Jasa Termasuk</div>
+      <div class="pt" style="color:var(--grad)">🛠 Jasa Termasuk</div>
       <div class="ps">Master data layanan yang termasuk per tipe paket — tercetak di PDF penawaran</div>
     </div>
     <div class="note mb12">Daftar layanan yang akan muncul di section "Jasa Termasuk" pada PDF.</div>
@@ -864,19 +864,31 @@ include __DIR__ . '/../includes/header.php';
 
   <!-- SECTION: SPESIFIKASI PRODUK (MASTER) -->
   <div class="card mb-24" id="spesifikasi-produk-card">
-    <div class="card-header" style="display:flex;justify-content:space-between;align-items:center">
-      <div>
-        <h3 class="card-title">⚙️ Master Spesifikasi Produk</h3>
-        <p class="card-subtitle">Atur detail teknis produk (seperti ukuran, kertas, cover) per kategori paket.</p>
-      </div>
-      <div style="background:var(--surface2);padding:4px;border-radius:8px;display:flex;gap:4px">
-        <button class="btn bsm sp-tab-btn" onclick="spSwitchTab('fullservice', this)" style="color:var(--success);background:var(--surface)">Full Service</button>
-        <button class="btn bsm sp-tab-btn" onclick="spSwitchTab('graduation', this)">Graduation</button>
-        <button class="btn bsm sp-tab-btn" onclick="spSwitchTab('alacarte', this)">À La Carte</button>
-      </div>
+    <div class="ph">
+      <div class="pt" style="color:var(--grad)">⚙️ Master Spesifikasi Produk</div>
+      <div class="ps">Atur detail teknis produk (seperti ukuran, kertas, cover) per kategori paket.</div>
     </div>
-    <div class="card-body">
-      <div id="sp-tab-desc" style="font-size:12px;color:var(--text3);margin-bottom:15px;padding-bottom:10px;border-bottom:1px solid var(--border)">
+    <div class="card-body" style="padding:16px">
+      <!-- Tab Switcher -->
+      <div style="display:flex;gap:6px;margin-bottom:16px;border-bottom:2px solid var(--border);padding-bottom:0">
+        <button class="sp-tab-btn active" data-pkg="fullservice"
+          onclick="spSwitchTab('fullservice',this)"
+          style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+          📚 Full Service
+        </button>
+        <button class="sp-tab-btn" data-pkg="graduation"
+          onclick="spSwitchTab('graduation',this)"
+          style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+          🎓 Graduation
+        </button>
+        <button class="sp-tab-btn" data-pkg="alacarte"
+          onclick="spSwitchTab('alacarte',this)"
+          style="padding:8px 16px;font-size:13px;font-weight:600;border:none;border-bottom:2px solid transparent;background:none;cursor:pointer;color:var(--text2);margin-bottom:-2px;border-radius:4px 4px 0 0;transition:.15s">
+          🛒 À La Carte
+        </button>
+      </div>
+
+      <div id="sp-tab-desc" style="font-size:11px;color:var(--text3);margin-bottom:12px;padding:6px 10px;background:var(--surface2);border-radius:6px">
         Spesifikasi untuk paket Full Service.
       </div>
 
@@ -976,6 +988,26 @@ include __DIR__ . '/../includes/header.php';
         <button class="btn bp bsm" onclick="skAddItem()" style="padding:7px 18px;font-size:13px;font-weight:600">+ Tambah</button>
         <span id="sk-add-status" style="font-size:12px;display:none"></span>
       </div>
+    </div>
+  </div>
+
+  <!-- ===== PARAGRAF PENUTUP PDF ===== -->
+  <div class="card mb16" id="penutup-pdf-card">
+    <div class="ph">
+      <div class="pt" style="color:var(--grad)">✉️ Paragraf Penutup PDF</div>
+      <div class="ps">Teks penutup yang muncul di bawah daftar keterangan pada PDF penawaran</div>
+    </div>
+    <div class="note mb12">Teks ini tampil di semua tipe paket (Full Service, Graduation, À La Carte).</div>
+    <div style="margin-bottom:12px">
+      <label style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;display:block;margin-bottom:8px">Isi Paragraf</label>
+      <textarea id="penutup-text"
+        style="width:100%;min-height:90px;font-size:13px;padding:10px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface);color:var(--text);font-family:inherit;line-height:1.6;resize:vertical"
+        placeholder="Masukkan teks paragraf penutup PDF..."></textarea>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px">
+      <button class="btn bp bsm" onclick="savePenutup()" style="padding:7px 18px;font-size:13px;font-weight:600">💾 Simpan</button>
+      <button class="btn bs bsm" onclick="resetPenutup()" style="padding:7px 14px;font-size:13px">↩ Reset Default</button>
+      <span id="penutup-status" style="font-size:12px;display:none"></span>
     </div>
   </div>
 
@@ -3600,9 +3632,8 @@ function spUpdateKategoriOptions(pkg) {
       <option value="ac-cetakonly">Cetak Only</option>
     `;
   } else if (pkg === 'graduation') {
-    // Check if master data 'grad' is available (usually loaded in init)
-    if (masterData && masterData.grad && masterData.grad.packages) {
-      masterData.grad.packages.forEach(p => {
+    if (typeof GRAD !== 'undefined' && GRAD.packages) {
+      GRAD.packages.forEach(p => {
         html += `<option value="${p.id}">${p.name}</option>`;
       });
     }
@@ -3753,7 +3784,55 @@ async function spDeleteItem(id) {
 // API: /api/syarat-ketentuan.php
 // ============================================================
 
-const SK_API = '/api/syarat-ketentuan.php';
+const SK_API      = '/api/syarat-ketentuan.php';
+const PENUTUP_API = '/api/penutup-pdf.php';
+
+const PENUTUP_DEFAULT = 'Demikian penawaran yang kami sampaikan. Besar harapan kami untuk dapat berpartisipasi dalam project Anda. Hal–hal yang belum termasuk dan diatur di sini akan dibicarakan di kemudian hari apabila penawaran ini disetujui. Atas perhatian dan kerjasamanya kami sampaikan terima kasih.';
+
+async function loadPenutup() {
+  try {
+    const res  = await fetch(PENUTUP_API);
+    const json = await res.json();
+    if (json.success) {
+      const ta = document.getElementById('penutup-text');
+      if (ta) ta.value = json.text;
+    }
+  } catch (e) {
+    console.warn('Gagal memuat teks penutup:', e);
+  }
+}
+
+async function savePenutup() {
+  const ta     = document.getElementById('penutup-text');
+  const status = document.getElementById('penutup-status');
+  const text   = ta ? ta.value.trim() : '';
+  if (!text) { showToast('Teks penutup tidak boleh kosong.', 'warning'); return; }
+
+  try {
+    const res  = await fetch(PENUTUP_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ text }),
+    });
+    const json = await res.json();
+    if (json.success) {
+      showToast('✓ Paragraf penutup berhasil disimpan', 'success');
+      if (status) { status.textContent = '✓ Tersimpan'; status.style.color = 'var(--success)'; status.style.display = 'inline'; }
+    } else {
+      throw new Error(json.error || 'Gagal menyimpan');
+    }
+  } catch (e) {
+    showToast('✕ ' + e.message, 'error');
+  }
+}
+
+function resetPenutup() {
+  const ta = document.getElementById('penutup-text');
+  if (ta) ta.value = PENUTUP_DEFAULT;
+  const status = document.getElementById('penutup-status');
+  if (status) { status.textContent = 'Direset ke default (belum disimpan)'; status.style.color = 'var(--text3)'; status.style.display = 'inline'; }
+}
+
 let skCurrentPkg  = 'fullservice';
 let skData        = {};    // cache { fullservice:[], graduation:[], alacarte:[] }
 let skEditingId   = null;
@@ -3990,6 +4069,7 @@ document.addEventListener('DOMContentLoaded', () => {
     skLoadItems('fullservice');
     spUpdateKategoriOptions('fullservice');
     spLoadItems('fullservice');
+    loadPenutup();
     
     // Init Quill for Creation Form
     initSkQuill('sk-new-detail-editor', 150);

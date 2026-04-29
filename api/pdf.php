@@ -117,62 +117,6 @@ if (file_exists($logoPath)) {
     $logoBase64 = 'data:image/png;base64,' . base64_encode(file_get_contents($logoPath));
 }
 
-// Parse catatan untuk bonus/add-on/harga add-on
-$addons = [];
-$addonDetails = [];  // Menyimpan addon dengan harganya
-$bonusExtra = [];
-$diskonInfo = '';
-$totalAddonPrice = 0;
-
-// Load addon data
-$allAddonsData = loadAddonsData();
-
-if ($catatan) {
-    foreach (explode('|', $catatan) as $part) {
-        $part = trim($part);
-        if (strpos($part, 'bonus:') === 0) {
-            $bonusExtra[] = trim(substr($part, 6));
-        } elseif (strpos($part, 'diskon ') === 0 || strpos($part, 'cashback ') === 0) {
-            $diskonInfo = $part;
-        } elseif (stripos($part, 'addons:') === 0) {
-            // Format dari JS: "addons: id1,id2:extraval,id3" (comma-separated, satu bagian)
-            $addonStr = trim(substr($part, 7)); // buang prefix "addons:"
-            $addonEntries = explode(',', $addonStr);
-            foreach ($addonEntries as $entry) {
-                $entry = trim($entry);
-                if (!$entry) continue;
-                // Format entry: "addonId" atau "addonId:extraVal"
-                $colonIdx = strrpos($entry, ':');
-                $addonId   = $colonIdx !== false ? trim(substr($entry, 0, $colonIdx)) : $entry;
-                $customPrice = $colonIdx !== false ? (int)trim(substr($entry, $colonIdx + 1)) : null;
-                if (!$addonId) continue;
-                $addonData = findAddonInCategories($allAddonsData, $addonId);
-                if ($addonData) {
-                    $addonPrice = $customPrice ?? getAddonPrice($addonData, $siswa);
-                    $addonDetails[] = [
-                        'name'  => $addonData['name'] ?? $addonId,
-                        'price' => $addonPrice,
-                        'id'    => $addonId
-                    ];
-                    $totalAddonPrice += $addonPrice;
-                } elseif ($customPrice > 0) {
-                    $addonDetails[] = [
-                        'name'  => ucfirst(str_replace('_', ' ', $addonId)),
-                        'price' => $customPrice,
-                        'id'    => $addonId
-                    ];
-                    $totalAddonPrice += $customPrice;
-                }
-            }
-        } elseif ($part) {
-            $addons[] = $part;
-        }
-    }
-}
-
-// Update harga total dengan addon
-$hargaTotalBaru = $harga + $totalAddonPrice;
-
 // ── Deteksi tipe paket ────────────────────────────────────────
 $paketLower    = strtolower($paket);
 $isFullService = (strpos($paketLower, 'full service') !== false);
@@ -237,6 +181,93 @@ if ($isFullService && $siswa > 0) {
     }
 }
 
+// ── Parse catatan untuk bonus/add-on/harga add-on ────────────
+$addons = [];
+$addonDetails = [];  // Menyimpan addon dengan harganya
+$bonusExtra = [];
+$diskonInfo = '';
+$totalAddonPrice = 0;
+
+// Load addon data
+$allAddonsData = loadAddonsData();
+
+if ($catatan) {
+    foreach (explode('|', $catatan) as $part) {
+        $part = trim($part);
+        if (strpos($part, 'bonus:') === 0) {
+            $bonusExtra[] = trim(substr($part, 6));
+        } elseif (strpos($part, 'diskon ') === 0 || strpos($part, 'cashback ') === 0) {
+            $diskonInfo = $part;
+        } elseif (stripos($part, 'addons:') === 0) {
+            $addonStr = trim(substr($part, 7));
+            $addonEntries = explode(',', $addonStr);
+            foreach ($addonEntries as $entry) {
+                $entry = trim($entry);
+                if (!$entry) continue;
+                $colonIdx = strrpos($entry, ':');
+                $addonId   = $colonIdx !== false ? trim(substr($entry, 0, $colonIdx)) : $entry;
+                $extraVal  = $colonIdx !== false ? (int)trim(substr($entry, $colonIdx + 1)) : null;
+                
+                if (!$addonId) continue;
+                $addonData = findAddonInCategories($allAddonsData, $addonId);
+                if ($addonData) {
+                    $unitPrice = getAddonPrice($addonData, $siswa);
+                    $finalPrice = $unitPrice;
+                    $calcLabel = "";
+                    
+                    // Multiplier logic (matches kalkulator.php / app-pages.js)
+                    if (isset($addonData['type'])) {
+                        if ($addonData['type'] === 'flat') {
+                            $finalPrice = $unitPrice * $siswa;
+                            $calcLabel = " ($siswa buku × " . rp($unitPrice) . ")";
+                        } elseif ($addonData['type'] === 'per_hal') {
+                            $hal = $jumlahHalaman ?? 0;
+                            $finalPrice = $unitPrice * $hal * $siswa;
+                            $calcLabel = " ($siswa buku × $hal hal × " . rp($unitPrice) . ")";
+                        } elseif ($addonData['type'] === 'extra_hal') {
+                            $extraQty = $extraVal ?? 0;
+                            $finalPrice = $unitPrice * $extraQty * $siswa;
+                            $calcLabel = " ($siswa buku × $extraQty hal tambahan × " . rp($unitPrice) . ")";
+                        }
+                    } elseif ($isGraduation && $extraVal > 0) {
+                        // Graduation Cetak (qty * price)
+                        // Cek apakah ini item cetak (g4r, g8r, etc)
+                        $isCetak = false;
+                        if (isset($allAddonsData['grad_cetak'])) {
+                            foreach ($allAddonsData['grad_cetak'] as $gc) {
+                                if ($gc['id'] === $addonId) { $isCetak = true; break; }
+                            }
+                        }
+                        if ($isCetak) {
+                            $finalPrice = $unitPrice * $extraVal;
+                            $calcLabel = " ($extraVal lbr × " . rp($unitPrice) . ")";
+                        }
+                    }
+
+                    $addonDetails[] = [
+                        'name'  => ($addonData['name'] ?? $addonId) . $calcLabel,
+                        'price' => $finalPrice,
+                        'id'    => $addonId
+                    ];
+                    $totalAddonPrice += $finalPrice;
+                } elseif ($extraVal > 0) {
+                    $addonDetails[] = [
+                        'name'  => ucfirst(str_replace('_', ' ', $addonId)),
+                        'price' => $extraVal,
+                        'id'    => $addonId
+                    ];
+                    $totalAddonPrice += $extraVal;
+                }
+            }
+        } elseif ($part) {
+            $addons[] = $part;
+        }
+    }
+}
+
+// Update harga total dengan addon
+$hargaTotalBaru = $harga + $totalAddonPrice;
+
 // ── Jasa Termasuk — dari tabel jasa_termasuk (DB) ────────────
 $jasaTermasukList = [];
 
@@ -272,6 +303,17 @@ try {
     $syaratKetentuanList = [];
 }
 
+// ── Teks Penutup PDF — dari tabel settings ─────────────────────
+$penutupDefault = 'Demikian penawaran yang kami sampaikan. Besar harapan kami untuk dapat berpartisipasi dalam project Anda. Hal–hal yang belum termasuk dan diatur di sini akan dibicarakan di kemudian hari apabila penawaran ini disetujui. Atas perhatian dan kerjasamanya kami sampaikan terima kasih.';
+try {
+    $stmtPenutup = $pdo->prepare("SELECT setting_value FROM settings WHERE setting_key = 'pdf_penutup' LIMIT 1");
+    $stmtPenutup->execute();
+    $penutupRow = $stmtPenutup->fetch(PDO::FETCH_ASSOC);
+    $penutupText = ($penutupRow && trim($penutupRow['setting_value']) !== '') ? $penutupRow['setting_value'] : $penutupDefault;
+} catch (Exception $e) {
+    $penutupText = $penutupDefault;
+}
+
 // ── Bonus & Fasilitas — dari tabel bonus_fasilitas (DB) ──────
 $dbPkgType = 'fullservice'; // default
 $dbKategori = 'all';
@@ -279,7 +321,7 @@ $dbKategori = 'all';
 if ($isGraduation) {
     $dbPkgType = 'graduation';
     try {
-        $stmtGrad = $pdo->query("SELECT setting_value FROM tbl_settings WHERE setting_key = 'grad_packages'");
+        $stmtGrad = $pdo->query("SELECT setting_value FROM settings WHERE setting_key = 'grad_packages'");
         $gradPkgJson = $stmtGrad->fetchColumn();
         if ($gradPkgJson) {
             $gradPkgs = json_decode($gradPkgJson, true);
@@ -293,7 +335,7 @@ if ($isGraduation) {
             }
         }
     } catch (Exception $e) {
-        // Jika tabel tbl_settings tidak ada, gunakan default
+        // Jika tabel settings tidak ada, gunakan default
         $dbKategori = 'all';
     }
 } elseif ($isAlacarte) {
@@ -1160,17 +1202,6 @@ $filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', $namaKlien) . '_' .
                             <?php endforeach; ?>
                         </table>
                     </div>
-                    <?php else: ?>
-                    <!-- SPESIFIKASI UMUM (Fallback jika tidak ada data master) -->
-                    <div class="pdf-section">
-                        <div class="pdf-section-title">Detail Pesanan</div>
-                        <table class="pdf-spec-table">
-                            <tr>
-                                <td>Jumlah Pesanan / Siswa</td>
-                                <td><strong><?= $siswa > 0 ? $siswa : '—' ?></strong></td>
-                            </tr>
-                        </table>
-                    </div>
                     <?php endif; ?>
 
                     <!-- JASA TERMASUK (jika applicable) -->
@@ -1273,11 +1304,7 @@ $filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', $namaKlien) . '_' .
                                 </tr>
                             </tfoot>
                         </table>
-                        <div style="margin-top: 10px; font-size: 10.5px; color: var(--gray); line-height: 1.6;">
-                            • Harga berlaku sesuai spesifikasi yang tercantum.<br>
-                            • Harga bersifat penawaran dan dapat berubah sesuai kesepakatan.<br>
-                            • Penawaran berlaku hingga: <strong><?= e($tglExp) ?></strong>
-                        </div>
+
                     </div>
 
                     <!-- KETERANGAN -->
@@ -1294,10 +1321,7 @@ $filename = 'Penawaran_' . preg_replace('/[^a-z0-9]/i', '_', $namaKlien) . '_' .
                             <?php endforeach; ?>
                         </ul>
                         <p style="font-size: 10.5px; color: var(--gray); line-height: 1.7; margin-top: 12px;">
-                            Demikian penawaran yang kami sampaikan. Besar harapan kami untuk dapat berpartisipasi dalam
-                            project Anda. Hal–hal yang belum termasuk dan diatur di sini akan dibicarakan di kemudian
-                            hari apabila penawaran ini disetujui. Atas perhatian dan kerjasamanya kami sampaikan terima
-                            kasih.
+                            <?= htmlspecialchars($penutupText, ENT_QUOTES, 'UTF-8') ?>
                         </p>
                     </div>
 
