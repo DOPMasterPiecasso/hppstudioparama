@@ -180,104 +180,179 @@ function buildAddonList(){
 }
 
 function kalcUpdateCore(){
-  const cat=document.getElementById('k-cat')?.value||'bukutahunan';
-  const siswa=parseInt(document.getElementById('k-siswa')?.value)||100;
+  const cat = document.getElementById('k-cat')?.value || 'bukutahunan';
+  const siswa = parseInt(document.getElementById('k-siswa')?.value) || 100;
 
-  if(cat==='graduation'){
-    const pkgId=document.getElementById('k-grad-pkg')?.value;
-    const pkg=GRAD.packages.find(p=>p.id===pkgId);
-    let rows='',total=0,addonRows='';
-    if(pkg){total=pkg.price;rows=`<div class="rr"><span class="rl">Paket ${pkg.name}</span><span class="rv">${fmt(pkg.price)}</span></div>`}
+  if (cat === 'graduation') {
+    const pkgId = document.getElementById('k-grad-pkg')?.value;
+    const pkg = GRAD.packages.find(p => p.id === pkgId);
+    let rows = '', total = 0, addonRows = '';
+    if (pkg) {
+      total = pkg.price;
+      rows = `<div class="rr"><span class="rl">Paket ${pkg.name}</span><span class="rv">${fmt(pkg.price)}</span></div>`;
+    }
     
     // Addons
-    if(GRAD.addons) GRAD.addons.forEach(a=>{const c=document.getElementById('chk-'+a.id);if(c&&c.checked){total+=a.price;addonRows+=`<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmt(a.price)}</span></div>`}});
+    if (GRAD.addons) GRAD.addons.forEach(a => {
+      const c = document.getElementById('chk-' + a.id);
+      if (c && c.checked) {
+        total += a.price;
+        addonRows += `<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmt(a.price)}</span></div>`;
+      }
+    });
     // Cetak Foto
-    if(GRAD.cetak) GRAD.cetak.forEach(c=>{
-      const qty=parseInt(document.getElementById('qty-cetak-'+c.id)?.value)||0;
-      if(qty>0){const p=qty*c.price;total+=p;addonRows+=`<div class="rr"><span class="rl">+ ${c.name} (${qty} lbr)</span><span class="rv gr">+${fmt(p)}</span></div>`}
+    if (GRAD.cetak) GRAD.cetak.forEach(c => {
+      const qty = parseInt(document.getElementById('qty-cetak-' + c.id)?.value) || 0;
+      if (qty > 0) {
+        const p = qty * c.price;
+        total += p;
+        addonRows += `<div class="rr"><span class="rl">+ ${c.name} (${qty} lbr)</span><span class="rv gr">+${fmt(p)}</span></div>`;
+      }
     });
 
-    document.getElementById('k-result').innerHTML=rows+addonRows;
-    document.getElementById('k-total').textContent=total>0?fmt(total):'—';
-    document.getElementById('k-total').style.color='var(--grad)';
-    const pEl=document.getElementById('k-profit'); if(pEl) pEl.innerHTML=`<div class="rr"><span class="rl">Tipe harga</span><span class="rv">Flat per event</span></div><div class="rr"><span class="rl">Transport</span><span class="rv">Included (Jabodetabek)</span></div>`;
-    const vEl=document.getElementById('k-verdict'); if(vEl) vEl.innerHTML='';
-    const nEl=document.getElementById('k-note'); if(nEl) nEl.textContent='Harga graduation flat per event, bukan per siswa.';
+    const resultEl = document.getElementById('k-result');
+    if (resultEl) resultEl.innerHTML = rows + addonRows;
+    
+    const totalEl = document.getElementById('k-total');
+    if (totalEl) {
+      totalEl.textContent = total > 0 ? fmt(total) : '—';
+      totalEl.style.color = 'var(--grad)';
+    }
+    
+    const pEl = document.getElementById('k-profit');
+    if (pEl) pEl.innerHTML = `<div class="rr"><span class="rl">Tipe harga</span><span class="rv">Flat per event</span></div><div class="rr"><span class="rl">Transport</span><span class="rv">Included (Jabodetabek)</span></div>`;
+    
+    const vEl = document.getElementById('k-verdict');
+    if (vEl) vEl.innerHTML = '';
+    
+    const nEl = document.getElementById('k-note');
+    if (nEl) nEl.textContent = 'Harga graduation flat per event, bukan per siswa.';
+    
     renderBonusPreview();
     return;
   }
 
-  const type=document.getElementById('k-type').value;
-  const cfg=ALC_CFG[type];
-  document.getElementById('k-total').style.color='var(--accent)';
+  const typeEl = document.getElementById('k-type');
+  if (!typeEl) return;
+  const type = typeEl.value;
+  const cfg = ALC_CFG[type];
+  
+  const totalEl = document.getElementById('k-total');
+  if (totalEl) totalEl.style.color = 'var(--accent)';
 
-  const halInput=document.getElementById('k-hal');
-  const showHal=(cfg?.fs)||(cfg?.bySiswa);
-  if(cfg&&cfg.fs){
-    const {pages}=getFSPrice(cfg.pkg,siswa);
-    halInput.value=pages;
-    document.getElementById('k-hal-info').textContent=`Otomatis: ${pages} halaman untuk ${siswa} siswa (dari pricelist)`;
-  } else if(cfg&&cfg.bySiswa){
-    const {pages}=getFSPrice('handy',siswa);
-    halInput.value=pages;
-    document.getElementById('k-hal-info').textContent=`Acuan: ${pages} halaman untuk ${siswa} siswa (ref. pricelist handy)`;
+  const halInput = document.getElementById('k-hal');
+  const halInfoEl = document.getElementById('k-hal-info');
+  const showHal = (cfg?.fs) || (cfg?.bySiswa);
+  
+  if (cfg && cfg.fs) {
+    const { pages } = getFSPrice(cfg.pkg, siswa);
+    if (halInput) halInput.value = pages;
+    if (halInfoEl) halInfoEl.textContent = `Otomatis: ${pages} halaman untuk ${siswa} siswa (dari pricelist)`;
+  } else if (cfg && cfg.bySiswa) {
+    const { pages } = getFSPrice('handy', siswa);
+    if (halInput) halInput.value = pages;
+    if (halInfoEl) halInfoEl.textContent = `Acuan: ${pages} halaman untuk ${siswa} siswa (ref. pricelist handy)`;
   } else {
-    halInput.value='—';
-    document.getElementById('k-hal-info').textContent='Halaman menyesuaikan paket';
+    if (halInput) halInput.value = '—';
+    if (halInfoEl) halInfoEl.textContent = 'Halaman menyesuaikan paket';
   }
-  const hal=cfg&&cfg.fs?getFSPrice(cfg.pkg,siswa).pages:(cfg&&cfg.bySiswa?getFSPrice('handy',siswa).pages:60);
-  const isSiswa=cfg?.bySiswa;
-  document.getElementById('k-siswa-row').style.display=isSiswa?'':'none';
-  document.getElementById('k-hal-row').style.display=showHal?'':'none';
+  
+  const hal = cfg && cfg.fs ? getFSPrice(cfg.pkg, siswa).pages : (cfg && cfg.bySiswa ? getFSPrice('handy', siswa).pages : 60);
+  const isSiswa = cfg?.bySiswa;
+  
+  const siswaRow = document.getElementById('k-siswa-row');
+  if (siswaRow) siswaRow.style.display = isSiswa ? '' : 'none';
+  
+  const halRow = document.getElementById('k-hal-row');
+  if (halRow) halRow.style.display = showHal ? '' : 'none';
 
-  const allAddons=[...ADDON_DATA.finishing,...ADDON_DATA.kertas,...ADDON_DATA.halaman,...ADDON_DATA.video,...ADDON_DATA.pkg1,...ADDON_DATA.pkg2];
-  allAddons.forEach(a=>{
-    const el=document.getElementById('acp-'+a.id);if(!el)return;
-    if(a.type==='flat'||a.type==='flat_video') el.textContent=a.type==='flat_video'?fmtM(a.price):fmt(getTier(a.tiers,siswa))+'/buku';
-    else if(a.type==='per_hal') el.textContent=getTier(a.tiers,siswa).toLocaleString('id-ID')+'/hal';
-    else if(a.type==='extra_hal') el.textContent=getTier(a.tiers,siswa).toLocaleString('id-ID')+'/hal ekstra';
+  const allAddons = [...ADDON_DATA.finishing, ...ADDON_DATA.kertas, ...ADDON_DATA.halaman, ...ADDON_DATA.video, ...ADDON_DATA.pkg1, ...ADDON_DATA.pkg2];
+  allAddons.forEach(a => {
+    const el = document.getElementById('acp-' + a.id);
+    if (!el) return;
+    if (a.type === 'flat' || a.type === 'flat_video') el.textContent = a.type === 'flat_video' ? fmtM(a.price) : fmt(getTier(a.tiers, siswa)) + '/buku';
+    else if (a.type === 'per_hal') el.textContent = getTier(a.tiers, siswa).toLocaleString('id-ID') + '/hal';
+    else if (a.type === 'extra_hal') el.textContent = getTier(a.tiers, siswa).toLocaleString('id-ID') + '/hal ekstra';
   });
 
-  let basePB=0,baseFlat=0,baseLabel='';
-  if(cfg?.fs){const{harga}=getFSPrice(cfg.pkg,siswa);basePB=harga;baseLabel=`${fmt(harga)}/buku (${siswa} siswa) • ${hal} hal`}
-  else if(cfg?.bySiswa){const hB=getFSPrice('handy',siswa).harga;basePB=Math.max(cfg.minPerBuku||0,Math.round(hB*ALC_F[cfg.factor]));baseLabel=`${fmt(basePB)}/buku (${siswa} siswa) • ${hal} hal`}
-  else if(cfg?.flat){baseFlat=(cfg.flat[0]+cfg.flat[1])/2;baseLabel=`${fmtM(cfg.flat[0])}${cfg.flat[0]!==cfg.flat[1]?' – '+fmtM(cfg.flat[1]):''} (flat/proyek)`}
+  let basePB = 0, baseFlat = 0, baseLabel = '';
+  if (cfg?.fs) {
+    const { harga } = getFSPrice(cfg.pkg, siswa);
+    basePB = harga;
+    baseLabel = `${fmt(harga)}/buku (${siswa} siswa) • ${hal} hal`;
+  } else if (cfg?.bySiswa) {
+    const hB = getFSPrice('handy', siswa).harga;
+    basePB = Math.max(cfg.minPerBuku || 0, Math.round(hB * ALC_F[cfg.factor]));
+    baseLabel = `${fmt(basePB)}/buku (${siswa} siswa) • ${hal} hal`;
+  } else if (cfg?.flat) {
+    baseFlat = (cfg.flat[0] + cfg.flat[1]) / 2;
+    baseLabel = `${fmtM(cfg.flat[0])}${cfg.flat[0] !== cfg.flat[1] ? ' – ' + fmtM(cfg.flat[1]) : ''} (flat/proyek)`;
+  }
 
-  let addonPB=0,addonVid=0,addonRows='';
-  allAddons.forEach(a=>{
-    const chk=document.getElementById('chk-'+a.id);if(!chk||!chk.checked)return;
-    if(a.type==='flat'){const v=getTier(a.tiers,siswa);addonPB+=v;addonRows+=`<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmt(v)}/buku</span></div>`}
-    else if(a.type==='per_hal'){const v=getTier(a.tiers,siswa)*hal;addonPB+=v;addonRows+=`<div class="rr"><span class="rl">+ ${a.name} (${hal}hal)</span><span class="rv gr">+${fmt(v)}/buku</span></div>`}
-    else if(a.type==='extra_hal'){const eh=parseInt(document.getElementById('xhal-'+a.id)?.value)||0;const v=getTier(a.tiers,siswa)*eh;addonPB+=v;addonRows+=`<div class="rr"><span class="rl">+ ${eh} hal tambahan</span><span class="rv gr">+${fmt(v)}/buku</span></div>`}
-    else if(a.type==='flat_video'){addonVid+=a.price;addonRows+=`<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmtM(a.price)} (flat)</span></div>`}
+  let addonPB = 0, addonVid = 0, addonRows = '';
+  allAddons.forEach(a => {
+    const chk = document.getElementById('chk-' + a.id);
+    if (!chk || !chk.checked) return;
+    if (a.type === 'flat') {
+      const v = getTier(a.tiers, siswa);
+      addonPB += v;
+      addonRows += `<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmt(v)}/buku</span></div>`;
+    } else if (a.type === 'per_hal') {
+      const v = getTier(a.tiers, siswa) * hal;
+      addonPB += v;
+      addonRows += `<div class="rr"><span class="rl">+ ${a.name} (${hal}hal)</span><span class="rv gr">+${fmt(v)}/buku</span></div>`;
+    } else if (a.type === 'extra_hal') {
+      const eh = parseInt(document.getElementById('xhal-' + a.id)?.value) || 0;
+      const v = getTier(a.tiers, siswa) * eh;
+      addonPB += v;
+      addonRows += `<div class="rr"><span class="rl">+ ${eh} hal tambahan</span><span class="rv gr">+${fmt(v)}/buku</span></div>`;
+    } else if (a.type === 'flat_video') {
+      addonVid += a.price;
+      addonRows += `<div class="rr"><span class="rl">+ ${a.name}</span><span class="rv gr">+${fmtM(a.price)} (flat)</span></div>`;
+    }
   });
 
-  const totPB=basePB+addonPB;
-  const totAll=isSiswa?totPB*siswa+addonVid:baseFlat+addonVid;
-  document.getElementById('k-result').innerHTML=`<div class="rr"><span class="rl">Harga dasar</span><span class="rv">${baseLabel}</span></div>`+addonRows;
-  document.getElementById('k-total').textContent=isSiswa?fmt(totAll):cfg?.flat?fmtM(cfg.flat[0])+(cfg.flat[0]!==cfg.flat[1]?' – '+fmtM(cfg.flat[1]):''):'—';
-  document.getElementById('k-total-sub').textContent=addonVid>0?`*termasuk video ${fmtM(addonVid)} flat`:'';
+  const totPB = basePB + addonPB;
+  const totAll = isSiswa ? totPB * siswa + addonVid : baseFlat + addonVid;
+  
+  const resultEl = document.getElementById('k-result');
+  if (resultEl) resultEl.innerHTML = `<div class="rr"><span class="rl">Harga dasar</span><span class="rv">${baseLabel}</span></div>` + addonRows;
+  
+  if (totalEl) totalEl.textContent = isSiswa ? fmt(totAll) : cfg?.flat ? fmtM(cfg.flat[0]) + (cfg.flat[0] !== cfg.flat[1] ? ' – ' + fmtM(cfg.flat[1]) : '') : '—';
+  
+  const totalSubEl = document.getElementById('k-total-sub');
+  if (totalSubEl) totalSubEl.textContent = addonVid > 0 ? `*termasuk video ${fmtM(addonVid)} flat` : '';
 
-  let profHTML='';
-  if(cfg?.fs&&isSiswa){
-    const cetak=estCetak(siswa,hal,cfg.pkg);
-    const gB=basePB-cetak+addonPB;
-    const gT=gB*siswa+addonVid;
-    const net=gT-OH.total;
-    const pct=gB/totPB*100;
-    let cetakEl=document.getElementById('k-cetak-est');
-    if(!cetakEl){cetakEl=document.createElement('span');cetakEl.id='k-cetak-est';cetakEl.style.display='none';document.body.appendChild(cetakEl)}
-    cetakEl.dataset.cetak=cetak*siswa;
-    profHTML=`<div class="rr"><span class="rl">Est. biaya cetak/buku</span><span class="rv rd">−${fmt(cetak)}</span></div><div class="rr"><span class="rl">Gross margin/buku</span><span class="rv gr">${fmt(gB)} (${pct.toFixed(0)}%)</span></div><div class="rr"><span class="rl">Gross total proyek</span><span class="rv gr">${fmt(gT)}</span></div><div class="rr"><span class="rl">Overhead bulanan</span><span class="rv rd">−${fmtM(OH.total)}</span></div><div class="rr tot"><span class="rl">Net (1 proyek/bln)</span><span class="rv ${net>=0?'gr':'rd'}">${net>=0?'':'-'}${fmtM(Math.abs(net))}</span></div>`;
-    const vEl=document.getElementById('k-verdict');
-    if(vEl) vEl.innerHTML=pct>=60?`<div class="note suc">✓ Margin ${pct.toFixed(0)}% sehat.</div>`:pct>=40?`<div class="note warn">⚠ Margin ${pct.toFixed(0)}% tipis, perhatikan efisiensi.</div>`:`<div class="note dan">✗ Margin ${pct.toFixed(0)}% terlalu rendah.</div>`;
+  let profHTML = '';
+  if (cfg?.fs && isSiswa) {
+    const cetak = estCetak(siswa, hal, cfg.pkg);
+    const gB = basePB - cetak + addonPB;
+    const gT = gB * siswa + addonVid;
+    const net = gT - OH.total;
+    const pct = gB / totPB * 100;
+    let cetakEl = document.getElementById('k-cetak-est');
+    if (!cetakEl) {
+      cetakEl = document.createElement('span');
+      cetakEl.id = 'k-cetak-est';
+      cetakEl.style.display = 'none';
+      document.body.appendChild(cetakEl);
+    }
+    cetakEl.dataset.cetak = cetak * siswa;
+    profHTML = `<div class="rr"><span class="rl">Est. biaya cetak/buku</span><span class="rv rd">−${fmt(cetak)}</span></div><div class="rr"><span class="rl">Gross margin/buku</span><span class="rv gr">${fmt(gB)} (${pct.toFixed(0)}%)</span></div><div class="rr"><span class="rl">Gross total proyek</span><span class="rv gr">${fmt(gT)}</span></div><div class="rr"><span class="rl">Overhead bulanan</span><span class="rv rd">−${fmtM(OH.total)}</span></div><div class="rr tot"><span class="rl">Net (1 proyek/bln)</span><span class="rv ${net >= 0 ? 'gr' : 'rd'}">${net >= 0 ? '' : '-'}${fmtM(Math.abs(net))}</span></div>`;
+    const vEl = document.getElementById('k-verdict');
+    if (vEl) vEl.innerHTML = pct >= 60 ? `<div class="note suc">✓ Margin ${pct.toFixed(0)}% sehat.</div>` : pct >= 40 ? `<div class="note warn">⚠ Margin ${pct.toFixed(0)}% tipis, perhatikan efisiensi.</div>` : `<div class="note dan">✗ Margin ${pct.toFixed(0)}% terlalu rendah.</div>`;
   } else {
-    const vEl=document.getElementById('k-verdict'); if(vEl) vEl.innerHTML='';
-    profHTML=`<div class="rr"><span class="rl">Tipe harga</span><span class="rv">${isSiswa?'Per siswa':'Flat per proyek'}</span></div>`
+    const vEl = document.getElementById('k-verdict');
+    if (vEl) vEl.innerHTML = '';
+    profHTML = `<div class="rr"><span class="rl">Tipe harga</span><span class="rv">${isSiswa ? 'Per siswa' : 'Flat per proyek'}</span></div>`;
   }
-  const pEl=document.getElementById('k-profit'); if(pEl) pEl.innerHTML=profHTML;
-  const notes={'fs-handy':'Full service: foto, editing, desain, e-book, cetak & kirim.','fs-minimal':'Paket buku square 24×24cm, semua layanan.','fs-large':'Buku besar B4 25×35cm, semua layanan.','ac-ebook':'Tanpa cetak fisik. Klien terima file digital.','ac-editcetak':'⚠ Klien bawa foto sendiri — wajib SOP kualitas file.','ac-desain':'⚠ Klien bawa semua konten siap pakai.','ac-cetakonly':'⚠ Klien bawa file print-ready.','ac-fotohalf':'Sesi ½ hari, max ~75 siswa.','ac-fotofull':'Full day, 76–150+ siswa.','ac-videod':'Flat per video, bukan per siswa.','ac-videodoc':'Flat per video.'};
-  const nEl=document.getElementById('k-note'); if(nEl) nEl.textContent=notes[type]||'';
+  
+  const pEl = document.getElementById('k-profit');
+  if (pEl) pEl.innerHTML = profHTML;
+  
+  const notes = { 'fs-handy': 'Full service: foto, editing, desain, e-book, cetak & kirim.', 'fs-minimal': 'Paket buku square 24×24cm, semua layanan.', 'fs-large': 'Buku besar B4 25×35cm, semua layanan.', 'ac-ebook': 'Tanpa cetak fisik. Klien terima file digital.', 'ac-editcetak': '⚠ Klien bawa foto sendiri — wajib SOP kualitas file.', 'ac-desain': '⚠ Klien bawa semua konten siap pakai.', 'ac-cetakonly': '⚠ Klien bawa file print-ready.', 'ac-fotohalf': 'Sesi ½ hari, max ~75 siswa.', 'ac-fotofull': 'Full day, 76–150+ siswa.', 'ac-videod': 'Flat per video, bukan per siswa.', 'ac-videodoc': 'Flat per video.' };
+  const nEl = document.getElementById('k-note');
+  if (nEl) nEl.textContent = notes[type] || '';
   renderBonusPreview();
 }
 
@@ -285,7 +360,7 @@ function kalcUpdate(){
   // Skip intermediate updates during edit data restore to prevent race condition
   if(typeof isRestoringEditData !== 'undefined' && isRestoringEditData) return;
   kalcUpdateCore(); 
-  applyDiskon(); 
+  if (typeof applyDiskon === 'function') applyDiskon(); 
 }
 
 // ============================================================
