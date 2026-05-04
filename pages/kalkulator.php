@@ -127,9 +127,9 @@ $jsUser = json_encode([
 ]);
 ?>
 <script>const PHP_USER = <?= $jsUser ?>;</script>
-<script src="/assets/js/app.js?v=1.5"></script>
-<script src="/assets/js/app-pages.js?v=1.5"></script>
-<script src="/assets/js/app-proyek.js?v=1.5"></script>
+<script src="/assets/js/app.js?v=1.6"></script>
+<script src="/assets/js/app-pages.js?v=1.6"></script>
+<script src="/assets/js/app-proyek.js?v=1.6"></script>
 <!-- Edit init ditangani di app-proyek.js DOMContentLoaded (async flow, no race condition) -->
 </body>
 </html>

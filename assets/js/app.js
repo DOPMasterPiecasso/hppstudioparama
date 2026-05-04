@@ -283,7 +283,6 @@ function miniBar(p){const c=bc(p);return`<div style="display:flex;align-items:ce
 // ============================================================
 // API HELPERS — replace localStorage
 // ============================================================
-const API_BASE = '/api';
 
 // Toast notification system
 let toastTimeout = null;
