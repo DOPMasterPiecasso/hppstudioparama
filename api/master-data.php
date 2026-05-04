@@ -41,19 +41,20 @@ try {
             case 'get_all':
                 // Return ALL master data sekaligus
                 $response = [
-                    'overhead'        => getMasterOverhead($pdo),
-                    'cetak_f'         => getMasterCetakFactors($pdo),
-                    'cetak_base'      => getMasterCetakBase($pdo),
-                    'alc_f'           => getMasterAlaCarteFactors($pdo),
-                    'fs'              => getMasterFullService($pdo),
-                    'addon_data'      => getMasterAddons($pdo),
-                    'grad'            => getMasterGraduation($pdo),
-                    'payment_terms'   => getMasterPaymentTerms($pdo),
-                    'bonus_fasilitas' => getMasterBonusFasilitas($pdo),
-                    'jasa_termasuk'   => getMasterJasaTermasuk($pdo),
+                    'overhead'         => getMasterOverhead($pdo),
+                    'cetak_f'          => getMasterCetakFactors($pdo),
+                    'cetak_base'       => getMasterCetakBase($pdo),
+                    'alc_f'            => getMasterAlaCarteFactors($pdo),
+                    'alc_cfg'          => getMasterAlaCarteConfig($pdo),
+                    'fs'               => getMasterFullService($pdo),
+                    'addon_data'       => getMasterAddons($pdo),
+                    'grad'             => getMasterGraduation($pdo),
+                    'payment_terms'    => getMasterPaymentTerms($pdo),
+                    'bonus_fasilitas'  => getMasterBonusFasilitas($pdo),
+                    'jasa_termasuk'    => getMasterJasaTermasuk($pdo),
                     'syarat_ketentuan' => getMasterSyaratKetentuan($pdo),
-                    'spesifikasi'     => getMasterSpesifikasi($pdo),
-                    'timestamp'       => date('Y-m-d H:i:s'),
+                    'spesifikasi'      => getMasterSpesifikasi($pdo),
+                    'timestamp'        => date('Y-m-d H:i:s'),
                 ];
                 break;
                 
@@ -103,6 +104,10 @@ try {
                 
             case 'get_syarat_ketentuan':
                 $response = getMasterSyaratKetentuan($pdo);
+                break;
+                
+            case 'get_alacarte_config':
+                $response = getMasterAlaCarteConfig($pdo);
                 break;
                 
             default:
@@ -271,6 +276,12 @@ function updateMasterData($pdo, $type, $body) {
         
         case 'payment_terms':
             return updatePaymentTerms($pdo, $body['data'] ?? []);
+
+        case 'alacarte_config_save':
+            return saveAlaCarteConfigItem($pdo, $body['data'] ?? []);
+
+        case 'alacarte_config_delete':
+            return deleteAlaCarteConfigItem($pdo, $body['data']['id'] ?? 0);
             
         default:
             throw new Exception('Unknown update type: ' . $type);
@@ -329,5 +340,68 @@ function getMasterSpesifikasi($pdo) {
     } catch (Exception $e) {
         return ['fullservice' => [], 'graduation' => [], 'alacarte' => []];
     }
+}
+
+// ============================================================
+// ALACARTE CONFIG — harga flat (foto only, video, dll)
+// ============================================================
+
+function getMasterAlaCarteConfig($pdo) {
+    try {
+        $stmt = $pdo->query(
+            "SELECT id, package_code, label, package_type, calc_key, by_siswa, price_min, price_max, min_per_buku, description, display_order
+             FROM packages_config WHERE active = 1 ORDER BY display_order ASC, id ASC"
+        );
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    } catch (Exception $e) {
+        error_log('getMasterAlaCarteConfig error: ' . $e->getMessage());
+        return [];
+    }
+}
+
+function saveAlaCarteConfigItem($pdo, $data) {
+    $id           = isset($data['id']) ? (int)$data['id'] : 0;
+    $code         = trim($data['package_code'] ?? '');
+    $label        = trim($data['label'] ?? '');
+    $package_type = trim($data['package_type'] ?? 'alc_flat');
+    $calc_key     = trim($data['calc_key'] ?? '') ?: null;
+    $by_siswa     = !empty($data['by_siswa']) ? 1 : 0;
+    $price_min    = (int)($data['price_min'] ?? 0);
+    $price_max    = (int)($data['price_max'] ?? $price_min);
+    $min_per_buku = (int)($data['min_per_buku'] ?? 0);
+    $description  = trim($data['description'] ?? '');
+    $order        = (int)($data['display_order'] ?? 0);
+
+    if (!$code || !$label) {
+        throw new Exception('package_code dan label wajib diisi');
+    }
+
+    if ($id > 0) {
+        // UPDATE
+        $stmt = $pdo->prepare(
+            "UPDATE packages_config
+             SET package_code=?, label=?, package_type=?, calc_key=?, by_siswa=?, price_min=?, price_max=?, min_per_buku=?, description=?, display_order=?
+             WHERE id=?"
+        );
+        $stmt->execute([$code, $label, $package_type, $calc_key, $by_siswa, $price_min, $price_max, $min_per_buku, $description, $order, $id]);
+    } else {
+        // INSERT
+        $stmt = $pdo->prepare(
+            "INSERT INTO packages_config (package_code, label, package_type, calc_key, by_siswa, price_min, price_max, min_per_buku, description, display_order, active)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, 1)"
+        );
+        $stmt->execute([$code, $label, $package_type, $calc_key, $by_siswa, $price_min, $price_max, $min_per_buku, $description, $order]);
+        $id = (int)$pdo->lastInsertId();
+    }
+
+    return getMasterAlaCarteConfig($pdo);
+}
+
+function deleteAlaCarteConfigItem($pdo, $id) {
+    $id = (int)$id;
+    if ($id <= 0) throw new Exception('ID tidak valid');
+    $stmt = $pdo->prepare("UPDATE packages_config SET active = 0 WHERE id = ?");
+    $stmt->execute([$id]);
+    return getMasterAlaCarteConfig($pdo);
 }
 ?>

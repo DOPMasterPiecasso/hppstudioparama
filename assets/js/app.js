@@ -102,19 +102,41 @@ let GRAD = DB_SETTINGS['grad_packages'] ? JSON.parse(DB_SETTINGS['grad_packages'
   ]
 };
 
-const ALC_CFG = DB_SETTINGS['alc_cfg'] ? JSON.parse(DB_SETTINGS['alc_cfg']) : {
-  'fs-handy':{label:'Full Service — Handy Book A4+',fs:true,pkg:'handy',bySiswa:true},
-  'fs-minimal':{label:'Full Service — Minimal Book SQ',fs:true,pkg:'minimal',bySiswa:true},
-  'fs-large':{label:'Full Service — Large Book B4',fs:true,pkg:'large',bySiswa:true},
-  'ac-ebook':{label:'E-Book Package',bySiswa:true,factor:'ebook'},
-  'ac-editcetak':{label:'Edit+Desain+Cetak',bySiswa:true,factor:'editcetak'},
-  'ac-fotohalf':{label:'Foto Only (½ hari)',bySiswa:false,flat:[3500000,5000000]},
-  'ac-fotofull':{label:'Foto Only (full day)',bySiswa:false,flat:[6000000,9000000]},
-  'ac-videod':{label:'Drone Video',bySiswa:false,flat:[1500000,1500000]},
-  'ac-videodoc':{label:'Docudrama Video',bySiswa:false,flat:[3000000,3000000]},
-  'ac-desain':{label:'Desain Only',bySiswa:true,factor:'desain',minPerBuku:50000},
-  'ac-cetakonly':{label:'Cetak Only',bySiswa:true,factor:'cetakonly',minPerBuku:30000},
-};
+// ALC_CFG: konfigurasi per kode paket (Full Service, ALC Factor, ALC Flat).
+// Sekarang 100% dimuat dari tabel packages_config.
+function buildALCCFG() {
+  const cfg = {};
+  const dbRows = DB_SETTINGS['alc_cfg'];
+  
+  if (Array.isArray(dbRows)) {
+    dbRows.forEach(row => {
+      const code = row.package_code;
+      const type = row.package_type;
+      
+      cfg[code] = {
+        label: row.label,
+        bySiswa: parseInt(row.by_siswa) === 1
+      };
+      
+      if (type === 'fs') {
+        cfg[code].fs = true;
+        cfg[code].pkg = row.calc_key;
+      } else if (type === 'alc_factor') {
+        cfg[code].factor = row.calc_key;
+        if (row.min_per_buku > 0) {
+          cfg[code].minPerBuku = parseInt(row.min_per_buku);
+        }
+      } else if (type === 'alc_flat') {
+        const pMin = parseInt(row.price_min) || 0;
+        const pMax = parseInt(row.price_max) || pMin;
+        cfg[code].flat = [pMin, pMax];
+      }
+    });
+  }
+  return cfg;
+}
+
+let ALC_CFG = buildALCCFG();
 
 let curFSPkg='handy', curAnPkg='handy';
 
@@ -694,11 +716,20 @@ async function refreshMasterData() {
             if (data.cetak_f)    CETAK_F = {...data.cetak_f};
             if (data.cetak_base) CETAK_BASE = data.cetak_base;
             if (data.alc_f)      ALC_F = {...data.alc_f};
+            if (data.alc_cfg)    { DB_SETTINGS['alc_cfg'] = data.alc_cfg; ALC_CFG = buildALCCFG(); }
             if (data.fs)         FS = {...data.fs};
             if (data.addon_data) ADDON_DATA = {...data.addon_data};
             if (data.grad)       GRAD = {...data.grad};
             if (data.bonus_fasilitas) BONUS_FASILITAS = {...data.bonus_fasilitas};
             if (data.payment_terms)   PT = data.payment_terms;
+            
+            // Perbarui UI kalkulator jika fungsi tersedia
+            if (typeof buildTypePaketDropdown === 'function') {
+                buildTypePaketDropdown();
+            }
+            if (typeof kalcUpdate === 'function') {
+                kalcUpdate();
+            }
             
             console.log('✓ Master data refreshed from API');
             return true;

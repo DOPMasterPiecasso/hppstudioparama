@@ -34,21 +34,7 @@ include __DIR__ . '/../includes/header.php';
           </div>
           <div class="fg" id="k-type-row"><label class="fl">Tipe Paket</label>
             <select id="k-type" onchange="kalcUpdate()">
-              <optgroup label="Full Service">
-                <option value="fs-handy">Full Service — Handy Book A4+</option>
-                <option value="fs-minimal">Full Service — Minimal Book SQ</option>
-                <option value="fs-large">Full Service — Large Book B4</option>
-              </optgroup>
-              <optgroup label="À La Carte">
-                <option value="ac-ebook">À La Carte — E-Book Package</option>
-                <option value="ac-editcetak">À La Carte — Edit+Desain+Cetak</option>
-                <option value="ac-fotohalf">À La Carte — Foto Only (½ hari)</option>
-                <option value="ac-fotofull">À La Carte — Foto Only (Full day)</option>
-                <option value="ac-videod">À La Carte — Drone Video</option>
-                <option value="ac-videodoc">À La Carte — Docudrama Video</option>
-                <option value="ac-desain">À La Carte — Desain Only</option>
-                <option value="ac-cetakonly">À La Carte — Cetak Only</option>
-              </optgroup>
+              <option value="fs-handy">Memuat paket...</option>
             </select>
           </div>
           <div class="fg" id="k-grad-row" style="display:none"><label class="fl">Paket Graduation</label><select id="k-grad-pkg" onchange="kalcUpdate()"></select></div>

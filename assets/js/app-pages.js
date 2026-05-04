@@ -100,6 +100,35 @@ function gcUpdate(){
 // ============================================================
 // KALKULATOR
 // ============================================================
+
+function buildTypePaketDropdown() {
+  const select = document.getElementById('k-type');
+  if (!select) return;
+  const currentVal = select.value;
+  
+  let fsHtml = '<optgroup label="Full Service">';
+  let alcHtml = '<optgroup label="À La Carte">';
+  
+  if (typeof ALC_CFG !== 'undefined') {
+    for (const [code, cfg] of Object.entries(ALC_CFG)) {
+      if (cfg.fs) {
+        fsHtml += `<option value="${code}">${cfg.label}</option>`;
+      } else {
+        alcHtml += `<option value="${code}">${cfg.label}</option>`;
+      }
+    }
+  }
+  
+  fsHtml += '</optgroup>';
+  alcHtml += '</optgroup>';
+  
+  select.innerHTML = fsHtml + alcHtml;
+  
+  // Restore nilai yang dipilih sebelumnya jika masih valid
+  if (typeof ALC_CFG !== 'undefined' && ALC_CFG[currentVal]) {
+    select.value = currentVal;
+  }
+}
 function kCatChange(){
   const cat=document.getElementById('k-cat').value;
   document.getElementById('k-type-row').style.display=cat==='bukutahunan'?'':'none';

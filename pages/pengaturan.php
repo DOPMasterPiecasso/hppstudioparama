@@ -196,8 +196,9 @@ include __DIR__ . '/../includes/header.php';
   <a href="#overhead-card" class="quick-nav-item">💰 <span class="quick-nav-label">Overhead & Gaji</span></a>
   <a href="#cetak-master-card" class="quick-nav-item">🖨️ <span class="quick-nav-label">Biaya Cetak</span></a>
   <a href="#alacarte-factors-card" class="quick-nav-item">🛒 <span class="quick-nav-label">Faktor À La Carte</span></a>
+  <a href="#packages-config-card" class="quick-nav-item">📦 <span class="quick-nav-label">Manajemen Paket</span></a>
   <a href="#addon-section" class="quick-nav-item">➕ <span class="quick-nav-label">Add-ons</span></a>
-  <a href="#graduation-section" class="quick-nav-item">🎓 <span class="quick-nav-label">Graduation</span></a>
+  <a href="#graduation-section" class="quick-nav-item">🎓 <span class="quick-nav-label">Graduation (Add-ons)</span></a>
   <a href="#bonus-fasilitas-card" class="quick-nav-item">🎁 <span class="quick-nav-label">Bonus & Fasilitas</span></a>
   <a href="#jasa-termasuk-card" class="quick-nav-item">🛠️ <span class="quick-nav-label">Jasa Termasuk</span></a>
   <a href="#spesifikasi-produk-card" class="quick-nav-item">⚙️ <span class="quick-nav-label">Spesifikasi</span></a>
@@ -211,8 +212,9 @@ include __DIR__ . '/../includes/header.php';
   <a href="#overhead-card" class="fab-menu-item" onclick="toggleFabMenu()">💰 Overhead</a>
   <a href="#cetak-master-card" class="fab-menu-item" onclick="toggleFabMenu()">🖨️ Biaya Cetak</a>
   <a href="#alacarte-factors-card" class="fab-menu-item" onclick="toggleFabMenu()">🛒 À La Carte</a>
+  <a href="#packages-config-card" class="fab-menu-item" onclick="toggleFabMenu()">📦 Manajemen Paket</a>
   <a href="#addon-section" class="fab-menu-item" onclick="toggleFabMenu()">➕ Add-ons</a>
-  <a href="#graduation-section" class="fab-menu-item" onclick="toggleFabMenu()">🎓 Graduation</a>
+  <a href="#graduation-section" class="fab-menu-item" onclick="toggleFabMenu()">🎓 Graduation (Add-ons)</a>
   <a href="#bonus-fasilitas-card" class="fab-menu-item" onclick="toggleFabMenu()">🎁 Bonus</a>
   <a href="#jasa-termasuk-card" class="fab-menu-item" onclick="toggleFabMenu()">🛠️ Jasa</a>
   <a href="#spesifikasi-produk-card" class="fab-menu-item" onclick="toggleFabMenu()">⚙️ Spesifikasi</a>
@@ -383,6 +385,122 @@ include __DIR__ . '/../includes/header.php';
     </div>
     <button class="btn bp bsm" onclick="saveALC()">Simpan Faktor À La Carte</button>
   </div>
+
+  <!-- ===== MANAJEMEN PAKET (FS, ALC Factor, ALC Flat) ===== -->
+  <div class="card mb16" id="packages-config-card">
+    <div class="ph">
+      <div class="pt" style="color:var(--accent);font-size:18px">📦 Manajemen Paket</div>
+      <div class="ps">Kelola semua tipe paket (Buku Tahunan &amp; Graduation). Klik paket untuk edit, atau tambah baru.</div>
+    </div>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;align-items:start">
+
+      <!-- Kolom Kiri: Daftar Paket -->
+      <div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+          <div style="font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em">Daftar Paket</div>
+          <select id="pkg-cat-filter" onchange="pkgRenderList()" style="padding:2px 6px;font-size:11px;border-radius:4px;border:1px solid var(--border);outline:none;cursor:pointer">
+            <option value="bukutahunan">📚 Buku Tahunan</option>
+            <option value="graduation">🎓 Graduation</option>
+          </select>
+        </div>
+        <div id="pkg-list-container">
+          <!-- List akan dirender oleh JavaScript pkgRenderList() -->
+        </div>
+
+        <!-- Tombol Tambah Baru -->
+        <button class="btn bs bsm" id="btn-pkg-add-new" onclick="pkgNewForm()"
+                style="width:100%;margin-top:8px;justify-content:center;border-style:dashed;gap:5px">
+          + Tambah Paket Baru
+        </button>
+      </div>
+
+      <!-- Kolom Kanan: Form Edit / Tambah -->
+      <div id="pkg-form-panel" style="display:none;background:var(--surface2);border-radius:10px;padding:14px;border:1px solid var(--border)">
+        <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:12px" id="pkg-form-title">Edit Paket</div>
+        <input type="hidden" id="pkg-id">
+
+        <div class="form-row" id="row-pkg-code">
+          <label>Kode Paket <span style="color:var(--danger)">*</span>
+            <span style="font-size:10px;color:var(--text3);font-weight:400"> — unik (cth: fs-handy)</span>
+          </label>
+          <input type="text" id="pkg-code" placeholder="cth: ac-fotohalf" style="font-family:monospace;font-size:12px">
+        </div>
+
+        <div class="form-row">
+          <label>Nama Tampilan <span style="color:var(--danger)">*</span></label>
+          <input type="text" id="pkg-label" placeholder="cth: Foto Only (½ Hari)">
+        </div>
+
+        <div class="form-row" id="row-pkg-type">
+          <label>Jenis Paket <span style="color:var(--danger)">*</span></label>
+          <select id="pkg-type" onchange="pkgTypeChange()">
+            <option value="fs">Full Service (Harga dari tabel tiers)</option>
+            <option value="alc_factor">À La Carte Berbasis Faktor (Dari faktor cetak/desain)</option>
+            <option value="alc_flat" selected>À La Carte Harga Flat (Tetap per proyek)</option>
+          </select>
+        </div>
+
+        <div id="pkg-dynamic-fields">
+          
+          <div class="form-row" id="row-calc-key" style="display:none">
+            <label>Calc Key <span style="font-size:10px;color:var(--text3);font-weight:400">(Key untuk data Master FS/ALC)</span></label>
+            <input type="text" id="pkg-calc-key" placeholder="cth: handy, ebook, desain">
+          </div>
+
+          <div class="form-row" id="row-by-siswa" style="display:none">
+            <label style="display:flex;align-items:center;gap:6px;font-weight:normal;margin-bottom:0">
+              <input type="checkbox" id="pkg-by-siswa">
+              Apakah paket ini dihitung "Per Siswa"?
+            </label>
+          </div>
+
+          <div class="form-row" id="row-min-buku" style="display:none;margin-top:12px">
+            <label>Minimal Harga per Buku (Rp) <span style="font-size:10px;color:var(--text3);font-weight:400">(Khusus desain/cetak only)</span></label>
+            <input type="number" id="pkg-min-buku" placeholder="0" min="0">
+          </div>
+
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px" id="row-flat-price">
+            <div class="form-row">
+              <label>Harga <span id="label-min-price">Min</span> (Rp) <span style="color:var(--danger)">*</span></label>
+              <input type="number" id="pkg-min" placeholder="3500000" min="0">
+            </div>
+            <div class="form-row" id="col-max-price">
+              <label>Harga Maks (Rp)
+                <span style="font-size:10px;color:var(--text3);font-weight:400"> (kosong = sama)</span>
+              </label>
+              <input type="number" id="pkg-max" placeholder="5000000" min="0">
+            </div>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <label>Deskripsi <span style="color:var(--text3);font-size:10px;font-weight:400">(opsional)</span></label>
+          <input type="text" id="pkg-desc" placeholder="cth: Sesi foto max ~75 siswa...">
+        </div>
+
+        <div class="form-row" id="row-pkg-order">
+          <label>Urutan Tampil</label>
+          <input type="number" id="pkg-order" value="0" min="0" style="width:80px">
+        </div>
+
+        <div style="display:flex;gap:8px;margin-top:14px">
+          <button class="btn bp bsm" onclick="pkgSave()" style="flex:1">💾 Simpan</button>
+          <button class="btn bs bsm" onclick="pkgCancelForm()">Batal</button>
+        </div>
+        <div id="pkg-status" style="font-size:11px;color:var(--success);margin-top:8px;display:none">✓ Tersimpan</div>
+      </div>
+
+      <!-- Placeholder saat belum pilih -->
+      <div id="pkg-form-placeholder" style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:180px;background:var(--surface2);border-radius:10px;border:1px dashed var(--border2);color:var(--text3)">
+        <div style="font-size:28px;margin-bottom:8px">📝</div>
+        <div style="font-size:13px;font-weight:500">Pilih paket untuk edit</div>
+        <div style="font-size:11px;margin-top:4px">atau klik "+ Tambah Paket Baru"</div>
+      </div>
+
+    </div><!-- end grid -->
+  </div>
+
 
   <!-- ===== ADD-ON SECTION ===== -->
   <div id="addon-section" style="margin-bottom:30px">
@@ -596,47 +714,7 @@ include __DIR__ . '/../includes/header.php';
 
   <!-- ===== GRADUATION SECTION ===== -->
   <div id="graduation-section">
-  <!-- Card 1: Edit Harga Paket Utama -->
-  <div class="card mb16">
-    <div class="ph"><div class="pt" style="color:var(--grad)">Graduation Package — Paket Utama</div><div class="ps">Dokumentasi wisuda — foto, video, photobooth &amp; glamation 360°</div></div>
-    <div class="note grad mb16">✏️ Klik angka harga mana saja untuk edit langsung. Semua harga juga bisa diubah di menu <b>Edit Semua Harga</b>.</div>
-
-    <div class="note mb12">Kelola paket utama — edit, tambah item baru, atau hapus. Perubahan langsung tersimpan ke database.</div>    
-    <!-- Daftar Paket Items -->
-    <div id="grad-pkg-items" style="margin-bottom:16px">
-      <?php foreach ($gradPackages as $pkg): ?>
-      <div class="grad-pkg-item" data-id="<?= htmlspecialchars($pkg['id']) ?>" data-name="<?= htmlspecialchars($pkg['name']) ?>" data-price="<?= htmlspecialchars($pkg['price']) ?>" data-desc="<?= htmlspecialchars($pkg['desc'] ?? '') ?>" style="margin-bottom:8px;padding:10px;background:#fafafa;border-radius:4px;border:1px solid var(--border);display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center">
-        <div style="font-size:13px;font-weight:500"><?= htmlspecialchars($pkg['name']) ?></div>
-        <div class="gp-display" style="font-size:13px;font-weight:600;color:var(--accent);min-width:120px;text-align:right;cursor:pointer;padding:4px 0" onclick="editGradPkg('<?= htmlspecialchars($pkg['id']) ?>')">Rp <?= number_format($pkg['price'], 0, ',', '.') ?></div>
-        <button class="btn bs bsm btn-edit-price" data-id="<?= htmlspecialchars($pkg['id']) ?>" style="padding:4px 8px;font-size:11px;cursor:pointer">✏️</button>
-        <button class="btn bs bsm btn-delete" data-id="<?= htmlspecialchars($pkg['id']) ?>" style="padding:4px 8px;font-size:11px;cursor:pointer">✕</button>
-      </div>
-      <?php endforeach; ?>
-    </div>
-
-    <!-- Add New Package Item -->
-    <div style="padding:12px;background:#f9f9f9;border-radius:4px;border:1px solid var(--border);margin-bottom:16px">
-      <div style="font-size:12px;font-weight:600;color:var(--text2);margin-bottom:8px">Tambah Paket Baru</div>
-      <div style="display:grid;grid-template-columns:1fr 150px 80px;gap:8px;margin-bottom:8px;align-items:center">
-        <input type="text" id="new-grad-pkg-name" placeholder="Nama paket (cth: Paket Promo, Paket VIP)" style="border:1px solid var(--border);padding:6px 8px;border-radius:3px;font-size:12px">
-        <input type="number" id="new-grad-pkg-price" placeholder="Harga Rp" style="border:1px solid var(--border);padding:6px 8px;border-radius:3px;font-size:12px">
-        <button class="btn bsm" style="background:#2a6b8a;color:white;border:none;cursor:pointer" onclick="addGradPkg()">+ Tambah</button>
-      </div>
-      <div style="margin-bottom:8px">
-        <label style="font-size:11px;font-weight:600;color:var(--text3);display:block;margin-bottom:4px">Deskripsi (opsional)</label>
-        <textarea id="new-grad-pkg-desc" placeholder="Deskripsi singkat paket..." style="width:100%;min-height:50px;border:1px solid var(--border);padding:6px 8px;border-radius:3px;font-size:12px;font-family:inherit"></textarea>
-      </div>
-    </div>
-
-    <!-- Control Buttons -->
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <button class="btn bgrad bsm" onclick="saveGrad()">Simpan Harga Paket</button>
-      <button class="btn bs bsm" onclick="resetGrad()">Reset ke Default</button>
-      <span id="grad-pkg-status" style="font-size:12px;color:var(--success);display:none">✓ Tersimpan</span>
-    </div>
-  </div>
-
-  <!-- Card 2: Edit Add-on & Cetak Foto -->
+  <!-- Card 1: Edit Add-on & Cetak Foto -->
   <div class="card mb16">
     <div class="ph"><div class="pt" style="color:var(--grad)">Edit Add-on &amp; Cetak Foto</div><div class="ps">Kelola add-on ekstra dan harga cetak foto satuan</div></div>
     <div class="note mb12">Kelola add-on dan cetak foto — edit harga, tambah item baru, atau hapus.</div>
@@ -4711,13 +4789,13 @@ async function saveAllAddons() {
                 statusEl.style.display = 'inline';
                 setTimeout(() => statusEl.style.display = 'none', 3000);
             }
-            showToast('✓ Semua perubahan add-on tersimpan ke database', 'success');
+            showToast('\u2713 Semua perubahan add-on tersimpan ke database', 'success');
         } else {
-            showToast('✕ ' + (data.message || 'Gagal menyimpan add-on'), 'error');
+            showToast('\u2715 ' + (data.message || 'Gagal menyimpan add-on'), 'error');
         }
     } catch (err) {
         console.error('Error:', err);
-        showToast('✕ Error: ' + err.message, 'error');
+        showToast('\u2715 Error: ' + err.message, 'error');
     }
 }
 
@@ -4776,9 +4854,7 @@ async function resetAddons() {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             credentials: 'include',
-            body: JSON.stringify({
-                operation: 'reset_addons'
-            })
+            body: JSON.stringify({ operation: 'reset_addons' })
         });
         
         const text = await response.text();
@@ -4794,12 +4870,346 @@ async function resetAddons() {
         showToast('✕ Error: ' + err.message, 'error');
     }
 }
+
 function toggleFabMenu() {
   const fab = document.getElementById('mobile-fab');
   const menu = document.getElementById('fab-menu');
   fab.classList.toggle('active');
   menu.classList.toggle('active');
 }
+
+// ============================================================
+// MANAJEMEN PAKET (FS, ALC Factor, ALC Flat) — CRUD (inline)
+// ============================================================
+const MASTER_API_URL = '/api/master-data.php';
+
+function pkgTypeChange() {
+  const cat = document.getElementById('pkg-cat-filter').value;
+  if (cat === 'graduation') {
+    document.getElementById('row-pkg-type').style.display = 'none';
+    document.getElementById('row-pkg-code').style.display = 'block';
+    document.getElementById('row-calc-key').style.display = 'none';
+    document.getElementById('row-by-siswa').style.display = 'none';
+    document.getElementById('row-min-buku').style.display = 'none';
+    document.getElementById('row-flat-price').style.display = 'grid';
+    document.getElementById('col-max-price').style.display = 'none';
+    document.getElementById('label-min-price').textContent = '';
+    document.getElementById('row-pkg-order').style.display = 'none';
+    return;
+  }
+
+  document.getElementById('row-pkg-type').style.display = 'block';
+  document.getElementById('row-pkg-code').style.display = 'block';
+  document.getElementById('row-pkg-order').style.display = 'block';
+  document.getElementById('col-max-price').style.display = 'block';
+  document.getElementById('label-min-price').textContent = 'Min';
+
+  const type = document.getElementById('pkg-type').value;
+  document.getElementById('row-calc-key').style.display = (type === 'fs' || type === 'alc_factor') ? 'block' : 'none';
+  document.getElementById('row-by-siswa').style.display = (type === 'fs' || type === 'alc_factor') ? 'block' : 'none';
+  document.getElementById('row-min-buku').style.display = (type === 'alc_factor') ? 'block' : 'none';
+  document.getElementById('row-flat-price').style.display = (type === 'alc_flat') ? 'grid' : 'none';
+}
+
+function pkgSelect(row) {
+  document.querySelectorAll('.pkg-item').forEach(el => {
+    el.style.background  = 'var(--surface2)';
+    el.style.borderColor = 'var(--border)';
+    el.style.boxShadow   = 'none';
+  });
+  const active = document.querySelector(`.pkg-item[data-id="${row.id}"]`);
+  if (active) {
+    active.style.background  = 'var(--accent-light)';
+    active.style.borderColor = 'var(--accent)';
+    active.style.boxShadow   = '0 0 0 2px var(--accent-light)';
+  }
+
+  document.getElementById('pkg-form-title').textContent = '✏️ Edit Paket';
+  document.getElementById('pkg-id').value    = row.id;
+  document.getElementById('pkg-code').value  = row.package_code || row.id; // Graduation uses id as code
+  document.getElementById('pkg-code').readOnly = true;
+  document.getElementById('pkg-label').value = row.label;
+  
+  document.getElementById('pkg-type').value = row.package_type || 'alc_flat';
+  document.getElementById('pkg-calc-key').value = row.calc_key || '';
+  document.getElementById('pkg-by-siswa').checked = parseInt(row.by_siswa) === 1;
+  document.getElementById('pkg-min-buku').value = row.min_per_buku || '';
+  
+  document.getElementById('pkg-min').value   = row.price_min;
+  document.getElementById('pkg-max').value   = row.price_max != row.price_min ? row.price_max : '';
+  
+  document.getElementById('pkg-desc').value  = row.description || '';
+  document.getElementById('pkg-order').value = row.display_order || 0;
+
+  pkgTypeChange();
+
+  document.getElementById('pkg-status').style.display = 'none';
+  document.getElementById('pkg-form-placeholder').style.display = 'none';
+  document.getElementById('pkg-form-panel').style.display = 'block';
+}
+
+function pkgNewForm() {
+  document.querySelectorAll('.pkg-item').forEach(el => {
+    el.style.background  = 'var(--surface2)';
+    el.style.borderColor = 'var(--border)';
+    el.style.boxShadow   = 'none';
+  });
+
+  const cat = document.getElementById('pkg-cat-filter').value;
+
+  document.getElementById('pkg-form-title').textContent = '➕ Tambah Paket Baru';
+  document.getElementById('pkg-id').value    = '';
+  document.getElementById('pkg-code').value  = '';
+  document.getElementById('pkg-code').readOnly = cat === 'graduation'; // auto-generated for graduation
+  document.getElementById('pkg-label').value = '';
+  
+  document.getElementById('pkg-type').value = 'alc_flat';
+  document.getElementById('pkg-calc-key').value = '';
+  document.getElementById('pkg-by-siswa').checked = false;
+  document.getElementById('pkg-min-buku').value = '';
+  
+  document.getElementById('pkg-min').value   = '';
+  document.getElementById('pkg-max').value   = '';
+  
+  document.getElementById('pkg-desc').value  = '';
+  document.getElementById('pkg-order').value = '0';
+
+  if (cat === 'graduation') {
+    document.getElementById('pkg-code').placeholder = '(Otomatis digenerate)';
+  } else {
+    document.getElementById('pkg-code').placeholder = 'cth: ac-fotohalf';
+  }
+
+  pkgTypeChange();
+
+  document.getElementById('pkg-status').style.display = 'none';
+  document.getElementById('pkg-form-placeholder').style.display = 'none';
+  document.getElementById('pkg-form-panel').style.display = 'block';
+  
+  if (cat !== 'graduation') {
+      document.getElementById('pkg-code').focus();
+  } else {
+      document.getElementById('pkg-label').focus();
+  }
+}
+
+function pkgCancelForm() {
+  document.getElementById('pkg-form-panel').style.display = 'none';
+  document.getElementById('pkg-form-placeholder').style.display = 'flex';
+  document.querySelectorAll('.pkg-item').forEach(el => {
+    el.style.background  = 'var(--surface2)';
+    el.style.borderColor = 'var(--border)';
+    el.style.boxShadow   = 'none';
+  });
+}
+
+async function pkgSave() {
+  const cat    = document.getElementById('pkg-cat-filter').value;
+  const id     = document.getElementById('pkg-id').value.trim();
+  const code   = document.getElementById('pkg-code').value.trim();
+  const label  = document.getElementById('pkg-label').value.trim();
+  const type   = document.getElementById('pkg-type').value;
+  const calcKey= document.getElementById('pkg-calc-key').value.trim();
+  const bySiswa= document.getElementById('pkg-by-siswa').checked ? 1 : 0;
+  const minBuku= parseInt(document.getElementById('pkg-min-buku').value) || 0;
+  
+  const minVal = parseInt(document.getElementById('pkg-min').value) || 0;
+  const maxRaw = document.getElementById('pkg-max').value.trim();
+  const maxVal = maxRaw !== '' ? (parseInt(maxRaw) || minVal) : minVal;
+  
+  const desc   = document.getElementById('pkg-desc').value.trim();
+  const order  = parseInt(document.getElementById('pkg-order').value) || 0;
+
+  if (!label) { showToast('Nama tampilan wajib diisi', 'error'); return; }
+
+  // LOGIC GRADUATION
+  if (cat === 'graduation') {
+    if (minVal <= 0) { showToast('Harga paket wajib diisi (> 0)', 'error'); return; }
+    
+    let pkgs = GRAD.packages ? [...GRAD.packages] : [];
+    let pkgId = id || ('gp_' + Date.now());
+    
+    const existingIndex = pkgs.findIndex(p => p.id === pkgId);
+    const existingNameIndex = pkgs.findIndex(p => p.name.toLowerCase() === label.toLowerCase());
+    
+    if (!id && existingNameIndex >= 0) {
+        showToast('Paket dengan nama "' + label + '" sudah ada', 'error'); return;
+    }
+
+    const newPkg = { id: pkgId, name: label, price: minVal, desc: desc, color: '' };
+    
+    if (existingIndex >= 0 && id) {
+        pkgs[existingIndex] = newPkg;
+    } else {
+        pkgs.push(newPkg);
+    }
+    
+    const success = await updateMasterData('graduation', { ...GRAD, packages: pkgs });
+    if (success) {
+        showToast('✓ Paket Graduation tersimpan', 'success');
+        GRAD.packages = pkgs;
+        pkgRenderList();
+        if (!id) pkgCancelForm();
+        if (typeof renderGraduation === 'function') renderGraduation();
+        if (typeof kalcUpdate === 'function') kalcUpdate();
+    }
+    return;
+  }
+
+  // LOGIC BUKU TAHUNAN
+  if (!code)  { showToast('Kode paket wajib diisi', 'error'); return; }
+  if (type === 'alc_flat' && minVal <= 0){ showToast('Harga minimum wajib diisi (> 0)', 'error'); return; }
+  if ((type === 'fs' || type === 'alc_factor') && !calcKey) { showToast('Calc Key wajib diisi untuk paket ini', 'error'); return; }
+
+  const payload = {
+    type: 'alacarte_config_save',
+    data: { 
+      id: id ? parseInt(id) : 0, 
+      package_code: code, 
+      label, 
+      package_type: type,
+      calc_key: calcKey,
+      by_siswa: bySiswa,
+      min_per_buku: minBuku,
+      price_min: minVal, 
+      price_max: maxVal, 
+      description: desc, 
+      display_order: order 
+    }
+  };
+
+  try {
+    const res  = await fetch(MASTER_API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify(payload) });
+    const json = await res.json();
+    if (json.success) {
+      const st = document.getElementById('pkg-status');
+      st.style.display = 'block';
+      setTimeout(() => st.style.display = 'none', 3000);
+      showToast('✓ Paket berhasil disimpan', 'success');
+      DB_SETTINGS['alc_cfg'] = json.data;
+      pkgRenderList();
+      if (!id) pkgCancelForm();
+    } else {
+      showToast('✕ ' + (json.error || 'Gagal menyimpan'), 'error');
+    }
+  } catch (e) {
+    showToast('✕ Error: ' + e.message, 'error');
+  }
+}
+
+async function pkgDelete(id, label) {
+  const cat = document.getElementById('pkg-cat-filter').value;
+  if (!confirm(`Hapus paket "${label}"?\nData tidak bisa dikembalikan.`)) return;
+  
+  if (cat === 'graduation') {
+     let pkgs = GRAD.packages ? [...GRAD.packages] : [];
+     pkgs = pkgs.filter(p => p.id !== id);
+     const success = await updateMasterData('graduation', { ...GRAD, packages: pkgs });
+     if (success) {
+         showToast('✓ Paket dihapus', 'success');
+         GRAD.packages = pkgs;
+         pkgRenderList();
+         pkgCancelForm();
+         if (typeof renderGraduation === 'function') renderGraduation();
+         if (typeof kalcUpdate === 'function') kalcUpdate();
+     }
+     return;
+  }
+
+  try {
+    const res  = await fetch(MASTER_API_URL, { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ type:'alacarte_config_delete', data:{ id } }) });
+    const json = await res.json();
+    if (json.success) {
+      showToast('✓ Paket dihapus', 'success');
+      pkgRenderList(json.data);
+      pkgCancelForm();
+    } else {
+      showToast('✕ ' + (json.error || 'Gagal menghapus'), 'error');
+    }
+  } catch (e) {
+    showToast('✕ Error: ' + e.message, 'error');
+  }
+}
+
+function pkgRenderList(providedRows = null) {
+  const container = document.getElementById('pkg-list-container');
+  const cat = document.getElementById('pkg-cat-filter').value;
+  
+  let rows = [];
+  if (providedRows) {
+     rows = providedRows;
+  } else {
+     if (cat === 'graduation') {
+         rows = (GRAD && GRAD.packages) ? GRAD.packages.map(p => ({
+             id: p.id,
+             package_code: p.id,
+             label: p.name,
+             package_type: 'graduation',
+             price_min: p.price,
+             price_max: p.price,
+             description: p.desc
+         })) : [];
+     } else {
+         rows = DB_SETTINGS['alc_cfg'] || [];
+     }
+  }
+
+  if (!rows || rows.length === 0) {
+    container.innerHTML = '<div style="color:var(--text3);font-size:13px;padding:16px 0">Belum ada data. Tambah paket baru.</div>';
+    return;
+  }
+  const fmt = n => 'Rp ' + parseInt(n).toLocaleString('id-ID');
+  container.innerHTML = rows.map(row => {
+    let typeBadge = '';
+    if (row.package_type === 'graduation') typeBadge = 'Graduation';
+    else if (row.package_type === 'fs') typeBadge = 'Full Service';
+    else if (row.package_type === 'alc_factor') typeBadge = 'ALC Factor';
+    else typeBadge = 'ALC Flat';
+    
+    let priceStr = '';
+    if (row.package_type === 'alc_flat' || row.package_type === 'graduation') {
+      priceStr = ' • ' + fmt(row.price_min) + (row.price_max != row.price_min ? ' – ' + fmt(row.price_max) : '');
+    }
+    
+    let deleteIdArg = row.package_type === 'graduation' ? `'${row.id}'` : row.id;
+
+    return `
+    <div class="pkg-item" data-id="${row.id}"
+         onclick="pkgSelect(${JSON.stringify(row).replace(/"/g,'&quot;')})"
+         style="display:flex;justify-content:space-between;align-items:center;padding:10px 12px;margin-bottom:6px;border-radius:8px;border:1px solid var(--border);background:var(--surface2);cursor:pointer;transition:all .15s;gap:8px">
+      <div style="min-width:0;flex:1">
+        <div style="font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${row.label}</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:1px">
+          <span style="font-weight:600;color:var(--accent);text-transform:uppercase;font-size:10px">${typeBadge}</span>${priceStr}
+        </div>
+      </div>
+      <button class="btn bs bsm" onclick="event.stopPropagation();pkgDelete(${deleteIdArg},'${row.label.replace(/'/g,"\\'")}')"
+              style="flex-shrink:0;padding:3px 8px;color:var(--danger);border-color:var(--danger);background:var(--danger-bg)">✕</button>
+    </div>
+  `}).join('');
+
+  // Pasang hover style
+  document.querySelectorAll('.pkg-item').forEach(el => {
+    el.addEventListener('mouseenter', () => { if (el.style.borderColor !== 'var(--accent)') el.style.background = 'var(--accent-light)'; });
+    el.addEventListener('mouseleave', () => { if (el.style.borderColor !== 'var(--accent)') el.style.background = 'var(--surface2)'; });
+  });
+
+  // Update ALC_CFG di kalkulator (jika ada) dan kategori Buku Tahunan
+  if (cat === 'bukutahunan' && typeof DB_SETTINGS !== 'undefined' && typeof buildALCCFG === 'function') {
+    DB_SETTINGS['alc_cfg'] = rows;
+    ALC_CFG = buildALCCFG();
+    if (typeof buildTypePaketDropdown === 'function') buildTypePaketDropdown();
+    if (typeof kalcUpdate === 'function') kalcUpdate();
+  }
+}
+
+// Render saat pertama kali load
+document.addEventListener('DOMContentLoaded', () => {
+  setTimeout(() => {
+     if (typeof pkgRenderList === 'function') pkgRenderList();
+  }, 1500); // tunggu data master ter-load
+});
 </script>
+
 </body>
 </html>

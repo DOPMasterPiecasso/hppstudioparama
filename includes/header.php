@@ -56,6 +56,18 @@ try {
         // Add-ons: tetap dari MySQL via MySQLMasterData
         $addons = $masterData->getAddons();
         $allSettings['addon_data'] = json_encode($addons ?: []);
+
+        // 2. Fetch Packages Config (pengganti alacarte_config)
+        try {
+            $stmtAlc = $pdo->query(
+                "SELECT id, package_code, label, package_type, calc_key, by_siswa, price_min, price_max, min_per_buku, description, display_order
+                 FROM packages_config WHERE active = 1 ORDER BY display_order ASC, id ASC"
+            );
+            $allSettings['alc_cfg'] = $stmtAlc->fetchAll(PDO::FETCH_ASSOC);
+        } catch (Exception $e) {
+            $allSettings['alc_cfg'] = [];
+            error_log("Gagal memuat packages_config: " . $e->getMessage());
+        }
     } else {
         throw new Exception('MySQL connection not available');
     }
