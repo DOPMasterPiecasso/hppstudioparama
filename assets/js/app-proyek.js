@@ -98,6 +98,17 @@ function getPenawaranByMonth(mk){
 }
 
 function renderProyek(){
+  // Defensive check: ensure penawaranList exists
+  if (typeof penawaranList === 'undefined') {
+    console.warn('renderProyek called before penawaranList initialized');
+    penawaranList = [];
+  }
+  
+  // Ensure isManager is defined
+  if (typeof isManager === 'undefined') {
+    window.isManager = (typeof currentUser !== 'undefined' && currentUser?.isManager) || false;
+  }
+  
   initBulanSelector();
   const filter=document.getElementById('pw-filter')?.value||'all';
   const sort=document.getElementById('pw-sort')?.value||'newest';

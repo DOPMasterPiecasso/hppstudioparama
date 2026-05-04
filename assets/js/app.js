@@ -6,109 +6,82 @@
 // ============================================================
 
 const currentUser = typeof PHP_USER !== 'undefined' ? PHP_USER : null;
-
-// ============================================================
-// API Configuration
-// ============================================================
+const isManager = currentUser?.isManager;
+const isAdmin = currentUser?.isAdmin;
+const STAFF_PAGES = ['kalkulator','proyek'];
 const API_BASE = '/api';
+if (typeof MASTER_API === 'undefined') {
+  window.MASTER_API = '/api/master-data.php';
+}
 
 // ============================================================
 // STATE — all prices live here, editable
 // ============================================================
+
+// 1. Defaults (Fallbacks)
 const DEF_OH = {total:73586000,marketing:15000000,creative:8000000,designer:20000000,pm:8000000,sosmed:7000000,freelance:4000000,operasional:11586000};
-let OH = DB_SETTINGS['oh'] ? (typeof DB_SETTINGS['oh'] === 'string' ? JSON.parse(DB_SETTINGS['oh']) : DB_SETTINGS['oh']) : {...DEF_OH};
+const DEF_CETAK_BASE = [
+  {lo:30,hi:50,label:'30–50 siswa',pages:{30:92000,45:102000,60:115000,65:127000,75:140000,80:140000,90:152000,100:165000,110:176000,120:176000,135:176000,150:176000,160:176000}},
+  {lo:51,hi:75,label:'51–75 siswa',pages:{30:80000,45:90000,60:100000,65:110000,75:122000,80:122000,90:134000,100:145000,110:158000,120:162000,135:165000,150:168000,160:170000}},
+  {lo:76,hi:100,label:'76–100 siswa',pages:{30:70000,45:80000,60:90000,65:98000,75:108000,80:108000,90:118000,100:130000,110:140000,120:145000,135:150000,150:155000,160:160000}},
+  {lo:101,hi:125,label:'101–125 siswa',pages:{30:62000,45:72000,60:82000,65:88000,75:97000,80:97000,90:106000,100:116000,110:126000,120:130000,135:135000,150:140000,160:145000}},
+  {lo:126,hi:150,label:'126–150 siswa',pages:{30:58000,45:68000,60:76000,65:82000,75:90000,80:90000,90:98000,100:108000,110:118000,120:122000,135:127000,150:132000,160:137000}},
+  {lo:151,hi:175,label:'151–175 siswa',pages:{30:54000,45:63000,60:71000,65:76000,75:84000,80:84000,90:91000,100:100000,110:109000,120:113000,135:118000,150:123000,160:128000}},
+  {lo:176,hi:200,label:'176–200 siswa',pages:{30:50000,45:59000,60:66000,65:71000,75:78000,80:78000,90:85000,100:93000,110:101000,120:105000,135:110000,150:115000,160:119000}},
+  {lo:201,hi:225,label:'201–225 siswa',pages:{30:47000,45:55000,60:62000,65:66000,75:73000,80:73000,90:79000,100:87000,110:95000,120:98000,135:103000,150:107000,160:111000}},
+  {lo:226,hi:250,label:'226–250 siswa',pages:{30:44000,45:52000,60:58000,65:62000,75:68000,80:68000,90:74000,100:81000,110:88000,120:92000,135:96000,150:100000,160:104000}},
+  {lo:251,hi:275,label:'251–275 siswa',pages:{30:41000,45:49000,60:55000,65:58000,75:64000,80:64000,90:70000,100:76000,110:83000,120:86000,135:90000,150:94000,160:98000}},
+  {lo:276,hi:300,label:'276–300 siswa',pages:{30:39000,45:46000,60:52000,65:55000,75:60000,80:60000,90:66000,100:72000,110:78000,120:81000,135:85000,150:89000,160:92000}},
+  {lo:301,hi:325,label:'301–325 siswa',pages:{30:37000,45:44000,60:49000,65:52000,75:57000,80:57000,90:62000,100:68000,110:74000,120:77000,135:80000,150:84000,160:87000}},
+  {lo:326,hi:350,label:'326–350 siswa',pages:{30:35000,45:42000,60:47000,65:50000,75:54000,80:54000,90:59000,100:65000,110:70000,120:73000,135:76000,150:80000,160:83000}},
+  {lo:351,hi:375,label:'351–375 siswa',pages:{30:33000,45:40000,60:45000,65:47000,75:52000,80:52000,90:56000,100:62000,110:67000,120:70000,135:73000,150:76000,160:79000}},
+  {lo:376,hi:400,label:'376–400 siswa',pages:{30:31000,45:38000,60:42000,65:45000,75:49000,80:49000,90:53000,100:58000,110:63000,120:66000,135:69000,150:72000,160:75000}},
+  {lo:401,hi:425,label:'401–425 siswa',pages:{30:30000,45:36000,60:40000,65:42000,75:46000,80:46000,90:50000,100:55000,110:60000,120:62000,135:65000,150:68000,160:71000}},
+  {lo:426,hi:450,label:'426–450 siswa',pages:{30:28000,45:34000,60:38000,65:40000,75:44000,80:44000,90:48000,100:52000,110:57000,120:59000,135:62000,150:65000,160:67000}},
+  {lo:451,hi:475,label:'451–475 siswa',pages:{30:27000,45:32000,60:36000,65:38000,75:42000,80:42000,90:45000,100:50000,110:54000,120:56000,135:59000,150:62000,160:64000}},
+  {lo:476,hi:500,label:'476–500 siswa',pages:{30:26000,45:31000,60:34000,65:36000,75:40000,80:40000,90:43000,100:47000,110:51000,120:53000,135:56000,150:59000,160:61000}},
+];
 
-console.log('=== app.js OH INITIALIZATION ===');
-console.log('Initial OH before cleanup:', JSON.parse(JSON.stringify(OH)));
+// 2. Main State (Initialized from DB_SETTINGS or Defaults)
+// No more JSON.parse here because header.php now passes raw objects
+let OH = DB_SETTINGS['oh'] || {...DEF_OH};
+let CETAK_F = DB_SETTINGS['cetak_f'] || {handy:1.0, minimal:0.95, large:1.15};
+let ALC_F = DB_SETTINGS['alc_f'] || {ebook:0.72, editcetak:0.62, desain:0.22, cetakonly:0.30};
+let FS = DB_SETTINGS['fs'] || {
+  handy: [[30,50,465000,30],[51,75,415000,30],[76,100,370000,45],[101,125,350000,55],[126,150,335000,60],[151,175,315000,65],[176,200,295000,75],[201,225,260000,80],[226,250,250000,80],[251,275,240000,90],[276,300,230000,100],[300,325,220000,100],[326,350,210000,120],[351,375,200000,120],[376,400,190000,135],[401,425,185000,135],[426,450,165000,145],[451,475,175000,150],[476,500,150000,160]],
+  minimal: [[30,50,450000,30],[51,75,400000,30],[76,100,355000,45],[101,125,335000,55],[126,150,320000,60],[151,175,300000,65],[176,200,280000,75],[201,225,245000,80],[226,250,235000,80],[251,275,240000,90],[276,300,215000,100],[300,325,205000,100],[326,350,195000,120],[351,375,185000,120],[376,400,180000,135],[401,425,170000,135],[426,450,160000,145],[451,475,150000,150],[476,500,140000,160]],
+  large: [[30,50,480000,30],[51,75,430000,30],[76,100,405000,45],[101,125,365000,55],[126,150,350000,60],[151,175,330000,65],[176,200,310000,75],[201,225,275000,80],[226,250,265000,80],[251,275,255000,90],[276,300,245000,100],[300,325,235000,100],[326,350,225000,120],[351,375,215000,120],[376,400,205000,135],[401,425,195000,135],[426,450,175000,145],[451,475,165000,150],[476,500,155000,160]]
+};
+let ADDON_DATA = DB_SETTINGS['addon_data'] || {
+  finishing: [], kertas: [], halaman: [], video: [], pkg1: [], pkg2: []
+};
+let GRAD = DB_SETTINGS['grad_packages'] || {
+  packages: [], addons: [], cetak: []
+};
+let CETAK_BASE = DB_SETTINGS['cetak_base'] || DEF_CETAK_BASE.map(r=>({...r, pages:{...r.pages}}));
 
-// Ensure OH has proper structure and calculate total if missing
-if (!OH.total || OH.total === 0) {
-    OH.total = (OH.designer||0) + (OH.marketing||0) + (OH.creative||0) + (OH.pm||0) + 
-               (OH.sosmed||0) + (OH.freelance||0) + (OH.operasional||0) + (OH.ops||0);
+let ALC_CFG = {}; // Initialized via buildALCCFG()
+let BONUS_FASILITAS = { fullservice: [], graduation: [], alacarte: [] };
+let PT = []; // Payment Terms
+let penawaranList = [];
+
+// ============================================================
+// INITIALIZATION LOGIC
+// ============================================================
+
+function initializeOH() {
+    // Ensure all fields are numeric
+    Object.keys(OH).forEach(key => {
+        OH[key] = typeof OH[key] === 'number' ? OH[key] : parseInt(OH[key]) || 0;
+    });
+
+    // Calculate total if missing or zero
+    if (!OH.total || OH.total === 0) {
+        OH.total = (OH.designer||0) + (OH.marketing||0) + (OH.creative||0) + (OH.pm||0) + 
+                   (OH.sosmed||0) + (OH.freelance||0) + (OH.operasional||0) + (OH.ops||0);
+    }
 }
-// Ensure all fields are numeric
-Object.keys(OH).forEach(key => {
-    OH[key] = typeof OH[key] === 'number' ? OH[key] : parseInt(OH[key]) || 0;
-});
 
-console.log('OH after numeric conversion:', JSON.parse(JSON.stringify(OH)));
-
-// Ensure operasional has a value
-if (!OH.operasional || OH.operasional === 0) {
-    OH.operasional = OH.ops || DEF_OH.operasional || 0;
-}
-
-console.log('OH final:', JSON.parse(JSON.stringify(OH)));
-console.log('OH.operasional final value:', OH.operasional, '(type:', typeof OH.operasional, ')');
-
-let CETAK_F = DB_SETTINGS['cetak_f'] ? (typeof DB_SETTINGS['cetak_f'] === 'string' ? JSON.parse(DB_SETTINGS['cetak_f']) : DB_SETTINGS['cetak_f']) : {handy:1.0, minimal:0.95, large:1.15};
-let ALC_F = DB_SETTINGS['alc_f'] ? (typeof DB_SETTINGS['alc_f'] === 'string' ? JSON.parse(DB_SETTINGS['alc_f']) : DB_SETTINGS['alc_f']) : {ebook:0.72, editcetak:0.62, desain:0.22, cetakonly:0.30};
-
-let FS = DB_SETTINGS['fs'] ? (typeof DB_SETTINGS['fs'] === 'string' ? JSON.parse(DB_SETTINGS['fs']) : DB_SETTINGS['fs']) : {
-  handy:[[30,50,465000,30],[51,75,415000,30],[76,100,370000,45],[101,125,350000,55],[126,150,335000,60],[151,175,315000,65],[176,200,295000,75],[201,225,260000,80],[226,250,250000,80],[251,275,240000,90],[276,300,230000,100],[300,325,220000,100],[326,350,210000,120],[351,375,200000,120],[376,400,190000,135],[401,425,185000,135],[426,450,165000,145],[451,475,175000,150],[476,500,150000,160]],
-  minimal:[[30,50,450000,30],[51,75,400000,30],[76,100,355000,45],[101,125,335000,55],[126,150,320000,60],[151,175,300000,65],[176,200,280000,75],[201,225,245000,80],[226,250,235000,80],[251,275,240000,90],[276,300,215000,100],[300,325,205000,100],[326,350,195000,120],[351,375,185000,120],[376,400,180000,135],[401,425,170000,135],[426,450,160000,145],[451,475,150000,150],[476,500,140000,160]],
-  large:[[30,50,480000,30],[51,75,430000,30],[76,100,405000,45],[101,125,365000,55],[126,150,350000,60],[151,175,330000,65],[176,200,310000,75],[201,225,275000,80],[226,250,265000,80],[251,275,255000,90],[276,300,245000,100],[300,325,235000,100],[326,350,225000,120],[351,375,215000,120],[376,400,205000,135],[401,425,195000,135],[426,450,175000,145],[451,475,165000,150],[476,500,155000,160]]
-};
-
-let ADDON_DATA = DB_SETTINGS['addon_data'] ? (typeof DB_SETTINGS['addon_data'] === 'string' ? JSON.parse(DB_SETTINGS['addon_data']) : DB_SETTINGS['addon_data']) : {
-  finishing:[
-    {id:'binding',name:'Binding Paku/Jepang/Spiral',type:'flat',tiers:[[25,75,50000],[76,150,35000],[151,9999,30000]]},
-    {id:'popup',name:'Pop Up 2D',type:'flat',tiers:[[25,75,55000],[76,150,40000],[151,9999,35000]]},
-    {id:'tunnel',name:'Cover Tunnel',type:'flat',tiers:[[25,75,75000],[76,150,60000],[151,9999,50000]]},
-    {id:'klip',name:'Cover Klip/Cetekan',type:'flat',tiers:[[25,75,15000],[76,150,10000],[151,9999,8000]]},
-    {id:'covbahan',name:'Cover Bahan',type:'flat',tiers:[[25,75,55000],[76,150,40000],[151,9999,35000]]},
-  ],
-  kertas:[
-    {id:'ivory',name:'Ivory Paper',type:'per_hal',tiers:[[25,50,450],[51,100,250],[101,150,200],[151,9999,150]]},
-    {id:'laminasi',name:'Laminasi Paper',type:'per_hal',tiers:[[25,50,600],[51,100,450],[101,150,400],[151,9999,350]]},
-  ],
-  halaman:[
-    {id:'extrahal',name:'Halaman Tambahan',type:'extra_hal',tiers:[[25,50,3000],[51,100,2000],[101,150,1300],[151,9999,1000]]},
-  ],
-  video:[
-    {id:'drone',name:'Drone Video (1–2 mnt)',type:'flat_video',price:1500000},
-    {id:'docudrama',name:'Docudrama Video (5–10 mnt)',type:'flat_video',price:3000000},
-  ],
-  pkg1:[
-    {id:'slidebox',name:'Slide Box',type:'flat',tiers:[[25,50,45000],[51,100,40000],[101,150,35000],[151,200,30000],[201,9999,25000]]},
-    {id:'stdbox1',name:'Standart Box 1',type:'flat',tiers:[[25,50,150000],[51,100,95000],[101,150,80000],[151,200,70000],[201,9999,65000]]},
-    {id:'stdbox2',name:'Standart Box 2',type:'flat',tiers:[[25,50,150000],[51,100,100000],[101,150,80000],[151,200,75000],[201,9999,70000]]},
-    {id:'hardbox',name:'Hard Box 3 (Akrilik)',type:'flat',tiers:[[25,50,125000],[51,100,100000],[101,150,90000],[151,200,80000],[201,9999,75000]]},
-  ],
-  pkg2:[
-    {id:'cbox1',name:'Custom Box 1',type:'flat',tiers:[[25,50,200000],[51,100,170000],[101,150,130000],[151,200,120000],[201,9999,110000]]},
-    {id:'cbox2',name:'Custom Box 2',type:'flat',tiers:[[25,50,165000],[51,100,150000],[101,150,130000],[151,200,120000],[201,9999,110000]]},
-    {id:'cbox3',name:'Custom Box 3',type:'flat',tiers:[[25,50,200000],[51,100,170000],[101,150,130000],[151,200,120000],[201,9999,110000]]},
-    {id:'cbox4',name:'Custom Box 4',type:'flat',tiers:[[25,50,200000],[51,100,170000],[101,150,140000],[151,200,130000],[201,9999,120000]]},
-    {id:'cbox5',name:'Custom Box 5',type:'flat',tiers:[[25,50,200000],[51,100,170000],[101,150,145000],[151,200,135000],[201,9999,130000]]},
-  ],
-};
-
-let GRAD = DB_SETTINGS['grad_packages'] ? (typeof DB_SETTINGS['grad_packages'] === 'string' ? JSON.parse(DB_SETTINGS['grad_packages']) : DB_SETTINGS['grad_packages']) : {
-  packages:[
-    {id:'gphv',name:'Photo & Video',price:4500000,desc:'2 Fotografer + 1 Videografer, 50 foto edited, video cinematic 2–4 mnt, G-Drive, 4 jam coverage, transport jabodetabek',color:'acc'},
-    {id:'gvideo',name:'Video Only',price:2000000,desc:'1 Videografer, video cinematic 2–5 mnt, G-Drive, 4 jam coverage, transport jabodetabek',color:''},
-    {id:'gphoto',name:'Photo Only',price:2750000,desc:'2 Fotografer, 100 foto edited, G-Drive, 4 jam coverage, transport jabodetabek',color:''},
-    {id:'gbooth',name:'Photo Booth',price:3850000,desc:'1–2 Crew profesional, backdrop wisuda, lighting studio, Selfiebox Machine, unlimited print 4R, max 3 jam, softcopy + QR Code realtime, transport jabodetabek',color:''},
-    {id:'g360',name:'Glamation 360°',price:4100000,desc:'1–2 Crew profesional, MP4, LCD 50in preview, GoPro/iPhone 12 Pro, overlay design free, max 3 jam, QR Code realtime, transport jabodetabek',color:''},
-    {id:'gcomplete',name:'Complete Package',price:7750000,desc:'Photo (2 foto, 100 edited) + Video (1 videografer, cinematic 2–4 mnt) + Photo Booth (unlimited print 4R, max 3 jam, QR Code), transport jabodetabek',color:'feat'},
-  ],
-  addons:[
-    {id:'gvideo_add',name:'Tambah 1 Videografer',price:1500000},
-    {id:'gphoto_add',name:'Tambah 1 Fotografer',price:1250000},
-    {id:'gbooth_add',name:'Tambah 1 Jam Photobooth/360',price:500000},
-    {id:'gwork_add',name:'Tambah 1 Jam Kerja/Orang',price:350000},
-  ],
-  cetak:[
-    {id:'g4r',name:'Cetak Foto 4R',price:4000},
-    {id:'g8r',name:'Cetak Foto 8R',price:8000},
-    {id:'g10r',name:'Cetak Foto 10R',price:15000},
-    {id:'g12r',name:'Cetak Foto 12R',price:20000},
-  ]
-};
-
-// ALC_CFG: konfigurasi per kode paket (Full Service, ALC Factor, ALC Flat).
-// Sekarang 100% dimuat dari tabel packages_config.
 function buildALCCFG() {
   const cfg = {};
   const dbRows = DB_SETTINGS['alc_cfg'];
@@ -141,27 +114,12 @@ function buildALCCFG() {
   return cfg;
 }
 
-let ALC_CFG = buildALCCFG();
-
-// Normalize GRAD structure to ensure packages exists
-if (!GRAD.packages) {
-  GRAD.packages = [];
-}
-if (!GRAD.addons) {
-  GRAD.addons = [];
-}
-if (!GRAD.cetak) {
-  GRAD.cetak = [];
-}
+// Perform initial construction
+initializeOH();
+ALC_CFG = buildALCCFG();
 
 let curFSPkg='handy', curAnPkg='handy';
-
-// Bonus & Fasilitas — diisi dari DB via refreshMasterData()
-let BONUS_FASILITAS = {
-  fullservice: [],
-  graduation:  [],
-  alacarte:    [],
-};
+let curCetakRange = 0;
 
 // ============================================================
 // HELPERS
@@ -174,43 +132,23 @@ const fmtM = n => {
   const val = parseInt(n) || 0;
   return val>=1000000?'Rp'+(val/1000000).toFixed(1)+'jt':fmt(val);
 };
-function getTier(tiers,qty){for(const[lo,hi,v]of tiers)if(qty>=lo&&qty<=hi)return v;return tiers[tiers.length-1][2]}
-function getFSPrice(pkg,siswa){for(const[lo,hi,h,p]of FS[pkg])if(siswa>=lo&&siswa<=hi)return{harga:h,pages:p};return siswa<30?{harga:FS[pkg][0][2],pages:FS[pkg][0][3]}:{harga:FS[pkg][FS[pkg].length-1][2],pages:FS[pkg][FS[pkg].length-1][3]}}
+function getTier(tiers,qty){for(const[lo,hi,v]of tiers)if(qty>=lo&&qty<=hi)return v;return (tiers && tiers.length) ? tiers[tiers.length-1][2] : 0}
+function getFSPrice(pkg,siswa){
+  if (!FS[pkg] || !FS[pkg].length) return {harga:0, pages:60};
+  for(const[lo,hi,h,p]of FS[pkg]) if(siswa>=lo&&siswa<=hi)return{harga:h,pages:p};
+  return siswa<30?{harga:FS[pkg][0][2],pages:FS[pkg][0][3]}:{harga:FS[pkg][FS[pkg].length-1][2],pages:FS[pkg][FS[pkg].length-1][3]}
+}
 function getFSPageForSiswa(pkg,siswa){return getFSPrice(pkg,siswa).pages}
 
 // ============================================================
-// BIAYA CETAK — Renjana Offset
+// BIAYA CETAK
 // ============================================================
-const DEF_CETAK_BASE = [
-  {lo:30,hi:50,label:'30–50 siswa',pages:{30:92000,45:102000,60:115000,65:127000,75:140000,80:140000,90:152000,100:165000,110:176000,120:176000,135:176000,150:176000,160:176000}},
-  {lo:51,hi:75,label:'51–75 siswa',pages:{30:80000,45:90000,60:100000,65:110000,75:122000,80:122000,90:134000,100:145000,110:158000,120:162000,135:165000,150:168000,160:170000}},
-  {lo:76,hi:100,label:'76–100 siswa',pages:{30:70000,45:80000,60:90000,65:98000,75:108000,80:108000,90:118000,100:130000,110:140000,120:145000,135:150000,150:155000,160:160000}},
-  {lo:101,hi:125,label:'101–125 siswa',pages:{30:62000,45:72000,60:82000,65:88000,75:97000,80:97000,90:106000,100:116000,110:126000,120:130000,135:135000,150:140000,160:145000}},
-  {lo:126,hi:150,label:'126–150 siswa',pages:{30:58000,45:68000,60:76000,65:82000,75:90000,80:90000,90:98000,100:108000,110:118000,120:122000,135:127000,150:132000,160:137000}},
-  {lo:151,hi:175,label:'151–175 siswa',pages:{30:54000,45:63000,60:71000,65:76000,75:84000,80:84000,90:91000,100:100000,110:109000,120:113000,135:118000,150:123000,160:128000}},
-  {lo:176,hi:200,label:'176–200 siswa',pages:{30:50000,45:59000,60:66000,65:71000,75:78000,80:78000,90:85000,100:93000,110:101000,120:105000,135:110000,150:115000,160:119000}},
-  {lo:201,hi:225,label:'201–225 siswa',pages:{30:47000,45:55000,60:62000,65:66000,75:73000,80:73000,90:79000,100:87000,110:95000,120:98000,135:103000,150:107000,160:111000}},
-  {lo:226,hi:250,label:'226–250 siswa',pages:{30:44000,45:52000,60:58000,65:62000,75:68000,80:68000,90:74000,100:81000,110:88000,120:92000,135:96000,150:100000,160:104000}},
-  {lo:251,hi:275,label:'251–275 siswa',pages:{30:41000,45:49000,60:55000,65:58000,75:64000,80:64000,90:70000,100:76000,110:83000,120:86000,135:90000,150:94000,160:98000}},
-  {lo:276,hi:300,label:'276–300 siswa',pages:{30:39000,45:46000,60:52000,65:55000,75:60000,80:60000,90:66000,100:72000,110:78000,120:81000,135:85000,150:89000,160:92000}},
-  {lo:301,hi:325,label:'301–325 siswa',pages:{30:37000,45:44000,60:49000,65:52000,75:57000,80:57000,90:62000,100:68000,110:74000,120:77000,135:80000,150:84000,160:87000}},
-  {lo:326,hi:350,label:'326–350 siswa',pages:{30:35000,45:42000,60:47000,65:50000,75:54000,80:54000,90:59000,100:65000,110:70000,120:73000,135:76000,150:80000,160:83000}},
-  {lo:351,hi:375,label:'351–375 siswa',pages:{30:33000,45:40000,60:45000,65:47000,75:52000,80:52000,90:56000,100:62000,110:67000,120:70000,135:73000,150:76000,160:79000}},
-  {lo:376,hi:400,label:'376–400 siswa',pages:{30:31000,45:38000,60:42000,65:45000,75:49000,80:49000,90:53000,100:58000,110:63000,120:66000,135:69000,150:72000,160:75000}},
-  {lo:401,hi:425,label:'401–425 siswa',pages:{30:30000,45:36000,60:40000,65:42000,75:46000,80:46000,90:50000,100:55000,110:60000,120:62000,135:65000,150:68000,160:71000}},
-  {lo:426,hi:450,label:'426–450 siswa',pages:{30:28000,45:34000,60:38000,65:40000,75:44000,80:44000,90:48000,100:52000,110:57000,120:59000,135:62000,150:65000,160:67000}},
-  {lo:451,hi:475,label:'451–475 siswa',pages:{30:27000,45:32000,60:36000,65:38000,75:42000,80:42000,90:45000,100:50000,110:54000,120:56000,135:59000,150:62000,160:64000}},
-  {lo:476,hi:500,label:'476–500 siswa',pages:{30:26000,45:31000,60:34000,65:36000,75:40000,80:40000,90:43000,100:47000,110:51000,120:53000,135:56000,150:59000,160:61000}},
-];
-
-let CETAK_BASE = DB_SETTINGS['cetak_base'] ? JSON.parse(DB_SETTINGS['cetak_base']) : DEF_CETAK_BASE.map(r=>({...r, pages:{...r.pages}}));
-let curCetakRange = 0;
 
 function getCetakRangeIdx(siswa){
   for(let i=0;i<CETAK_BASE.length;i++){
     if(siswa>=CETAK_BASE[i].lo && siswa<=CETAK_BASE[i].hi) return i;
   }
-  return CETAK_BASE.length-1;
+  return CETAK_BASE.length > 0 ? CETAK_BASE.length-1 : 0;
 }
 
 function setCetakRange(idx, btn){
@@ -223,7 +161,8 @@ function setCetakRange(idx, btn){
 
 function renderCetakTable(){
   const r = CETAK_BASE[curCetakRange];
-  const pages = Object.keys(r.pages).map(Number).sort((a,b)=>a-b);
+  if (!r) return;
+  const pages = Object.keys(r.pages || {}).map(Number).sort((a,b)=>a-b);
   const rows = pages.map(p=>`
     <tr>
       <td style="font-weight:500;white-space:nowrap">${p} hal</td>
@@ -281,7 +220,7 @@ function bc(p){return p>=70?'#2D7A4A':p>=55?'#2A6B8A':p>=40?'#8A5F1A':'#A02020'}
 function miniBar(p){const c=bc(p);return`<div style="display:flex;align-items:center;gap:5px"><div style="width:75px;height:6px;background:var(--border);border-radius:3px;overflow:hidden"><div style="width:${Math.min(p,100)}%;height:100%;background:${c};border-radius:3px"></div></div><span style="font-size:12px;color:${c};font-weight:500">${p.toFixed(0)}%</span></div>`}
 
 // ============================================================
-// API HELPERS — replace localStorage
+// API HELPERS
 // ============================================================
 
 // Toast notification system
@@ -348,10 +287,6 @@ async function saveSettingsToAPI(key, value) {
 async function loadSettingsFromAPI() {
   try {
     const res = await fetch(API_BASE + '/settings.php');
-    if (!res.ok) {
-      console.warn('Settings API returned status:', res.status);
-      return;
-    }
     const json = await res.json();
     if (json.data) {
       if (json.data.overhead) Object.assign(OH, json.data.overhead);
@@ -368,16 +303,9 @@ async function loadSettingsFromAPI() {
   } catch(e) { console.warn('Settings load failed:', e); }
 }
 
-// Penawaran API
-let penawaranList = [];
-
 async function loadPenawaranFromAPI() {
   try {
     const res = await fetch(API_BASE + '/penawaran.php');
-    if (!res.ok) {
-      console.warn('Penawaran API returned status:', res.status);
-      return;
-    }
     const json = await res.json();
     penawaranList = (json.data || []).map(p => ({
       id: p.id, nama: p.nama_klien, paket: p.paket,
@@ -454,10 +382,6 @@ function goPageCore(id, el){
   window.location.href = '/pages/' + id + '.php';
 }
 
-const isManager = currentUser?.isManager;
-const isAdmin = currentUser?.isAdmin;
-const STAFF_PAGES = ['kalkulator','proyek'];
-
 function goPage(id, el){
   if(!currentUser) return;
   if(!isManager && !STAFF_PAGES.includes(id)) return;
@@ -468,35 +392,35 @@ function goPage(id, el){
 // RINGKASAN
 // ============================================================
 function renderRingkasan(){
-  console.log('=== renderRingkasan called ===');
-  console.log('OH.operasional:', OH.operasional, '(type:', typeof OH.operasional, ')');
   const oh=OH.total;
   const {harga:h150}=getFSPrice('handy',150);
   const c150=estCetak(150,60,'handy');
   const mb=h150-c150;
-  const bepP=oh/(mb*150);
-  document.getElementById('metrics-ov').innerHTML=`
+  const bepP=oh/(mb*150 || 1);
+  const metricsOv = document.getElementById('metrics-ov');
+  if (metricsOv) metricsOv.innerHTML=`
     <div class="m"><div class="ml">Overhead Bulanan</div><div class="mv acc">${fmtM(oh)}</div><div class="ms">total pengeluaran tim & ops</div></div>
     <div class="m"><div class="ml">BEP (150 siswa)</div><div class="mv war">${bepP.toFixed(1)} proyek</div><div class="ms">min. proyek/bulan</div></div>
     <div class="m"><div class="ml">Gross Margin Avg</div><div class="mv suc">68–80%</div><div class="ms">full service, 30–150 siswa</div></div>
     <div class="m"><div class="ml">Net (3 proyek)</div><div class="mv suc">${fmtM(3*150*h150-3*150*c150-oh)}</div><div class="ms">estimasi @150 siswa</div></div>`;
   const ohItems=[['Designer',OH.designer||0],['Marketing',OH.marketing||0],['Creative Prod.',OH.creative||0],['Project Mgr',OH.pm||0],['Social Media',OH.sosmed||0],['Freelance',OH.freelance||0],['Operasional',OH.operasional||0]];
-  console.log('ohItems:', ohItems);
   const mx=Math.max(...ohItems.map(x=>x[1]));
   const cols=['#2A6B8A','#C85B2A','#2D7A4A','#8A5F1A','#6B3A8A','#4A7A6B','#888'];
-  document.getElementById('oh-bars').innerHTML=ohItems.map(([l,v],i)=>{
+  const ohBars = document.getElementById('oh-bars');
+  if (ohBars) ohBars.innerHTML=ohItems.map(([l,v],i)=>{
     const val=parseInt(v)||0;
-    console.log(`Rendering ${l}: value=${v}, parsed=${val}, formatted=${fmtM(val)}`);
     return `<div class="br"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:${mx>0?val/mx*100:0}%;background:${cols[i]}"></div></div><div class="bv">${fmtM(val)}</div></div>`;
   }).join('');
   const komps=[['Foto+Stylist+Prop',30,'#C85B2A'],['Cetak+Shipping',25,'#2A6B8A'],['Desain Layout',20,'#2D7A4A'],['Editing Foto',15,'#8A5F1A'],['PM+Overhead',7,'#6B3A8A'],['E-Book',3,'#888']];
-  document.getElementById('komp-bars').innerHTML=komps.map(([l,p,c])=>`<div class="br"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:${p}%;background:${c}"></div></div><div class="bv">${p}%</div></div>`).join('');
+  const kompBars = document.getElementById('komp-bars');
+  if (kompBars) kompBars.innerHTML=komps.map(([l,p,c])=>`<div class="br"><div class="bl">${l}</div><div class="bt"><div class="bf" style="width:${p}%;background:${c}"></div></div><div class="bv">${p}%</div></div>`).join('');
   let bepHTML='';
   for(const[lbl,np,ns,hp]of[['Konservatif',3,150,335000],['Moderat',5,150,335000],['Optimis',8,150,335000]]){
     const rev=np*ns*hp,cogs=np*ns*estCetak(ns,60,'handy'),gp=rev-cogs,net=gp-oh,ok=net>=0;
     bepHTML+=`<div style="border:1px solid var(--border);border-radius:var(--r);padding:13px"><div style="font-size:12px;font-weight:600;color:var(--text3);margin-bottom:6px">${lbl}</div><div style="font-size:11px;color:var(--text3)">${np} proyek × ${ns} siswa</div><div style="margin-top:7px;display:flex;flex-direction:column;gap:3px;font-size:12px"><div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Revenue</span><span>${fmtM(rev)}</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">COGS</span><span style="color:var(--danger)">-${fmtM(cogs)}</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Gross</span><span>${fmtM(gp)}</span></div><div style="display:flex;justify-content:space-between"><span style="color:var(--text2)">Overhead</span><span style="color:var(--danger)">-${fmtM(oh)}</span></div><div style="display:flex;justify-content:space-between;font-weight:600;margin-top:4px;padding-top:4px;border-top:1px solid var(--border)"><span>Net</span><span style="color:${ok?'var(--success)':'var(--danger)'}">${ok?'':'-'}${fmtM(Math.abs(net))}</span></div></div></div>`;
   }
-  document.getElementById('bep-sc').innerHTML=bepHTML;
+  const bepSc = document.getElementById('bep-sc');
+  if (bepSc) bepSc.innerHTML=bepHTML;
 }
 
 // ============================================================
@@ -504,18 +428,20 @@ function renderRingkasan(){
 // ============================================================
 function setPkg(p){
   curFSPkg=p;
-  ['handy','minimal','large'].forEach(x=>document.getElementById('btn-'+x).className='btn bsm '+(x===p?'bp':'bs'));
+  ['handy','minimal','large'].forEach(x=>{
+    const el = document.getElementById('btn-'+x);
+    if (el) el.className='btn bsm '+(x===p?'bp':'bs');
+  });
   renderFS();
 }
 
 function suggestedPrice(siswa, cetak, grossTotal, ohPerProyek) {
-  const minFromNet = cetak + (ohPerProyek / siswa) * 1.3;
+  const minFromNet = cetak + (ohPerProyek / (siswa || 1)) * 1.3;
   const minFromMargin = cetak / 0.45;
   const raw = Math.max(minFromNet, minFromMargin);
   return Math.ceil(raw / 5000) * 5000;
 }
 
-// Save fullservice pricing data to API
 function saveFS() {
   const body = { fs_prices: FS };
   fetch(API_BASE + '/settings.php', {
@@ -525,30 +451,26 @@ function saveFS() {
   })
   .then(res => res.json())
   .then(json => {
-    if(json.success) {
-      showToast('Harga fullservice berhasil disimpan', 'success');
-    } else {
-      showToast(json.message || 'Gagal menyimpan harga', 'error');
-    }
+    if(json.success) showToast('Harga fullservice berhasil disimpan', 'success');
+    else showToast(json.message || 'Gagal menyimpan harga', 'error');
   })
-  .catch(e => {
-    console.error('Save failed:', e);
-    showToast('Error: ' + e.message, 'error');
-  });
+  .catch(e => showToast('Error: ' + e.message, 'error'));
 }
 
 function renderFS(){
   const rows = FS[curFSPkg];
+  if (!rows) return;
   const nProyek = parseInt(document.getElementById('fs-nproyek')?.value) || 4;
   const ohPerProyek = OH.total / nProyek;
   let insightList = [];
   let prevHarga = 9999999;
 
-  document.getElementById('fs-body').innerHTML = rows.map(([lo,hi,harga,pages],i) => {
+  const fsBody = document.getElementById('fs-body');
+  if (fsBody) fsBody.innerHTML = rows.map(([lo,hi,harga,pages],i) => {
     const mid = Math.round((lo+hi)/2);
     const cetak = estCetak(mid, pages, curFSPkg);
     const grossBuku = harga - cetak;
-    const pct = grossBuku / harga * 100;
+    const pct = grossBuku / (harga || 1) * 100;
     const grossTotal = grossBuku * mid;
     const netProyek = grossTotal - ohPerProyek;
     const netOk = netProyek > 0;
@@ -589,21 +511,22 @@ function renderFS(){
   }).join('');
 
   const insightBox = document.getElementById('fs-insights');
-  if (insightList.length === 0) {
-    insightBox.innerHTML = '<div style="font-size:13px;color:var(--success)">✓ Semua range sudah dalam kondisi baik berdasarkan asumsi ' + nProyek + ' proyek aktif/bulan.</div>';
-    return;
+  if (insightBox) {
+    if (insightList.length === 0) {
+      insightBox.innerHTML = '<div style="font-size:13px;color:var(--success)">✓ Semua range sudah dalam kondisi baik berdasarkan asumsi ' + nProyek + ' proyek aktif/bulan.</div>';
+    } else {
+      insightBox.innerHTML = insightList.map(ins => {
+        if (ins.anomaly) return `<div style="margin-bottom:10px;padding:10px 12px;background:var(--danger-bg);border-radius:8px;font-size:13px"><b style="color:var(--danger)">⚠ Anomali Harga: ${ins.lo}–${ins.hi} siswa</b><br><span style="color:var(--text2)">Harga <b>${fmt(ins.harga)}</b> lebih <b>mahal</b> dari range sebelumnya (${ins.prevLo}–${ins.prevHi}: ${fmt(ins.prevHarga)})</span></div>`;
+        return `<div style="margin-bottom:10px;padding:10px 12px;background:var(--warning-bg);border-radius:8px;font-size:13px"><b style="color:var(--warning)">${ins.lo}–${ins.hi} siswa — ${ins.reason}</b><br><span style="color:var(--text2)">Gross margin ${ins.pct.toFixed(0)}%, net per proyek ${ins.netProyek>=0?'+':''}${fmtM(ins.netProyek)}. Saran harga minimal: <b>${fmt(ins.saran)}</b>.</span></div>`;
+      }).join('');
+    }
   }
-  insightBox.innerHTML = insightList.map(ins => {
-    if (ins.anomaly) return `<div style="margin-bottom:10px;padding:10px 12px;background:var(--danger-bg);border-radius:8px;font-size:13px"><b style="color:var(--danger)">⚠ Anomali Harga: ${ins.lo}–${ins.hi} siswa</b><br><span style="color:var(--text2)">Harga <b>${fmt(ins.harga)}</b> lebih <b>mahal</b> dari range sebelumnya (${ins.prevLo}–${ins.prevHi}: ${fmt(ins.prevHarga)})</span></div>`;
-    return `<div style="margin-bottom:10px;padding:10px 12px;background:var(--warning-bg);border-radius:8px;font-size:13px"><b style="color:var(--warning)">${ins.lo}–${ins.hi} siswa — ${ins.reason}</b><br><span style="color:var(--text2)">Gross margin ${ins.pct.toFixed(0)}%, net per proyek ${ins.netProyek>=0?'+':''}${fmtM(ins.netProyek)}. Saran harga minimal: <b>${fmt(ins.saran)}</b>.</span></div>`;
-  }).join('');
 }
 
 // ============================================================
-// PENGATURAN PAGE — render & save functions
+// PENGATURAN PAGE
 // ============================================================
 function renderPengaturan(){
-  // Render overhead fields
   const ovEl = document.getElementById('ov-oh');
   if(ovEl){
     const fields = ['designer', 'marketing', 'creative', 'pm', 'sosmed', 'freelance', 'ops'];
@@ -616,12 +539,6 @@ function renderPengaturan(){
     `).join('');
   }
 
-  // Jika CETAK_BASE kosong (DB belum punya data), pakai default
-  if (!CETAK_BASE || CETAK_BASE.length === 0) {
-    CETAK_BASE = DEF_CETAK_BASE.map(r => ({...r, pages: {...r.pages}}));
-  }
-
-  // Render cetak range buttons
   const btnsEl = document.getElementById('cetak-range-btns');
   if(btnsEl && CETAK_BASE.length > 0){
     btnsEl.innerHTML = CETAK_BASE.map((r, i) => `
@@ -637,27 +554,20 @@ function saveOH(){
     const val = parseInt(document.getElementById(`ov-${f}`)?.value) || 0;
     OH[f] = val;
   });
-  OH.total = fields.reduce((s, f) => s + OH[f], 0);
-  saveSettingsToAPI('overhead', OH).then(success => {
-    if(success) kalcUpdate();
-  });
+  OH.total = fields.reduce((s, f) => s + (OH[f]||0), 0);
+  saveSettingsToAPI('overhead', OH).then(success => { if(success) kalcUpdate(); });
 }
 
 function resetOH(){
-  const defOH = {designer:0, marketing:0, creative:0, pm:0, sosmed:0, freelance:0, ops:0, total:0};
-  Object.assign(OH, defOH);
-  saveSettingsToAPI('overhead', OH).then(success => {
-    if(success) renderPengaturan();
-  });
+  Object.assign(OH, {designer:0, marketing:0, creative:0, pm:0, sosmed:0, freelance:0, ops:0, total:0});
+  saveSettingsToAPI('overhead', OH).then(success => { if(success) renderPengaturan(); });
 }
 
 function saveCetak(){
   CETAK_F.handy = parseFloat(document.getElementById('ov-cetak-handy')?.value) || 1.0;
   CETAK_F.minimal = parseFloat(document.getElementById('ov-cetak-minimal')?.value) || 0.95;
   CETAK_F.large = parseFloat(document.getElementById('ov-cetak-large')?.value) || 1.15;
-  saveSettingsToAPI('cetak_f', CETAK_F).then(success => {
-    if(success) kalcUpdate();
-  });
+  saveSettingsToAPI('cetak_f', CETAK_F).then(success => { if(success) kalcUpdate(); });
 }
 
 function saveALC(){
@@ -668,111 +578,61 @@ function saveALC(){
   saveSettingsToAPI('alc_f', ALC_F);
 }
 
-function saveGrad(){
-  saveSettingsToAPI('grad_packages', GRAD.packages);
-}
-
-function resetGrad(){
-  saveSettingsToAPI('grad_packages', null);
-}
-
-function saveGradAddon(){
-  saveSettingsToAPI('grad_addons', GRAD.addons);
-}
+function saveGrad(){ saveSettingsToAPI('grad_packages', GRAD.packages); }
+function resetGrad(){ saveSettingsToAPI('grad_packages', null); }
+function saveGradAddon(){ saveSettingsToAPI('grad_addons', GRAD.addons); }
 
 // ============================================================
-// MASTER DATA FUNCTIONS — Update via /api/master-data.php
+// MASTER DATA API
 // ============================================================
 
-// Fungsi universal untuk update master data
 async function updateMasterData(type, data) {
     try {
-        console.log('updateMasterData called with type:', type);
-        console.log('Data to send:', data);
-        console.log('MASTER_API URL:', MASTER_API);
-        
-        const payload = { type: type, data: data };
-        console.log('Full payload:', JSON.stringify(payload));
-        
         const response = await fetch(MASTER_API, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: JSON.stringify({ type: type, data: data })
         });
-        
-        console.log('Response status:', response.status);
-        console.log('Response headers:', response.headers);
-        
-        const responseText = await response.text();
-        console.log('Raw response text:', responseText);
-        
-        const result = JSON.parse(responseText);
-        console.log('Parsed response:', result);
-        
-        if (result.success) {
-            console.log('✓ Master data updated:', type);
-            return true;
-        } else {
-            console.error('Failed to update master data:', result.error);
-            showToast('✕ Server error: ' + (result.error || 'Unknown error'), 'error');
-            return false;
-        }
+        const result = await response.json();
+        if (result.success) return true;
+        showToast('✕ Server error: ' + (result.error || 'Unknown error'), 'error');
+        return false;
     } catch (error) {
-        console.error('Error updating master data:', error);
-        console.error('Error message:', error.message);
-        console.error('Error stack:', error.stack);
         showToast('✕ Network error: ' + error.message, 'error');
         return false;
     }
 }
 
-// Fungsi untuk refresh data dari master API
 async function refreshMasterData() {
     try {
         const response = await fetch(MASTER_API + '?action=get_all');
         const result = await response.json();
         if (result.success && result.data) {
             const data = result.data;
-            
-            // Update semua global variables
-            if (data.overhead)    OH = {...OH, ...flattenObject(data.overhead)};
-            if (data.cetak_f)    CETAK_F = {...data.cetak_f};
+            if (data.overhead) OH = {...OH, ...flattenObject(data.overhead)};
+            if (data.cetak_f) CETAK_F = {...data.cetak_f};
             if (data.cetak_base) CETAK_BASE = data.cetak_base;
-            if (data.alc_f)      ALC_F = {...data.alc_f};
-            if (data.alc_cfg)    { DB_SETTINGS['alc_cfg'] = data.alc_cfg; ALC_CFG = buildALCCFG(); }
-            if (data.fs)         FS = {...data.fs};
+            if (data.alc_f) ALC_F = {...data.alc_f};
+            if (data.alc_cfg) { DB_SETTINGS['alc_cfg'] = data.alc_cfg; ALC_CFG = buildALCCFG(); }
+            if (data.fs) FS = {...data.fs};
             if (data.addon_data) ADDON_DATA = {...data.addon_data};
-            if (data.grad)       GRAD = {...data.grad};
+            if (data.grad) GRAD = {...data.grad};
             if (data.bonus_fasilitas) BONUS_FASILITAS = {...data.bonus_fasilitas};
-            if (data.payment_terms)   PT = data.payment_terms;
-            
-            // Perbarui UI kalkulator jika fungsi tersedia
-            if (typeof buildTypePaketDropdown === 'function') {
-                buildTypePaketDropdown();
-            }
-            if (typeof kalcUpdate === 'function') {
-                kalcUpdate();
-            }
-            
-            console.log('✓ Master data refreshed from API');
+            if (data.payment_terms) PT = data.payment_terms;
+            if (typeof buildTypePaketDropdown === 'function') buildTypePaketDropdown();
+            if (typeof kalcUpdate === 'function') kalcUpdate();
             return true;
         }
-    } catch (error) {
-        console.error('Error refreshing master data:', error);
-    }
+    } catch (error) { console.error('Error refreshing master data:', error); }
     return false;
 }
 
-// Helper untuk flatten object (convery nested object to flat)
 function flattenObject(obj) {
     const result = {};
     for (const key in obj) {
         const val = obj[key];
-        if (typeof val === 'object' && !Array.isArray(val)) {
-            Object.assign(result, flattenObject(val));
-        } else {
-            result[key.toLowerCase().replace(/[. ]/g, '')] = val;
-        }
+        if (typeof val === 'object' && !Array.isArray(val)) Object.assign(result, flattenObject(val));
+        else result[key.toLowerCase().replace(/[. ]/g, '')] = val;
     }
     return result;
 }

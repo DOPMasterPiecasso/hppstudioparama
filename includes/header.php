@@ -95,47 +95,8 @@ try {
 const DB_SETTINGS = <?= json_encode($allSettings) ?>;
 </script>
 <script>
-// Master Data API Helper — fetch dari master data terpusat
-// Semua halaman lain bisa menggunakan API ini untuk data master
+// Master Data API Helper — constant used by other scripts
 const MASTER_API = '/api/master-data.php';
-
-async function loadMasterDataFromAPI() {
-    try {
-        const response = await fetch(MASTER_API + '?action=get_all');
-        const result = await response.json();
-        if (result.success) {
-            return result.data;
-        }
-    } catch (error) {
-        console.error('Failed to load master data from API:', error);
-    }
-    return null;
-}
-
-async function updateMasterData(type, data) {
-    try {
-        console.log('updateMasterData called:', type, data);
-        const response = await fetch(MASTER_API, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ type: type, data: data })
-        });
-        
-        const result = await response.json();
-        console.log('updateMasterData response:', result);
-        
-        if (result.success) {
-            console.log('✓ Master data updated:', type);
-            return true;
-        } else {
-            console.error('API error:', result.error || result.message);
-            return false;
-        }
-    } catch (error) {
-        console.error('Failed to update master data:', error);
-        return false;
-    }
-}
 </script>
 <style>
 :root{--bg:#F7F5F0;--surface:#FFF;--surface2:#F0EDE6;--border:#E2DDD5;--border2:#CCC8C0;--text:#1A1714;--text2:#5C5750;--text3:#9C9890;--accent:#C85B2A;--accent-light:#F5EAE3;--accent2:#2A6B8A;--accent2-light:#E3EFF5;--success:#2D7A4A;--success-bg:#E8F5ED;--warning:#8A5F1A;--warning-bg:#FDF3E3;--danger:#A02020;--danger-bg:#FAEAEA;--navy:#1C2E3D;--grad:#1A5C3A;--grad-light:#E5F2EC;--font-d:'DM Serif Display',Georgia,serif;--font-b:'DM Sans',sans-serif;--r:10px;--rl:16px;--sh:0 1px 3px rgba(0,0,0,.06),0 4px 16px rgba(0,0,0,.04)}
