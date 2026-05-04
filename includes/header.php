@@ -34,28 +34,28 @@ try {
             if ($k !== 'total') $ohTotal += $v;
         }
         $oh['total'] = $ohTotal;
-        $allSettings['oh'] = json_encode($oh);
+        $allSettings['oh'] = $oh;
         
         // Load pricing factors dari MySQL
         $pricingFactors = $masterData->getPricingFactors();
-        $allSettings['cetak_f'] = json_encode($pricingFactors['cetak'] ?? ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15]);
-        $allSettings['alc_f'] = json_encode($pricingFactors['alacarte'] ?? ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30]);
+        $allSettings['cetak_f'] = $pricingFactors['cetak'] ?? ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15];
+        $allSettings['alc_f'] = $pricingFactors['alacarte'] ?? ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30];
         
         // Full Service dari MySQL
         $fsData = $masterData->getFullService();
-        $allSettings['fs'] = json_encode($fsData ?: ['handy' => [], 'minimal' => [], 'large' => []]);
+        $allSettings['fs'] = $fsData ?: ['handy' => [], 'minimal' => [], 'large' => []];
         
         // Cetak Base dari MySQL
         $cetakBase = $masterData->getCetakBase();
-        $allSettings['cetak_base'] = json_encode($cetakBase ?: []);
+        $allSettings['cetak_base'] = $cetakBase ?: [];
         
         // Graduation dari MySQL
         $graduation = $masterData->getGraduation();
-        $allSettings['grad_packages'] = json_encode($graduation ?: ['packages' => [], 'addons' => [], 'cetak' => []]);
+        $allSettings['grad_packages'] = $graduation ?: ['packages' => [], 'addons' => [], 'cetak' => []];
         
         // Add-ons: tetap dari MySQL via MySQLMasterData
         $addons = $masterData->getAddons();
-        $allSettings['addon_data'] = json_encode($addons ?: []);
+        $allSettings['addon_data'] = $addons ?: [];
 
         // 2. Fetch Packages Config (pengganti alacarte_config)
         try {
@@ -73,19 +73,19 @@ try {
     }
     
     // Extract untuk PHP use di pages
-    $cetakF = json_decode($allSettings['cetak_f'], true);
-    $alcF   = json_decode($allSettings['alc_f'], true);
+    $cetakF = $allSettings['cetak_f'];
+    $alcF   = $allSettings['alc_f'];
     
 } catch (Exception $e) {
     error_log('header.php DB load error: ' . $e->getMessage());
     // Fallback ke default jika DB tidak bisa diakses
-    $allSettings['oh'] = json_encode(['designer' => 0, 'marketing' => 0, 'creative' => 0, 'pm' => 0, 'sosmed' => 0, 'freelance' => 0, 'operasional' => 0, 'total' => 0]);
-    $allSettings['cetak_f'] = json_encode(['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15]);
-    $allSettings['alc_f'] = json_encode(['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30]);
-    $allSettings['fs'] = json_encode(['handy' => [], 'minimal' => [], 'large' => []]);
-    $allSettings['addon_data'] = json_encode(['finishing' => [], 'kertas' => [], 'halaman' => [], 'video' => [], 'pkg1' => [], 'pkg2' => []]);
-    $allSettings['cetak_base'] = json_encode([]);
-    $allSettings['grad_packages'] = json_encode(['packages' => [], 'addons' => [], 'cetak' => []]);
+    $allSettings['oh'] = ['designer' => 0, 'marketing' => 0, 'creative' => 0, 'pm' => 0, 'sosmed' => 0, 'freelance' => 0, 'operasional' => 0, 'total' => 0];
+    $allSettings['cetak_f'] = ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15];
+    $allSettings['alc_f'] = ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30];
+    $allSettings['fs'] = ['handy' => [], 'minimal' => [], 'large' => []];
+    $allSettings['addon_data'] = ['finishing' => [], 'kertas' => [], 'halaman' => [], 'video' => [], 'pkg1' => [], 'pkg2' => []];
+    $allSettings['cetak_base'] = [];
+    $allSettings['grad_packages'] = ['packages' => [], 'addons' => [], 'cetak' => []];
     
     $cetakF = ['handy' => 1.0, 'minimal' => 0.95, 'large' => 1.15];
     $alcF   = ['ebook' => 0.72, 'editcetak' => 0.62, 'desain' => 0.22, 'cetakonly' => 0.30];
