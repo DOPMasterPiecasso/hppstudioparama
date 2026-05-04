@@ -145,7 +145,11 @@ function buildAddonList(){
   // Update graduation package dropdown
   const gs=document.getElementById('k-grad-pkg');
   if(gs && (!gs.options.length || gs.options.length === 1)) {
-    gs.innerHTML='<option value="">— Pilih paket —</option>'+GRAD.packages.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
+    if (typeof GRAD !== 'undefined' && GRAD.packages && Array.isArray(GRAD.packages)) {
+      gs.innerHTML='<option value="">— Pilih paket —</option>'+GRAD.packages.map(p=>`<option value="${p.id}">${p.name} — ${fmt(p.price)}</option>`).join('');
+    } else {
+      console.warn('GRAD.packages not available yet');
+    }
   }
 
   let html='';

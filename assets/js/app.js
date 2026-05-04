@@ -8,10 +8,15 @@
 const currentUser = typeof PHP_USER !== 'undefined' ? PHP_USER : null;
 
 // ============================================================
+// API Configuration
+// ============================================================
+const API_BASE = '/api';
+
+// ============================================================
 // STATE — all prices live here, editable
 // ============================================================
 const DEF_OH = {total:73586000,marketing:15000000,creative:8000000,designer:20000000,pm:8000000,sosmed:7000000,freelance:4000000,operasional:11586000};
-let OH = DB_SETTINGS['oh'] ? JSON.parse(DB_SETTINGS['oh']) : {...DEF_OH};
+let OH = DB_SETTINGS['oh'] ? (typeof DB_SETTINGS['oh'] === 'string' ? JSON.parse(DB_SETTINGS['oh']) : DB_SETTINGS['oh']) : {...DEF_OH};
 
 console.log('=== app.js OH INITIALIZATION ===');
 console.log('Initial OH before cleanup:', JSON.parse(JSON.stringify(OH)));
@@ -36,16 +41,16 @@ if (!OH.operasional || OH.operasional === 0) {
 console.log('OH final:', JSON.parse(JSON.stringify(OH)));
 console.log('OH.operasional final value:', OH.operasional, '(type:', typeof OH.operasional, ')');
 
-let CETAK_F = DB_SETTINGS['cetak_f'] ? JSON.parse(DB_SETTINGS['cetak_f']) : {handy:1.0, minimal:0.95, large:1.15};
-let ALC_F = DB_SETTINGS['alc_f'] ? JSON.parse(DB_SETTINGS['alc_f']) : {ebook:0.72, editcetak:0.62, desain:0.22, cetakonly:0.30};
+let CETAK_F = DB_SETTINGS['cetak_f'] ? (typeof DB_SETTINGS['cetak_f'] === 'string' ? JSON.parse(DB_SETTINGS['cetak_f']) : DB_SETTINGS['cetak_f']) : {handy:1.0, minimal:0.95, large:1.15};
+let ALC_F = DB_SETTINGS['alc_f'] ? (typeof DB_SETTINGS['alc_f'] === 'string' ? JSON.parse(DB_SETTINGS['alc_f']) : DB_SETTINGS['alc_f']) : {ebook:0.72, editcetak:0.62, desain:0.22, cetakonly:0.30};
 
-let FS = DB_SETTINGS['fs'] ? JSON.parse(DB_SETTINGS['fs']) : {
+let FS = DB_SETTINGS['fs'] ? (typeof DB_SETTINGS['fs'] === 'string' ? JSON.parse(DB_SETTINGS['fs']) : DB_SETTINGS['fs']) : {
   handy:[[30,50,465000,30],[51,75,415000,30],[76,100,370000,45],[101,125,350000,55],[126,150,335000,60],[151,175,315000,65],[176,200,295000,75],[201,225,260000,80],[226,250,250000,80],[251,275,240000,90],[276,300,230000,100],[300,325,220000,100],[326,350,210000,120],[351,375,200000,120],[376,400,190000,135],[401,425,185000,135],[426,450,165000,145],[451,475,175000,150],[476,500,150000,160]],
   minimal:[[30,50,450000,30],[51,75,400000,30],[76,100,355000,45],[101,125,335000,55],[126,150,320000,60],[151,175,300000,65],[176,200,280000,75],[201,225,245000,80],[226,250,235000,80],[251,275,240000,90],[276,300,215000,100],[300,325,205000,100],[326,350,195000,120],[351,375,185000,120],[376,400,180000,135],[401,425,170000,135],[426,450,160000,145],[451,475,150000,150],[476,500,140000,160]],
   large:[[30,50,480000,30],[51,75,430000,30],[76,100,405000,45],[101,125,365000,55],[126,150,350000,60],[151,175,330000,65],[176,200,310000,75],[201,225,275000,80],[226,250,265000,80],[251,275,255000,90],[276,300,245000,100],[300,325,235000,100],[326,350,225000,120],[351,375,215000,120],[376,400,205000,135],[401,425,195000,135],[426,450,175000,145],[451,475,165000,150],[476,500,155000,160]]
 };
 
-let ADDON_DATA = DB_SETTINGS['addon_data'] ? JSON.parse(DB_SETTINGS['addon_data']) : {
+let ADDON_DATA = DB_SETTINGS['addon_data'] ? (typeof DB_SETTINGS['addon_data'] === 'string' ? JSON.parse(DB_SETTINGS['addon_data']) : DB_SETTINGS['addon_data']) : {
   finishing:[
     {id:'binding',name:'Binding Paku/Jepang/Spiral',type:'flat',tiers:[[25,75,50000],[76,150,35000],[151,9999,30000]]},
     {id:'popup',name:'Pop Up 2D',type:'flat',tiers:[[25,75,55000],[76,150,40000],[151,9999,35000]]},
@@ -79,7 +84,7 @@ let ADDON_DATA = DB_SETTINGS['addon_data'] ? JSON.parse(DB_SETTINGS['addon_data'
   ],
 };
 
-let GRAD = DB_SETTINGS['grad_packages'] ? JSON.parse(DB_SETTINGS['grad_packages']) : {
+let GRAD = DB_SETTINGS['grad_packages'] ? (typeof DB_SETTINGS['grad_packages'] === 'string' ? JSON.parse(DB_SETTINGS['grad_packages']) : DB_SETTINGS['grad_packages']) : {
   packages:[
     {id:'gphv',name:'Photo & Video',price:4500000,desc:'2 Fotografer + 1 Videografer, 50 foto edited, video cinematic 2–4 mnt, G-Drive, 4 jam coverage, transport jabodetabek',color:'acc'},
     {id:'gvideo',name:'Video Only',price:2000000,desc:'1 Videografer, video cinematic 2–5 mnt, G-Drive, 4 jam coverage, transport jabodetabek',color:''},
@@ -137,6 +142,17 @@ function buildALCCFG() {
 }
 
 let ALC_CFG = buildALCCFG();
+
+// Normalize GRAD structure to ensure packages exists
+if (!GRAD.packages) {
+  GRAD.packages = [];
+}
+if (!GRAD.addons) {
+  GRAD.addons = [];
+}
+if (!GRAD.cetak) {
+  GRAD.cetak = [];
+}
 
 let curFSPkg='handy', curAnPkg='handy';
 
@@ -333,6 +349,10 @@ async function saveSettingsToAPI(key, value) {
 async function loadSettingsFromAPI() {
   try {
     const res = await fetch(API_BASE + '/settings.php');
+    if (!res.ok) {
+      console.warn('Settings API returned status:', res.status);
+      return;
+    }
     const json = await res.json();
     if (json.data) {
       if (json.data.overhead) Object.assign(OH, json.data.overhead);
@@ -355,6 +375,10 @@ let penawaranList = [];
 async function loadPenawaranFromAPI() {
   try {
     const res = await fetch(API_BASE + '/penawaran.php');
+    if (!res.ok) {
+      console.warn('Penawaran API returned status:', res.status);
+      return;
+    }
     const json = await res.json();
     penawaranList = (json.data || []).map(p => ({
       id: p.id, nama: p.nama_klien, paket: p.paket,
