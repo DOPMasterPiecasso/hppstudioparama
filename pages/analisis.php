@@ -72,8 +72,8 @@ $jsUser = json_encode([
 ]);
 ?>
 <script>const PHP_USER = <?= $jsUser ?>;</script>
-<script src="/assets/js/app.js?v=1.8"></script>
-<script src="/assets/js/app-pages.js?v=1.8"></script>
-<script src="/assets/js/app-proyek.js?v=1.8"></script>
+<script src="/assets/js/app.js?v=1.9"></script>
+<script src="/assets/js/app-pages.js?v=1.9"></script>
+<script src="/assets/js/app-proyek.js?v=1.9"></script>
 </body>
 </html>
