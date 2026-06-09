@@ -37,14 +37,24 @@ function renderAlacarte(){
 // ADD-ON TABLE (editable)
 // ============================================================
 function renderAddon(){
-  function finRow(a){return`<tr><td>${a.name}</td>${a.tiers.map((t,ti)=>`<td><input class="edi" type="number" value="${t[2]}" onchange="ADDON_DATA.finishing[${ADDON_DATA.finishing.findIndex(x=>x.id===a.id)}].tiers[${ti}][2]=parseInt(this.value)" style="width:70px;text-align:right"></td>`).join('')}</tr>`}
-  document.getElementById('adn-finishing').innerHTML=ADDON_DATA.finishing.map(a=>finRow(a)).join('');
-  document.getElementById('adn-kertas').innerHTML=ADDON_DATA.kertas.map((a,ai)=>`<tr><td>${a.name}</td>${a.tiers.map((t,ti)=>`<td><input class="edi" type="number" value="${t[2]}" onchange="ADDON_DATA.kertas[${ai}].tiers[${ti}][2]=parseInt(this.value)" style="width:60px;text-align:right"><span style="font-size:11px;color:var(--text3)">/hal</span></td>`).join('')}</tr>`).join('');
-  document.getElementById('adn-halaman').innerHTML=ADDON_DATA.halaman.map((a,ai)=>`<tr><td>25–50 order</td><td><input class="edi" type="number" value="${a.tiers[0][2]}" onchange="ADDON_DATA.halaman[0].tiers[0][2]=parseInt(this.value)" style="width:70px;text-align:right"></td></tr><tr><td>51–100 order</td><td><input class="edi" type="number" value="${a.tiers[1][2]}" onchange="ADDON_DATA.halaman[0].tiers[1][2]=parseInt(this.value)" style="width:70px;text-align:right"></td></tr><tr><td>101–150 order</td><td><input class="edi" type="number" value="${a.tiers[2][2]}" onchange="ADDON_DATA.halaman[0].tiers[2][2]=parseInt(this.value)" style="width:70px;text-align:right"></td></tr><tr><td>&gt;151 order</td><td><input class="edi" type="number" value="${a.tiers[3][2]}" onchange="ADDON_DATA.halaman[0].tiers[3][2]=parseInt(this.value)" style="width:70px;text-align:right"></td></tr>`).join('');
-  document.getElementById('adn-video').innerHTML=ADDON_DATA.video.map((a,ai)=>`<tr><td>${a.name}</td><td>${a.id==='drone'?'1–2 menit':'5–10 menit'}</td><td><input class="edi" type="number" value="${a.price}" onchange="ADDON_DATA.video[${ai}].price=parseInt(this.value)" style="width:90px;text-align:right"></td></tr>`).join('');
-  function pkgRow(arr,grp){return arr.map((a,i)=>`<tr><td>${a.name}</td>${a.tiers.map((t,ti)=>`<td><input class="edi" type="number" value="${t[2]}" onchange="ADDON_DATA.${grp}[${i}].tiers[${ti}][2]=parseInt(this.value)" style="width:60px;text-align:right"></td>`).join('')}</tr>`).join('')}
-  document.getElementById('adn-pkg1').innerHTML=pkgRow(ADDON_DATA.pkg1,'pkg1');
-  document.getElementById('adn-pkg2').innerHTML=pkgRow(ADDON_DATA.pkg2,'pkg2');
+  function tierLabel(t){return (t[0]||'')+((t[1]&&t[1]!==9999)?'–'+t[1]:t[0]?'+':'')}
+  function dynCols(hdrId, bodyId, arr, suffix){
+    const maxT = arr.reduce((n,a)=>Math.max(n,a.tiers.length),0);
+    const hdrs = [...Array(maxT)].map((_,i)=>'<th>'+(i<(arr[0]?.tiers?.length||0)?tierLabel(arr[0].tiers[i]):suffix||'')+'</th>').join('');
+    document.getElementById(hdrId).innerHTML='<tr><th>Jenis</th>'+hdrs+'</tr>';
+    document.getElementById(bodyId).innerHTML=arr.map((a,ai)=>'<tr><td>'+a.name+'</td>'+a.tiers.map((t,ti)=>'<td><input class="edi" type="number" value="'+t[2]+'" onchange="ADDON_DATA.'+bodyId.replace('adn-','')+'['+ai+'].tiers['+ti+'][2]=parseInt(this.value)" style="width:60px;text-align:right"></td>').join('')+[...Array(maxT-a.tiers.length)].map(()=>'<td></td>').join('')+'</tr>').join('');
+  }
+  dynCols('hdr-finishing','adn-finishing',ADDON_DATA.finishing);
+  dynCols('hdr-kertas','adn-kertas',ADDON_DATA.kertas,'/hal');
+  dynCols('hdr-pkg1','adn-pkg1',ADDON_DATA.pkg1);
+  dynCols('hdr-pkg2','adn-pkg2',ADDON_DATA.pkg2);
+  function dynRows(hdrId, bodyId, arr, labels){
+    document.getElementById(hdrId).innerHTML='<tr><th>Jumlah Order</th><th>Harga/Hal</th></tr>';
+    document.getElementById(bodyId).innerHTML=arr.map((a,ai)=>labels.map((l,i)=>'<tr><td>'+l+'</td><td><input class="edi" type="number" value="'+(a.tiers[i]?.[2]||0)+'" onchange="ADDON_DATA.'+bodyId.replace('adn-','')+'['+ai+'].tiers['+i+'][2]=parseInt(this.value)" style="width:70px;text-align:right"></td></tr>').join('')).join('');
+  }
+  dynRows('hdr-halaman','adn-halaman',ADDON_DATA.halaman,['25–50 order','51–100 order','101–150 order','>151 order']);
+  document.getElementById('hdr-video').innerHTML='<tr><th>Jenis</th><th>Durasi</th><th>Harga</th></tr>';
+  document.getElementById('adn-video').innerHTML=ADDON_DATA.video.map((a,ai)=>'<tr><td>'+a.name+'</td><td>'+(a.id==='drone'?'1–2 menit':'5–10 menit')+'</td><td><input class="edi" type="number" value="'+a.price+'" onchange="ADDON_DATA.video['+ai+'].price=parseInt(this.value)" style="width:90px;text-align:right"></td></tr>').join('');
 }
 
 // ============================================================
@@ -280,7 +290,12 @@ function kalcUpdateCore(){
   });
 
   let basePB = 0, baseFlat = 0, baseLabel = '';
-  if (cfg?.fs) {
+  const isMini = siswa < 30;
+  if (isMini) {
+    basePB = 0;
+    baseFlat = 15000000;
+    baseLabel = `${siswa} siswa • ${hal} hal`;
+  } else if (cfg?.fs) {
     const { harga } = getFSPrice(cfg.pkg, siswa);
     basePB = harga;
     baseLabel = `${fmt(harga)}/buku (${siswa} siswa) • ${hal} hal`;
@@ -317,18 +332,22 @@ function kalcUpdateCore(){
   });
 
   const totPB = basePB + addonPB;
-  const totAll = isSiswa ? totPB * siswa + addonVid : baseFlat + addonVid;
+  const totAll = isMini ? 15000000 + addonPB * siswa + addonVid : (isSiswa ? totPB * siswa + addonVid : baseFlat + addonVid);
   
   const resultEl = document.getElementById('k-result');
   if (resultEl) resultEl.innerHTML = `<div class="rr"><span class="rl">Harga dasar</span><span class="rv">${baseLabel}</span></div>` + addonRows;
   
-  if (totalEl) totalEl.textContent = isSiswa ? fmt(totAll) : cfg?.flat ? fmtM(cfg.flat[0]) + (cfg.flat[0] !== cfg.flat[1] ? ' – ' + fmtM(cfg.flat[1]) : '') : '—';
+  if (totalEl) totalEl.textContent = isMini ? fmt(totAll) : (isSiswa ? fmt(totAll) : cfg?.flat ? fmtM(cfg.flat[0]) + (cfg.flat[0] !== cfg.flat[1] ? ' – ' + fmtM(cfg.flat[1]) : '') : '—');
   
   const totalSubEl = document.getElementById('k-total-sub');
   if (totalSubEl) totalSubEl.textContent = addonVid > 0 ? `*termasuk video ${fmtM(addonVid)} flat` : '';
 
   let profHTML = '';
-  if (cfg?.fs && isSiswa) {
+  if (isMini) {
+    const vEl = document.getElementById('k-verdict');
+    if (vEl) vEl.innerHTML = '<div class="note grad">📦 Harga spesial untuk order < 30 siswa: Rp15jt flat.</div>';
+    profHTML = `<div class="rr"><span class="rl">Tipe harga</span><span class="rv">Flat mini (minimal order)</span></div>`;
+  } else if (cfg?.fs && isSiswa) {
     const cetak = estCetak(siswa, hal, cfg.pkg);
     const gB = basePB - cetak + addonPB;
     const gT = gB * siswa + addonVid;

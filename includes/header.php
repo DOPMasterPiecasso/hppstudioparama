@@ -138,10 +138,16 @@ body{background:var(--bg);font-family:var(--font-b);color:var(--text);min-height
 .mv{font-family:var(--font-d);font-size:21px}
 .ms{font-size:11px;color:var(--text3);margin-top:2px}
 .mv.acc{color:var(--accent)}.mv.suc{color:var(--success)}.mv.war{color:var(--warning)}
-.tw{overflow-x:auto}
+.tw{overflow-x:auto;max-width:100%}
+#page-addon .tw{max-width:520px}
+.tw::-webkit-scrollbar{height:6px}
+.tw::-webkit-scrollbar-track{background:var(--surface2);border-radius:3px}
+.tw::-webkit-scrollbar-thumb{background:var(--border2);border-radius:3px}
+.tw::-webkit-scrollbar-thumb:hover{background:var(--text3)}
+
 table{width:100%;border-collapse:collapse;font-size:13px}
-th{background:var(--surface2);padding:8px 11px;text-align:left;font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);white-space:nowrap}
-td{padding:8px 11px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle}
+th{background:var(--surface2);padding:8px 11px;text-align:left;font-size:12px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.04em;border-bottom:1px solid var(--border);white-space:nowrap}
+td{padding:8px 11px;border-bottom:1px solid var(--border);color:var(--text);vertical-align:middle;font-size:13px}
 tr:last-child td{border-bottom:none}
 tr:hover td{background:var(--surface2)}
 input,select,textarea{font-family:var(--font-b);font-size:13px;padding:7px 10px;border:1px solid var(--border2);border-radius:8px;background:var(--surface);color:var(--text);outline:none;transition:border-color .15s;width:100%}
@@ -174,7 +180,8 @@ input[type=checkbox]{width:auto}
 .tb{padding:7px 14px;font-size:13px;font-weight:500;cursor:pointer;border:none;background:none;color:var(--text3);border-bottom:2px solid transparent;margin-bottom:-1px;transition:all .15s;font-family:var(--font-b)}
 .tb.active{color:var(--accent);border-bottom-color:var(--accent)}
 .tp{display:none}.tp.active{display:block}
-.g2{display:grid;grid-template-columns:1fr 1fr;gap:15px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:15px;min-width:0}
+.g2 .card{min-width:0}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px}
 .full-width{position:relative;width:100%;padding-left:30px;padding-right:30px;margin-left:-26px;margin-right:-26px;padding-top:0;padding-bottom:0;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);box-shadow:var(--sh)}
 .fg{display:flex;flex-direction:column;gap:5px}

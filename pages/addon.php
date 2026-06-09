@@ -25,19 +25,19 @@ include __DIR__ . '/../includes/header.php';
   <div class="g2">
     <div>
       <div class="sec">Finishing &amp; Binding</div>
-      <div class="card mb16"><div class="tw"><table><thead><tr><th>Jenis</th><th>25–75 buku</th><th>76–150 buku</th><th>&gt;151 buku</th></tr></thead><tbody id="adn-finishing"></tbody></table></div></div>
+      <div class="card mb16"><div class="tw"><table><thead id="hdr-finishing"><tr><th>Jenis</th></tr></thead><tbody id="adn-finishing"></tbody></table></div></div>
       <div class="sec">Upgrade Kertas</div>
-      <div class="card mb16"><div class="tw"><table><thead><tr><th>Jenis</th><th>25–50</th><th>51–100</th><th>101–150</th><th>&gt;151</th></tr></thead><tbody id="adn-kertas"></tbody></table></div></div>
+      <div class="card mb16"><div class="tw"><table><thead id="hdr-kertas"><tr><th>Jenis</th></tr></thead><tbody id="adn-kertas"></tbody></table></div></div>
       <div class="sec">Halaman Tambahan (per halaman)</div>
-      <div class="card mb16"><div class="tw"><table><thead><tr><th>Jumlah Order</th><th>Harga/Hal</th></tr></thead><tbody id="adn-halaman"></tbody></table></div></div>
+      <div class="card mb16"><div class="tw"><table><thead id="hdr-halaman"><tr><th>Jumlah Order</th><th>Harga/Hal</th></tr></thead><tbody id="adn-halaman"></tbody></table></div></div>
       <div class="sec">Video</div>
-      <div class="card"><div class="tw"><table><thead><tr><th>Jenis</th><th>Durasi</th><th>Harga</th></tr></thead><tbody id="adn-video"></tbody></table></div></div>
+      <div class="card"><div class="tw"><table><thead id="hdr-video"><tr><th>Jenis</th><th>Durasi</th><th>Harga</th></tr></thead><tbody id="adn-video"></tbody></table></div></div>
     </div>
     <div>
       <div class="sec">Packaging — Slide &amp; Standard</div>
-      <div class="card mb16"><div class="tw"><table><thead><tr><th>Tipe</th><th>25–50</th><th>51–100</th><th>101–150</th><th>151–200</th><th>&gt;200</th></tr></thead><tbody id="adn-pkg1"></tbody></table></div></div>
+      <div class="card mb16"><div class="tw"><table><thead id="hdr-pkg1"><tr><th>Tipe</th></tr></thead><tbody id="adn-pkg1"></tbody></table></div></div>
       <div class="sec">Packaging — Custom Box</div>
-      <div class="card"><div class="tw"><table><thead><tr><th>Tipe</th><th>25–50</th><th>51–100</th><th>101–150</th><th>151–200</th><th>&gt;200</th></tr></thead><tbody id="adn-pkg2"></tbody></table></div></div>
+      <div class="card"><div class="tw"><table><thead id="hdr-pkg2"><tr><th>Tipe</th></tr></thead><tbody id="adn-pkg2"></tbody></table></div></div>
     </div>
   </div>
 </div>
