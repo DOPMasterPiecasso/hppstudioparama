@@ -1,5 +1,4 @@
 <?php
-session_save_path(__DIR__ . '/../_sessions');
 session_start();
 require_once __DIR__ . '/../config/db.php';
 
