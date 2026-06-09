@@ -171,7 +171,7 @@ $jsUser = json_encode([
 ]);
 ?>
 <script>const PHP_USER = <?= $jsUser ?>;</script>
-<script src="/assets/js/app.js?v=1.7"></script>
+<script src="/assets/js/app.js?v=1.8"></script>
 
 <script>
 const API = '/api/roles.php';

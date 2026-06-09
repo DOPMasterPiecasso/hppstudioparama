@@ -59,7 +59,7 @@ $MySQL_Config = [
     'port' => $envVars['DB_PORT'] ?? getenv('DB_PORT') ?: 3306,
     'name' => $envVars['DB_NAME'] ?? getenv('DB_NAME') ?: 'parama_hpp',
     'user' => $envVars['DB_USER'] ?? getenv('DB_USER') ?: 'root',
-    'pass' => $envVars['DB_PASS'] ?? getenv('DB_PASS') ?: '',
+    'pass' => $envVars['DB_PASS'] ?? getenv('DB_PASS') ?: 'rahasia123',
     'charset' => 'utf8mb4'
 ];
 
