@@ -96,14 +96,19 @@ try {
                 if ($addon['id'] === $id) {
                     $addon['name'] = $body['name'] ?? $addon['name'];
                     
-                    if ($body['type'] === 'flat_video') {
-                        $addon['type'] = 'flat_video';
+                    // Preserve original type if not explicitly provided
+                    if (isset($body['type'])) {
+                        $addon['type'] = $body['type'];
+                    }
+                    
+                    if ($addon['type'] === 'flat_video') {
                         $addon['price'] = (int)($body['price'] ?? 0);
-                        unset($addon['tiers']); // Hapus tiers jika berganti tipe
+                        unset($addon['tiers']);
                     } else {
-                        $addon['type'] = 'flat';
-                        $addon['tiers'] = $body['tiers'] ?? [];
-                        unset($addon['price']); // Hapus price jika berganti tipe
+                        if (isset($body['tiers'])) {
+                            $addon['tiers'] = $body['tiers'];
+                        }
+                        unset($addon['price']);
                     }
                     $found = true;
                     break;

@@ -573,9 +573,19 @@ class MySQLMasterData {
              ORDER BY category, sub_id, min_qty ASC"
         );
 
+        // Safety: mapping kategori ke tipe yang benar untuk data korup
+        $typeMap = [
+            'halaman' => 'extra_hal',
+            'kertas'  => 'per_hal',
+        ];
+        
         // Group rows menjadi: category -> sub_id -> {meta, tiers[]}
         $grouped = [];
         while ($row = $stmt->fetch(PDO::FETCH_ASSOC)) {
+            // Koreksi tipe jika diketahui kategori (perbaiki data korup)
+            if (isset($typeMap[$row['category']])) {
+                $row['type'] = $typeMap[$row['category']];
+            }
             $cat = $row['category'];
             $sid = $row['sub_id'];
 

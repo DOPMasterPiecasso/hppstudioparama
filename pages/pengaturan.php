@@ -512,7 +512,7 @@ include __DIR__ . '/../includes/header.php';
       <div class="note mb12">Klik harga untuk edit. Tier: range qty (min-max) dengan harga masing-masing.</div>
       <div id="addon-finishing-items" style="margin-bottom:12px">
         <?php foreach ($addonsData['finishing'] ?? [] as $item): ?>
-        <div class="addon-item" data-category="finishing" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #3498db">
+        <div class="addon-item" data-category="finishing" data-type="<?= htmlspecialchars($item['type']) ?>" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #3498db">
           <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
             <?php if ($item['type'] === 'flat'): ?>
@@ -550,7 +550,7 @@ include __DIR__ . '/../includes/header.php';
       <div class="note mb12">Per halaman. Tier: range qty (min-max) dengan harga per halaman masing-masing.</div>
       <div id="addon-kertas-items" style="margin-bottom:12px">
         <?php foreach ($addonsData['kertas'] ?? [] as $item): ?>
-        <div class="addon-item" data-category="kertas" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #27ae60">
+        <div class="addon-item" data-category="kertas" data-type="per_hal" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #27ae60">
           <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
             <span style="display:inline-block;background:#e8f5e9;padding:2px 6px;border-radius:3px">Per Halaman</span>
@@ -584,7 +584,7 @@ include __DIR__ . '/../includes/header.php';
       <div class="note mb12">Tier: range qty dengan harga/halaman masing-masing.</div>
       <div id="addon-halaman-items" style="margin-bottom:12px">
         <?php foreach ($addonsData['halaman'] ?? [] as $item): ?>
-        <div class="addon-item" data-category="halaman" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #f39c12">
+        <div class="addon-item" data-category="halaman" data-type="extra_hal" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #f39c12">
           <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
             <span style="display:inline-block;background:#fff3e0;padding:2px 6px;border-radius:3px">Extra Halaman</span>
@@ -618,7 +618,7 @@ include __DIR__ . '/../includes/header.php';
       <div class="note mb12">Harga flat untuk seluruh project, tidak berdasar tier qty.</div>
       <div id="addon-video-items" style="margin-bottom:12px">
         <?php foreach ($addonsData['video'] ?? [] as $item): ?>
-        <div class="addon-item" data-category="video" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #e74c3c">
+        <div class="addon-item" data-category="video" data-type="<?= htmlspecialchars($item['type']) ?>" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #e74c3c">
           <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
             <span style="display:inline-block;background:#ffebee;padding:2px 6px;border-radius:3px">Flat Video</span>
@@ -642,7 +642,7 @@ include __DIR__ . '/../includes/header.php';
       <div class="note mb12">Tier: 25-50, 51-100, 101-150, 151-200, >200 buku.</div>
       <div id="addon-pkg1-items" style="margin-bottom:12px">
         <?php foreach ($addonsData['pkg1'] ?? [] as $item): ?>
-        <div class="addon-item" data-category="pkg1" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #9c27b0">
+        <div class="addon-item" data-category="pkg1" data-type="<?= htmlspecialchars($item['type']) ?>" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #9c27b0">
           <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
             <span style="display:inline-block;background:#f3e5f5;padding:2px 6px;border-radius:3px">Packaging Standar</span>
@@ -676,7 +676,7 @@ include __DIR__ . '/../includes/header.php';
       <div class="note mb12">Tier: 25-50, 51-100, 101-150, 151-200, >200 buku.</div>
       <div id="addon-pkg2-items" style="margin-bottom:12px">
         <?php foreach ($addonsData['pkg2'] ?? [] as $item): ?>
-        <div class="addon-item" data-category="pkg2" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #00bcd4">
+        <div class="addon-item" data-category="pkg2" data-type="<?= htmlspecialchars($item['type']) ?>" data-id="<?= htmlspecialchars($item['id']) ?>" style="margin-bottom:10px;padding:12px;background:#fafafa;border-radius:4px;border-left:3px solid #00bcd4">
           <div style="font-weight:600;font-size:13px;margin-bottom:6px"><?= htmlspecialchars($item['name']) ?></div>
           <div style="font-size:12px;color:var(--text2);margin-bottom:8px">
             <span style="display:inline-block;background:#e0f2f1;padding:2px 6px;border-radius:3px">Custom Box</span>
@@ -4457,11 +4457,14 @@ async function confirmAddAddon(category) {
         return;
     }
     
+    const typeMap = { video: 'flat_video', halaman: 'extra_hal', kertas: 'per_hal' };
+    const addonType = typeMap[category] || 'flat';
+    
     // Send to server
     const newAddon = {
         id: 'addon_' + Date.now(),
         name: name,
-        type: category === 'video' ? 'flat_video' : 'flat',
+        type: addonType,
         tiers: tiers,
         price: tiers[0][2] // For flat_video
     };
@@ -4475,7 +4478,7 @@ async function confirmAddAddon(category) {
                 operation: 'add_addon',
                 category: category,
                 name: name,
-                type: category === 'video' ? 'flat_video' : 'flat',
+                type: addonType,
                 tiers: tiers,
                 price: tiers[0][2]
             })
@@ -4608,11 +4611,14 @@ async function saveEditAddonItem(category, id) {
         return;
     }
     
+    const itemEl = document.querySelector(`.addon-item[data-category="${category}"][data-id="${id}"]`);
+    const itemType = itemEl ? itemEl.dataset.type : 'flat';
+    
     let updatedAddon = {
         operation: 'update_addon',
         id: id,
         name: newName,
-        type: category === 'video' ? 'flat_video' : 'flat',
+        type: itemType,
         category: category
     };
     
@@ -4807,13 +4813,14 @@ function collectAddonsByCategory(category) {
         const priceElements = item.querySelectorAll('.addon-price-display');
         if (priceElements.length === 0) return;
         
+        const itemType = item.dataset.type;
         // Single price (for video)
-        if (category === 'video') {
+        if (itemType === 'flat_video') {
             const price = parseInt(priceElements[0].textContent.replace(/\D/g, '') || 0);
             result.push({
                 id: item.dataset.id,
                 name: item.querySelector('div:nth-child(1)').textContent,
-                type: 'flat_video',
+                type: itemType,
                 price: price
             });
         } else {
@@ -4834,7 +4841,7 @@ function collectAddonsByCategory(category) {
                 result.push({
                     id: item.dataset.id,
                     name: item.querySelector('div:nth-child(1)').textContent,
-                    type: 'flat',
+                    type: itemType,
                     tiers: tiers
                 });
             }
