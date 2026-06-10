@@ -651,6 +651,12 @@ class MySQLMasterData {
                 $name = $item['name'] ?? '';
                 $type = $item['type'] ?? 'flat';
 
+                // Backend safety: koreksi tipe berdasarkan kategori (data korup dari frontend)
+                $typeMap = ['finishing' => 'flat', 'kertas' => 'per_hal', 'halaman' => 'extra_hal', 'video' => 'flat_video', 'pkg1' => 'flat', 'pkg2' => 'flat'];
+                if (isset($typeMap[$category])) {
+                    $type = $typeMap[$category];
+                }
+
                 if ($type === 'flat_video') {
                     // Tipe Flat (Video/Drone): Harga tunggal
                     $price = (int)($item['price'] ?? 0);

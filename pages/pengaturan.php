@@ -4612,7 +4612,8 @@ async function saveEditAddonItem(category, id) {
     }
     
     const itemEl = document.querySelector(`.addon-item[data-category="${category}"][data-id="${id}"]`);
-    const itemType = itemEl ? itemEl.dataset.type : 'flat';
+    const typeByCategory = { finishing: 'flat', kertas: 'per_hal', halaman: 'extra_hal', video: 'flat_video', pkg1: 'flat', pkg2: 'flat' };
+    const itemType = itemEl ? (itemEl.dataset.type || typeByCategory[category] || 'flat') : typeByCategory[category] || 'flat';
     
     let updatedAddon = {
         operation: 'update_addon',
@@ -4809,11 +4810,15 @@ function collectAddonsByCategory(category) {
     const items = document.querySelectorAll(`.addon-item[data-category="${category}"]`);
     const result = [];
     
+    // Source of truth: category determines type (jaga-jaga data-type hilang/browser cache)
+    const typeByCategory = { finishing: 'flat', kertas: 'per_hal', halaman: 'extra_hal', video: 'flat_video', pkg1: 'flat', pkg2: 'flat' };
+    
     items.forEach(item => {
         const priceElements = item.querySelectorAll('.addon-price-display');
         if (priceElements.length === 0) return;
         
-        const itemType = item.dataset.type;
+        // Pakai data-type dari DOM jika ada, fallback ke mapping kategori
+        const itemType = item.dataset.type || typeByCategory[category] || 'flat';
         // Single price (for video)
         if (itemType === 'flat_video') {
             const price = parseInt(priceElements[0].textContent.replace(/\D/g, '') || 0);
