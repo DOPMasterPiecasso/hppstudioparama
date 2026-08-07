@@ -2602,8 +2602,8 @@ async function resetGrad() {
 // PAYMENT TERMS CRUD FUNCTIONS
 // ============================================================
 
-// Global Payment Terms object
-let PT = <?= json_encode(['terms' => $paymentTerms]) ?>;
+// Global Payment Terms object (dideklarasikan di app.js)
+PT = <?= json_encode(['terms' => $paymentTerms]) ?>;
 
 async function savePaymentTerms() {
     try {
